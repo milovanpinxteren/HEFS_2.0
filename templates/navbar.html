@@ -1,0 +1,39 @@
+<div class="navbar">
+    <div class="dropdown">
+        <button class="dropbtn">
+            Productoverzicht
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="../hefs/veh">VEH</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">
+            Ordersoverzicht
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="../hefs/get_orders">Nieuwe orders ophalen</a>
+            <a href="../hefs/customerinfo">Klantinformatie</a>
+            <a href="#">Pickbonnen</a>
+            <a href="#">Routes</a>
+            <a href="#">NAW-gegevens</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">
+            Financieel overzicht
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="#">Overzicht</a>
+            <a href="#">Facturatie</a>
+        </div>
+    </div>
+
+    <a href="/admin">Admin pagina</a>
+    <div class="accountdiv">
+        Ingelogd als: {{ user.username }}
+    </div>
+</div>

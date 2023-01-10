@@ -3,16 +3,22 @@
 {% load static %}
 <head>
     <meta charset="UTF-8">
-    <title>HEFS</title>
+    <title>Producten overzicht</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}" />
 </head>
 <body>
-{% if user.is_authenticated %}
 {% include "navbar.html" %}
-{% else %}
-<h1>U bent niet ingelogd</h1>
-<h2>Klik <a href="/admin">hier</a> om in te loggen (met kerstdiner2022/paasdiner2023/moederdagdiner2023/etc)</h2>
-{% endif %}
+
+
+<h1>Producten overzicht</h1>
+Tabel met: <br>
+Aantal orders <br>
+Aantal personen <br>
+Aantal hoofdgerechten per order <br>
+Gemiddelde omzet per order <br>
+<br><br>
+VEH tabel
+
 </body>
 </html>

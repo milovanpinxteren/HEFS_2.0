@@ -1,13 +1,18 @@
 from django.contrib import admin
-from .models import Productinfo, Productextra
+from .models import Productinfo, Productextra, Vaste_kosten
 
 
 @admin.register(Productinfo)
-class ProductAdmin(admin.ModelAdmin):
+class ProductInfoAdmin(admin.ModelAdmin):
     list_display = ['omschrijving', 'productcode', 'productID', 'picknaam', 'productnaam',
                     'leverancier', 'verpakkingseenheid', 'gang']
     search_fields = ("omschrijving__contains",)
 
 @admin.register(Productextra)
-class ProductAdmin(admin.ModelAdmin):
+class ProductExtraAdmin(admin.ModelAdmin):
     list_display = ['productnaam', 'extra_productnaam']
+
+
+@admin.register(Vaste_kosten)
+class VasteKostenAdmin(admin.ModelAdmin):
+    list_display = ['kostennaam', 'kostenomschrijving', 'kosten']

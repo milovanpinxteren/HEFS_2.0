@@ -56,6 +56,8 @@ class Orders(models.Model):
     land = models.CharField(max_length=250, null=True, blank=True)
 
 class Orderline(models.Model):
+    #TODO foreignkey vanuit orders
+    conversieID = models.IntegerField(default=0)
     product = models.CharField(max_length=250, null=True, blank=True)
     productSKU = models.CharField(max_length=250, null=True, blank=True)
     aantal = models.IntegerField(default=0, null=True, blank=True)
@@ -90,26 +92,37 @@ class Productinfo(models.Model):
     afmeting_breedte_mm = models.IntegerField(default=0)
     afmeting_hoogte_mm = models.IntegerField(default=0)
 
-for i in range(1,26):
-    name = "Verpakkingscombinatie_" + str(i) + " keer besteld"
-    Productinfo.add_to_class(name, models.CharField(max_length=300, default='', help_text="Bijvoorbeeld 4,3,2"))
+    def __str__(self):
+        return self.productnaam
 
     def save(self):
         if not (self.productcode or self.productcode):
             self.productcode = random.randint(99, 999)
             self.productID = str(self.gang) + str(self.productcode) + str(self.verpakkingseenheid)
-            
+
         super(Productinfo, self).save()
 
+for i in range(1,26):
+    name = "Verpakkingscombinatie_" + str(i) + " keer besteld"
+    Productinfo.add_to_class(name, models.CharField(max_length=300, default='', help_text="Bijvoorbeeld 4,3,2"))
+
+
+
+
+
+
+
+
+class Productextra(models.Model):
+    product = models.ForeignKey('Productinfo', on_delete=models.PROTECT, default='')
+    productnaam = models.CharField(product, max_length=250, blank=True)
+    extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.CASCADE, related_name='productextra_extra_productnaam', default='', blank=True)
+    # productnaam = models.CharField(max_length=250, choices=product_choice)
+    # extra_productnaam = models.CharField(max_length=250, choices=product_choice)
     def __str__(self):
         return self.productnaam
 
 
-class Productextra(models.Model):
-    productnaam = models.ForeignKey(Productinfo, on_delete=models.CASCADE, related_name='productextra_productnaam')
-    extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.CASCADE, related_name='productextra_extra_productnaam')
-    # productnaam = models.CharField(max_length=250, choices=product_choice)
-    # extra_productnaam = models.CharField(max_length=250, choices=product_choice)
 
 
 class Orderextra(models.Model):
@@ -136,3 +149,8 @@ class Percentuele_kosten(models.Model):
     kostennaam = models.CharField(max_length=30, default='')
     kostenomschrijving = models.CharField(max_length=300, default='-')
     percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+
+class ApiUrls(models.Model):
+    url = models.URLField(max_length=250)
+    # userID
