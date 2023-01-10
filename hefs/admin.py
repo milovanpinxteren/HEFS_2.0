@@ -10,8 +10,8 @@ class ProductInfoAdmin(admin.ModelAdmin):
 
 @admin.register(Productextra)
 class ProductExtraAdmin(admin.ModelAdmin):
-    list_display = ['productnaam', 'extra_productnaam']
-
+    list_display = ['product', 'extra_productnaam']
+    search_fields = ("product__productnaam",)
 
 @admin.register(Vaste_kosten)
 class VasteKostenAdmin(admin.ModelAdmin):

@@ -114,9 +114,9 @@ for i in range(1,26):
 
 
 class Productextra(models.Model):
-    product = models.ForeignKey('Productinfo', on_delete=models.PROTECT, default='')
+    product = models.ForeignKey('Productinfo', on_delete=models.PROTECT, default='', related_name='productextra_productnaam')
     productnaam = models.CharField(product, max_length=250, blank=True)
-    extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.CASCADE, related_name='productextra_extra_productnaam', default='', blank=True)
+    extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_extra_productnaam', default='', blank=True)
     # productnaam = models.CharField(max_length=250, choices=product_choice)
     # extra_productnaam = models.CharField(max_length=250, choices=product_choice)
     def __str__(self):
@@ -153,4 +153,5 @@ class Percentuele_kosten(models.Model):
 
 class ApiUrls(models.Model):
     url = models.URLField(max_length=250)
-    # userID
+    user_id = models.IntegerField(default=0)
+    begindatum = models.DateField(null=True)
