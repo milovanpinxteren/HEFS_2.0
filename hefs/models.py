@@ -57,7 +57,7 @@ class Orders(models.Model):
 
 class Orderline(models.Model):
     #TODO foreignkey vanuit orders
-    conversieID = models.IntegerField(default=0)
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE)
     product = models.CharField(max_length=250, null=True, blank=True)
     productSKU = models.CharField(max_length=250, null=True, blank=True)
     aantal = models.IntegerField(default=0, null=True, blank=True)
