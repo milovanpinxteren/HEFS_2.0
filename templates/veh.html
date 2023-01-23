@@ -20,5 +20,17 @@ Gemiddelde omzet per order <br>
 <br><br>
 VEH tabel
 
+<table>
+    <tbody>
+    {% for row in veh %}
+    <tr>
+        {% for v in row %}
+        <td>{{ v }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
 </body>
 </html>

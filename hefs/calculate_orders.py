@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 
 from hefs.models import Orders, PickOrders, Orderline, PickItems, Productextra, Productinfo, \
     VerpakkingsCombinaties, Orderextra
@@ -10,7 +11,7 @@ class CalculateOrders():
         PickOrders.objects.all().delete()
         PickItems.objects.all().delete()
         self.make_pickfile()
-        self.make_veh()
+        # self.make_veh()
 
     def make_pickfile(self):
         print('MAKE PICKFILE')
@@ -60,6 +61,7 @@ class CalculateOrders():
 
 
     def make_product_extras(self, product):
+        #TODO: als 1x brunch fixen en 1x brunch dasher -> samenvoegen en dan pas picks maken
         print('MAKE PRODUCT EXTRAS')
         productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
         aantal = product.aantal
@@ -82,3 +84,7 @@ class CalculateOrders():
 
     def make_veh(self):
         print('MAKE VEH')
+        self.veh = PickItems.objects.select_related('pick_order__order').values_list('product_id',
+            'pick_order__order__afleverdatum').annotate(totaal=Count('hoeveelheid'))
+
+        return self.veh

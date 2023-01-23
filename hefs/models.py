@@ -2,6 +2,9 @@ import random
 
 from django.db import models
 
+
+
+
 #############################################Orders below###############################################################
 class NewOrders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
@@ -147,7 +150,7 @@ class PickItems(models.Model):
     hoeveelheid = models.FloatField()
 
     def __str__(self):
-        return f"{self.quantity} {self.product_to_pick}"
+        return f"{self.hoeveelheid} {self.product}"
 
 #############################################Kosten models below########################################################
 
