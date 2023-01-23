@@ -27,7 +27,7 @@ class VerpakkingsMogelijkhedenAdmin(admin.ModelAdmin):
 @admin.register(VerpakkingsCombinaties)
 class VerpakkingsCombinatiesAdmin(admin.ModelAdmin):
     list_display = ['verpakkingsmogelijkheid', 'bestelde_hoeveelheid', 'verpakkingscombinatie']
-    search_fields = ("verpakkingsmogelijkheid__contains",)
+    search_fields = ("verpakkingsmogelijkheid_id__naam",)
 
 @admin.register(Gang)
 class GangAdmin(admin.ModelAdmin):
