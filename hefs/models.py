@@ -57,7 +57,6 @@ class Orders(models.Model):
     land = models.CharField(max_length=250, null=True, blank=True)
 
 class Orderline(models.Model):
-    #TODO foreignkey vanuit orders
     order = models.ForeignKey(Orders, on_delete=models.CASCADE, default='', blank=True)
     product = models.CharField(max_length=250, null=True, blank=True)
     productSKU = models.CharField(max_length=250, null=True, blank=True)
@@ -139,7 +138,6 @@ class Orderextra(models.Model):
 
 class PickOrders(models.Model):
     order = models.ForeignKey(Orders, on_delete=models.CASCADE)
-    afleverdatum = models.DateTimeField()
 
 
 class PickItems(models.Model):

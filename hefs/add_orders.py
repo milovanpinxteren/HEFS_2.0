@@ -44,7 +44,6 @@ class AddOrders():
                                       land=neworder_first.land)
             for neworderline in neworderlines:
                 order = Orders.objects.get(conversieID=neworderline.conversieID)
-                print(order)
                 existing_order = Orderline.objects.filter(order=order, product=neworderline.product,
                                                           productSKU=neworderline.productSKU,
                                                           aantal=neworderline.aantal)
