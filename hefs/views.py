@@ -5,8 +5,10 @@ from django.shortcuts import render
 
 from .add_orders import AddOrders
 from .calculate_orders import CalculateOrders
+from .forms import PickbonnenForm
 from .get_orders import GetOrders
 from .models import PickItems
+from .pickbonnengenerator import PickbonnenGenerator
 
 
 def index(request):
@@ -14,11 +16,17 @@ def index(request):
 
 
 def show_veh(request):
-    veh = PickItems.objects.select_related('pick_order__order'
-                                           ).values_list('product__pickitems__omschrijving', 'pick_order__order__afleverdatum')\
+    veh = PickItems.objects.select_related('pick_order__order')\
+        .values_list('product__pickitems__omschrijving', 'pick_order__order__afleverdatum')\
+        .order_by('pick_order__order__afleverdatum', 'pick_order__order__afleverdatum')\
         .annotate(totaal=Sum('hoeveelheid'))
+    # table = VehTable(PickItems.objects.select_related('pick_order__order')
+    #                  .values_list('product__pickitems__omschrijving',
+    #                               'pick_order__order__afleverdatum')
+    #                  .annotate(totaal=Sum('hoeveelheid')))
 
-    context = {'veh': list(veh)}
+
+    context = {'table': veh, 'column_headers':  set(x[1] for x in veh)}
     return render(request, 'veh.html', context)
 
 
@@ -76,7 +84,22 @@ def add_orders():
 
 
 def pickbonnen_page(request):
-    return render(request, 'pickbonnenpage.html')
+    form = PickbonnenForm()
+    context = {'form': form}
+    return render(request, 'pickbonnenpage.html', context)
+
+def get_pickbonnen(request):
+    if request.method == 'POST':
+        form = PickbonnenForm(request.POST, request.FILES)
+        if form.is_valid():
+            begindatum = form['begindatum'].value()
+            einddatum = form['einddatum'].value()
+            conversieID = form['conversieID'].value()
+            routenr = form['routenr'].value()
+            PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
+    new_form = PickbonnenForm()
+    context = {'form': new_form}
+    return render(request, 'pickbonnenpage.html', context)
 
 
 def financial_overview_page(request):

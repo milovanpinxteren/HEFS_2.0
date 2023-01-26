@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load render_table from django_tables2 %}
+{% load define_action %}
 {% load static %}
 <head>
     <meta charset="UTF-8">
     <title>Producten overzicht</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
 </head>
 <body>
 {% include "navbar.html" %}
 
 
-<h1>Producten overzicht</h1>
+<h1 class="page-title">Producten overzicht</h1>
 Tabel met: <br>
 Aantal orders <br>
 Aantal personen <br>
@@ -19,18 +21,38 @@ Aantal hoofdgerechten per order <br>
 Gemiddelde omzet per order <br>
 <br><br>
 VEH tabel
-
+<br>
+{#{% render_table table %}#}
+{#{% render_table table %}#}
 <table>
-    <tbody>
-    {% for row in veh %}
-    <tr>
-        {% for v in row %}
-        <td>{{ v }}</td>
-        {% endfor %}
-    </tr>
+    <thead>
+    <th>omschrijving</th>
+    {% for column in column_headers %}
+        <th>
+            {{ column }}
+        </th>
     {% endfor %}
-    </tbody>
+    </thead>
+    {% for row in table %}
+        {% define newrow as False %}
+        {% if omschrijving != row.0 %}
+            {% define row.0 as omschrijving %}
+            {% define newrow as True %}
+            <tr>
+            <td>
+                {{ omschrijving }}
+            </td>
+        {% endif %}
+    <td>
+        {{ row.2 }}
+    </td>
+    {% if newrow %}
+        </tr>
+    {% endif %}
+    {% endfor %}
 </table>
-
+{#{% for column in columns %}#}
+{{ columns }}
+{#{% endfor %}#}
 </body>
 </html>
