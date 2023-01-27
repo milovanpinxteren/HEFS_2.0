@@ -41,7 +41,7 @@ class NewOrders(models.Model):
 class Orders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
     besteldatum = models.DateTimeField(null=True, blank=True)
-    afleverdatum = models.DateTimeField(null=True, blank=True)
+    afleverdatum = models.DateField(null=True, blank=True)
     aflevertijd = models.TimeField(null=True, blank=True)
     verzendkosten = models.IntegerField(default=0, null=True, blank=True)
     korting = models.IntegerField(default=0, null=True, blank=True)
@@ -58,6 +58,7 @@ class Orders(models.Model):
     postcode = models.CharField(max_length=250, null=True, blank=True)
     plaats = models.CharField(max_length=250, null=True, blank=True)
     land = models.CharField(max_length=250, null=True, blank=True)
+    routenr = models.IntegerField(null=True, blank=True)
 
 class Orderline(models.Model):
     order = models.ForeignKey(Orders, on_delete=models.CASCADE, default='', blank=True)

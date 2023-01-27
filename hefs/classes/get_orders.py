@@ -1,7 +1,7 @@
 
 from hefs.apis import kerstdiner2022api
 
-from .models import ApiUrls
+from hefs.models import ApiUrls
 
 
 class GetOrders:

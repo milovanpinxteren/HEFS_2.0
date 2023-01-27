@@ -11,6 +11,11 @@
 {% include "navbar.html" %}
 <h1 class="page-title">Pickbonnen pagina</h1>
 <h3>Kies hier welke pickbonnen u wilt uitdraaien</h3>
+<p>
+    Optie 1: Kies een begin <b>en</b> einddatum. -> Pickbonnen worden gegenereerd voor die datums
+    (wil je alleen orders van 1 dag? Vul dan als begin- en einddatum die dag in)<br>
+    Optie 2: Typ een ConversieID -> Pickbon van dat ConversieID wordt gegenereerd
+</p>
 <form action="./get_pickbonnen" method="post" enctype="multipart/form-data" autocomplete="off">
     <div class="pickbonnen-form">
         {% csrf_token %}
@@ -24,7 +29,7 @@
             {{ form.conversieID.label_tag }} <br>{{ form.conversieID }}
         </p>
         <p>
-            {{ form.routenr.label_tag }} <br>{{ form.routenr }}
+            {{ form.routenr.label_tag }} (voor nu leeg laten, nog niet functioneel) <br>{{ form.routenr }}
         </p>
         <p>
             <br>

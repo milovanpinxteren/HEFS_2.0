@@ -4,15 +4,85 @@
 <head>
     <meta charset="UTF-8">
     <title>HEFS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
 </head>
 <body>
 {% if user.is_authenticated %}
-{% include "navbar.html" %}
+    {% include "navbar.html" %}
+    <div>
+        <h1 class="page-title">Practische Informatie</h1>
+        <div>
+            <p>
+            <h3>Productoverzicht</h3>
+            <p>Hier vind je een overzicht van de te maken producten per datum</p>
+            <hr>
+            </p>
+        </div>
+        <div>
+            <h3>Ordersoverzicht</h3>
+            <p>Hier vind je een overzicht van de orders</p>
+            <div class="sub-information">
+                <ul>
+                    <li class="sub-information-ul">
+                        <div class="sub-information-div">
+                            <h4 class="sub-information-div-header">Nieuwe orders ophalen:</h4>
+                            <p class="sub-information-div-text">Druk op de knop, de orders worden opgehaald en berekend
+                                via
+                                de
+                                API</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h4 class="sub-information-div-header">Nieuwe order aanmaken:</h4>
+                            <p class="sub-information-div-text">Hier kan je een order aanmaken, hierna wordt deze meteen
+                                berekend,
+                                om een pickbon te genereren, ga dan na de berekening naar Pickbonnen</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h4 class="sub-information-div-header">Klantinformatie</h4>
+                            <p class="sub-information-div-text">Informatie over de klanten/orders (orderverloop-grafiek,
+                                locaties, order-kerngetallen</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h4 class="sub-information-div-header">Pickbonnen</h4>
+                            <p class="sub-information-div-text">Op basis van welke pickbonnen je wil zien, worden die
+                                gegenereerd</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h4 class="sub-information-div-header">Routes</h4>
+                            <p class="sub-information-div-text">Importeer/Genereer routes voor de orders</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <div>
+            <p>
+            <h3>Finiancieel Overzicht</h3>
+            <p>Hier vind je een overzicht van de Financien en hulpmiddelen voor facturatie</p>
+            <hr>
+            </p>
+        </div>
+        <div>
+            <p>
+            <h3>Admin pagina</h3>
+            <p>Hier kan je producten/artikelen/verpakkingen invoeren, bestaande orders zien/wijzigen en kosten invoeren</p>
+            <hr>
+            </p>
+        </div>
+    </div>
 {% else %}
-<h1>U bent niet ingelogd</h1>
-<h2>Klik <a href="/admin">hier</a> om in te loggen (met kerstdiner2022/paasdiner2023/moederdagdiner2023/etc)</h2>
+    <h1>U bent niet ingelogd</h1>
+    <h2>Klik <a href="/admin">hier</a> om in te loggen (met kerstdiner2022/paasdiner2023/moederdagdiner2023/etc)</h2>
 {% endif %}
 </body>
 </html>

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-{% load render_table from django_tables2 %}
 {% load define_action %}
 {% load static %}
 <head>
@@ -22,8 +21,7 @@ Gemiddelde omzet per order <br>
 <br><br>
 VEH tabel
 <br>
-{#{% render_table table %}#}
-{#{% render_table table %}#}
+
 <table>
     <thead>
     <th>omschrijving</th>
@@ -39,13 +37,16 @@ VEH tabel
             {% define row.0 as omschrijving %}
             {% define newrow as True %}
             <tr>
-            <td>
-                {{ omschrijving }}
-            </td>
+{#            <td>#}
+{#                {{ omschrijving }}#}
+{#            </td>#}
         {% endif %}
+    {% for column in row %}
     <td>
-        {{ row.2 }}
+        {{ column }}
     </td>
+        {% endfor %}
+
     {% if newrow %}
         </tr>
     {% endif %}

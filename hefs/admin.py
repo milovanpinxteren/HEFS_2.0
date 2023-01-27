@@ -1,7 +1,13 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
-    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra
+    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders
 
+
+@admin.register(Orders)
+class OrderInfoAdmin(admin.ModelAdmin):
+    list_display = ['conversieID', 'besteldatum', 'afleverdatum', 'orderprijs', 'voornaam',
+                    'achternaam']
+    search_fields = ("conversieID__contains", "voornaam__contains", "achternaam__contains")
 
 @admin.register(Productinfo)
 class ProductInfoAdmin(admin.ModelAdmin):

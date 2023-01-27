@@ -25,7 +25,8 @@
     color: black;
     outline: none;
     text-align: center;
-    background-color: lightcoral;
+    background-color: #346751;
+    opacity: 0.8;
 }
 
 .accountdiv {
@@ -54,7 +55,7 @@
 }
 
 .navbar a:hover, .dropdown:hover .dropbtn {
-    background-color: red;
+    background-color: #346751;
 }
 
 .dropdown-content {
@@ -81,6 +82,34 @@
 
 .dropdown:hover .dropdown-content {
     display: block;
+}
+
+.sub-information {
+    margin: 0 0 0 5%;
+    padding: 0px;
+
+}
+
+.sub-information-div {
+    /*margin: 0 0 0 5%;*/
+    /*padding: 0px;*/
+    display: inline;
+
+}
+
+.sub-information-ul{
+    /*border-bottom: 1px solid #000;*/
+}
+
+.sub-information-div-header {
+    display: inline;
+}
+
+.sub-information-div-text {
+    /*margin: 0 0 0 5%;*/
+    padding: 0px;
+    display: inline;
+    vertical-align: top;
 }
 
 .pickbonnen-form {

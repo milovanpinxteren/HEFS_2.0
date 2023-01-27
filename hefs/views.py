@@ -1,14 +1,16 @@
-from django.contrib.auth.models import User
-from django.db.models import Count, Sum
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from .add_orders import AddOrders
-from .calculate_orders import CalculateOrders
+from hefs.classes.add_orders import AddOrders
+from hefs.classes.calculate_orders import CalculateOrders
 from .forms import PickbonnenForm
-from .get_orders import GetOrders
-from .models import PickItems
-from .pickbonnengenerator import PickbonnenGenerator
+from hefs.classes.get_orders import GetOrders
+from .models import PickItems, Orders
+from hefs.classes.pickbonnengenerator import PickbonnenGenerator
+from django.db import connection
+
+from .sql_commands import SqlCommands
 
 
 def index(request):
@@ -16,17 +18,17 @@ def index(request):
 
 
 def show_veh(request):
-    veh = PickItems.objects.select_related('pick_order__order')\
-        .values_list('product__pickitems__omschrijving', 'pick_order__order__afleverdatum')\
-        .order_by('pick_order__order__afleverdatum', 'pick_order__order__afleverdatum')\
-        .annotate(totaal=Sum('hoeveelheid'))
-    # table = VehTable(PickItems.objects.select_related('pick_order__order')
-    #                  .values_list('product__pickitems__omschrijving',
-    #                               'pick_order__order__afleverdatum')
-    #                  .annotate(totaal=Sum('hoeveelheid')))
-
-
-    context = {'table': veh, 'column_headers':  set(x[1] for x in veh)}
+    dates = Orders.objects.order_by('afleverdatum').values_list('afleverdatum').distinct()
+    date_array = []
+    for date in dates:
+        date_array.append(date)
+    cursor = connection.cursor()
+    test = SqlCommands().get_veh_command(date_array)
+    print(test)
+    cursor.execute(test)
+    veh = cursor.fetchall()
+    print(veh)
+    context = {'table': veh, 'column_headers': date_array}
     return render(request, 'veh.html', context)
 
 
@@ -36,6 +38,10 @@ def show_customerinfo(request):
 
 def getorderspage(request):
     return render(request, 'getorderspage.html')
+
+
+def makeorderspage(request):
+    return render(request, 'makeorderspage.html')
 
 
 def show_busy(request):
@@ -87,6 +93,7 @@ def pickbonnen_page(request):
     form = PickbonnenForm()
     context = {'form': form}
     return render(request, 'pickbonnenpage.html', context)
+
 
 def get_pickbonnen(request):
     if request.method == 'POST':
