@@ -34,10 +34,10 @@ VEH tabel
 <br>
 
 <table id="vehTable">
-    <thead>
-    <th>omschrijving</th>
+    <thead class="table-head">
+    <th class="table-heading">omschrijving</th>
     {% for column in column_headers %}
-        <th>
+        <th class="table-heading">
             {{ column.0 | date:"d-m-Y" }}
         </th>
     {% endfor %}
@@ -47,18 +47,18 @@ VEH tabel
         {% if omschrijving != row.0 %}
             {% define row.0 as omschrijving %}
             {% define newrow as True %}
-            <tr>
+            <tr class="table-rows">
         {% endif %}
     {% for column in row %}
-        <td>
+        <td class="table-data">
             {% if column != None %}
                 {% if column|length < 4 %}
-                    {{ column|floatformat }}
+                    <span class="number-span">{{ column|floatformat }}</span>
                 {% elif column|length > 4 %}
                     {{ column }}
                 {% endif %}
             {% elif column == None %}
-                0
+               <span class="number-span">0</span>
             {% endif %}
         </td>
     {% endfor %}

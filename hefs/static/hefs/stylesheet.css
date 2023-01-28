@@ -97,7 +97,7 @@
 
 }
 
-.sub-information-ul{
+.sub-information-ul {
     /*border-bottom: 1px solid #000;*/
 }
 
@@ -115,4 +115,40 @@
 .pickbonnen-form {
     background-color: lightgray;
     width: 25%;
+}
+
+#vehTable {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
+.table-head {
+    border: 1px solid;
+}
+
+.table-heading {
+    border: 1px solid;
+}
+
+.table-rows {
+    border: 1px solid;
+}
+
+.table-rows:hover {
+    border: 1px solid;
+    background-color: #b2bfb5;
+    /*opacity: 0.1;*/
+}
+
+.table-data {
+    border: 1px solid;
+    /*padding-left: 10px;*/
+    /*margin-left: 500px;*/
+}
+
+.number-span {
+    display: inline-block;
+    width: 100px;
+    text-align: center;
+
 }
