@@ -1,7 +1,5 @@
-from django.db.models import Sum
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
-
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
 from .forms import PickbonnenForm
@@ -9,7 +7,6 @@ from hefs.classes.get_orders import GetOrders
 from .models import PickItems, Orders
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from django.db import connection
-
 from .sql_commands import SqlCommands
 
 

@@ -7,6 +7,17 @@
     <title>Producten overzicht</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+
+    <script>
+        function ExportToExcel(type, fn, dl) {
+            var elt = document.getElementById('vehTable');
+            var wb = XLSX.utils.table_to_book(elt, {sheet: "sheet1"});
+            return dl ?
+                XLSX.write(wb, {bookType: type, bookSST: true, type: 'base64'}) :
+                XLSX.writeFile(wb, fn || ('overzicht-VEH.' + (type || 'xlsx')));
+        }
+    </script>
 </head>
 <body>
 {% include "navbar.html" %}
@@ -22,12 +33,12 @@ Gemiddelde omzet per order <br>
 VEH tabel
 <br>
 
-<table>
+<table id="vehTable">
     <thead>
     <th>omschrijving</th>
     {% for column in column_headers %}
         <th>
-            {{ column }}
+            {{ column.0 | date:"d-m-Y" }}
         </th>
     {% endfor %}
     </thead>
@@ -37,23 +48,26 @@ VEH tabel
             {% define row.0 as omschrijving %}
             {% define newrow as True %}
             <tr>
-{#            <td>#}
-{#                {{ omschrijving }}#}
-{#            </td>#}
         {% endif %}
     {% for column in row %}
-    <td>
-        {{ column }}
-    </td>
-        {% endfor %}
-
+        <td>
+            {% if column != None %}
+                {% if column|length < 4 %}
+                    {{ column|floatformat }}
+                {% elif column|length > 4 %}
+                    {{ column }}
+                {% endif %}
+            {% elif column == None %}
+                0
+            {% endif %}
+        </td>
+    {% endfor %}
     {% if newrow %}
         </tr>
     {% endif %}
     {% endfor %}
 </table>
-{#{% for column in columns %}#}
-{{ columns }}
-{#{% endfor %}#}
+<button onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
 </body>
+
 </html>
