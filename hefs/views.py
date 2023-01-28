@@ -1,5 +1,5 @@
 from django.db.models import Sum
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 
 from hefs.classes.add_orders import AddOrders
@@ -24,10 +24,8 @@ def show_veh(request):
         date_array.append(date)
     cursor = connection.cursor()
     test = SqlCommands().get_veh_command(date_array)
-    print(test)
     cursor.execute(test)
     veh = cursor.fetchall()
-    print(veh)
     context = {'table': veh, 'column_headers': date_array}
     return render(request, 'veh.html', context)
 
@@ -94,7 +92,7 @@ def pickbonnen_page(request):
     context = {'form': form}
     return render(request, 'pickbonnenpage.html', context)
 
-
+# @job
 def get_pickbonnen(request):
     if request.method == 'POST':
         form = PickbonnenForm(request.POST, request.FILES)
@@ -104,9 +102,9 @@ def get_pickbonnen(request):
             conversieID = form['conversieID'].value()
             routenr = form['routenr'].value()
             PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
-    new_form = PickbonnenForm()
-    context = {'form': new_form}
-    return render(request, 'pickbonnenpage.html', context)
+    response = FileResponse(open('pickbonnen.pdf', 'rb'), content_type='application/pdf', as_attachment=True)
+    return response
+
 
 
 def financial_overview_page(request):
