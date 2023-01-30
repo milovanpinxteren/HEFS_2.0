@@ -122,6 +122,11 @@
     border-collapse: collapse;
 }
 
+.table {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
 .table-head {
     border: 1px solid;
 }
@@ -142,7 +147,7 @@
 
 .table-data {
     border: 1px solid;
-    /*padding-left: 10px;*/
+    padding: 5px;
     /*margin-left: 500px;*/
 }
 
@@ -150,5 +155,20 @@
     display: inline-block;
     width: 100px;
     text-align: center;
+}
 
+#percentual_costs_table {
+    display: inline-block;
+    width: 30%;
+
+}
+
+#fixed_costs_table {
+    display: inline-block;
+    width: 30%;
+}
+
+#variable_costs_table {
+    display: inline-block;
+    width: 30%;
 }

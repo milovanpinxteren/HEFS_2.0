@@ -24,15 +24,19 @@
 
 
 <h1 class="page-title">Producten overzicht</h1>
-Tabel met: <br>
-Aantal orders <br>
-Aantal personen <br>
-Aantal hoofdgerechten per order <br>
-Gemiddelde omzet per order <br>
-<br><br>
-VEH tabel
+{#Tabel met: <br>#}
+{#Aantal orders <br>#}
+{#Aantal personen <br>#}
+{#Aantal hoofdgerechten per order <br>#}
+{#Gemiddelde omzet per order <br>#}
+{#<br><br>#}
+{#VEH tabel#}
 <br>
-
+<button onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+<br><br>
+<p>
+    <h3>{{ veh_is_empty }}</h3>
+</p>
 <table id="vehTable">
     <thead class="table-head">
     <th class="table-heading">omschrijving</th>
@@ -58,7 +62,7 @@ VEH tabel
                     {{ column }}
                 {% endif %}
             {% elif column == None %}
-               <span class="number-span">0</span>
+                <span class="number-span">0</span>
             {% endif %}
         </td>
     {% endfor %}
@@ -67,7 +71,7 @@ VEH tabel
     {% endif %}
     {% endfor %}
 </table>
-<button onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+
 </body>
 
 </html>

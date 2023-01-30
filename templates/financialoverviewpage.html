@@ -3,12 +3,73 @@
 {% load static %}
 <head>
     <meta charset="UTF-8">
-    <title>Pickbonnen</title>
+    <title>Financieel Overzicht</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
 </head>
 <body>
 {% include "navbar.html" %}
-<h1>Financieel Overzicht</h1>
+<h1 class="page-title">Financieel Overzicht</h1>
+
+<div id="percentual_costs_table">
+    <table class="table">
+        <thead class="table-head">Percentuele kosten
+        <th class="table-heading">Kostennaam</th>
+        <th class="table-heading">Omschrijving</th>
+        <th class="table-heading">Percentage</th>
+        </thead>
+        <tbody>
+        <tr class="table-rows">
+            {% for row in percentual_costs %}
+                <td class="table-data">{{ row.kostennaam }}</td>
+                <td class="table-data">{{ row.kostenomschrijving }}</td>
+                <td class="table-data">{{ row.percentage }}</td>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="fixed_costs_table">
+    <table class="table">
+        <thead class="table-head">Vaste Kosten
+        <th class="table-heading">Kostennaam</th>
+        <th class="table-heading">Omschrijving</th>
+        <th class="table-heading">Kosten</th>
+        </thead>
+        <tbody>
+        <tr class="table-rows">
+            {% for row in fixed_costs %}
+                <td class="table-data">{{ row.kostennaam }}</td>
+                <td class="table-data">{{ row.kostenomschrijving }}</td>
+                <td class="table-data">{{ row.kosten }}</td>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="variable_costs_table">
+    <table class="table">
+        <thead class="table-head">Variable kosten
+        <th class="table-heading">Kostennaam</th>
+        <th class="table-heading">Omschrijving</th>
+        <th class="table-heading">Kosten</th>
+        <th class="table-heading">Vermenigvuldinging (1=order, 2=hoofdgerecht)</th>
+        </thead>
+        <tbody>
+        <tr class="table-rows">
+            {% for row in variable_costs %}
+                <td class="table-data">{{ row.kostennaam }}</td>
+                <td class="table-data">{{ row.kostenomschrijving }}</td>
+                <td class="table-data">{{ row.kosten_per_eenheid }}</td>
+                {% if row.vermenigvuldiging == 1 %}
+                    <td class="table-data">Per order</td>
+                {% elif row.vermenigvuldiging == 2 %}
+                    <td class="table-data">Per Hoofdgerecht</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import random
 
 from django.db import models
-
+from django.contrib.postgres.fields import ArrayField
 
 
 
@@ -175,7 +175,10 @@ class PercentueleKosten(models.Model):
 
 #############################################General models below#######################################################
 
+
+
 class ApiUrls(models.Model):
     api = models.URLField(max_length=250)
     user_id = models.IntegerField(default=0)
     begindatum = models.DateField(null=True)
+    organisatieIDs = ArrayField(models.IntegerField(default=0), blank=True, default=[])
