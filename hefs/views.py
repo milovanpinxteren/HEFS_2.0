@@ -1,16 +1,17 @@
 import requests
+from django.db.models import Sum
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
 from .forms import PickbonnenForm
 from hefs.classes.get_orders import GetOrders
-from .models import PickItems, Orders, ApiUrls, PercentueleKosten, VasteKosten, VariableKosten
+from .models import PickItems, Orders, ApiUrls, PercentueleKosten, VasteKosten, VariableKosten, AlgemeneInformatie
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from django.db import connection
 from .sql_commands import SqlCommands
 
-# global usergroup = requests.get()
+
 
 def index(request):
     return HttpResponse("TEST")
@@ -18,6 +19,10 @@ def index(request):
 
 def show_veh(request):
     organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
+    prognosegetal = AlgemeneInformatie.objects.get(naam='prognosegetal').waarde
+    aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+    aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
+    prognosefractie = prognosegetal / aantal_hoofdgerechten
     dates = Orders.objects.filter(organisatieID__in=organisations_to_show).order_by('afleverdatum').values_list('afleverdatum').distinct()
     if not dates:
         context = {'table': '', 'column_headers': '', 'veh_is_empty': 'Geen producten gevonden, weet u zeker dat u met de juiste account bent ingelogd?'}
@@ -26,10 +31,11 @@ def show_veh(request):
         for date in dates:
             date_array.append(date)
         cursor = connection.cursor()
-        test = SqlCommands().get_veh_command(date_array)
-        cursor.execute(test)
+        sql_veh = SqlCommands().get_veh_command(date_array, prognosefractie)
+        cursor.execute(sql_veh)
         veh = cursor.fetchall()
-        context = {'table': veh, 'column_headers': date_array}
+        context = {'table': veh, 'column_headers': date_array, 'prognosegetal': prognosegetal,
+                   'aantal_hoofdgerechten': aantal_hoofdgerechten, 'aantal_orders': aantal_orders}
     return render(request, 'veh.html', context)
 
 
@@ -114,6 +120,11 @@ def financial_overview_page(request):
     percentual_costs = PercentueleKosten.objects.all()
     fixed_costs = VasteKosten.objects.all()
     variable_costs = VariableKosten.objects.all()
+    organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
+    totale_inkomsten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(Sum('orderprijs')).get('orderprijs__sum')
+    totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(Sum('verzendkosten')).get('verzendkosten__sum')
+    inkomsten_zonder_verzendkosten = totale_inkomsten - totale_verzendkosten
     context = {'percentual_costs': percentual_costs, 'fixed_costs': fixed_costs,
-               'variable_costs': variable_costs}
+               'variable_costs': variable_costs, 'totale_inkomsten': totale_inkomsten,
+               'inkomsten_zonder_verzendkosten': inkomsten_zonder_verzendkosten}
     return render(request, 'financialoverviewpage.html', context)

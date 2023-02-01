@@ -10,66 +10,91 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Financieel Overzicht</h1>
+<div class="costs_tables_div">
+    <div id="percentual_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Percentuele kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Percentage</th>
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                {% for row in percentual_costs %}
+                    <td class="table-data">{{ row.kostennaam }}</td>
+                    <td class="table-data">{{ row.kostenomschrijving }}</td>
+                    <td class="table-data">{{ row.percentage }}</td>
+                {% endfor %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="fixed_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Vaste kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Kosten</th>
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                {% for row in fixed_costs %}
+                    <td class="table-data">{{ row.kostennaam }}</td>
+                    <td class="table-data">{{ row.kostenomschrijving }}</td>
+                    <td class="table-data">{{ row.kosten }}</td>
+                {% endfor %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="variable_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Variable kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Kosten</th>
+            <th class="table-heading">Vermenigvuldinging</th>
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                {% for row in variable_costs %}
+                    <td class="table-data">{{ row.kostennaam }}</td>
+                    <td class="table-data">{{ row.kostenomschrijving }}</td>
+                    <td class="table-data">{{ row.kosten_per_eenheid }}</td>
+                    {% if row.vermenigvuldiging == 1 %}
+                        <td class="table-data">Per order</td>
+                    {% elif row.vermenigvuldiging == 2 %}
+                        <td class="table-data">Per Hoofdgerecht</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="profit-table">
+    <div id="fixed_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Winst</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Bedrag</th>
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                <td class="table-data">Totale inkomsten</td>
+                <td class="table-data">Orderprijzen van alle orders opgeteld</td>
+                <td class="table-data">{{ totale_inkomsten }}</td>
+            </tr>
+            <tr>
+                <td class="table-data">Totale inkomsten zonder verzendkosten</td>
+                <td class="table-data">Totale inkomsten - Totale verzendkosten</td>
+                <td class="table-data">{{ inkomsten_zonder_verzendkosten }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-<div id="percentual_costs_table">
-    <table class="table">
-        <thead class="table-head">Percentuele kosten
-        <th class="table-heading">Kostennaam</th>
-        <th class="table-heading">Omschrijving</th>
-        <th class="table-heading">Percentage</th>
-        </thead>
-        <tbody>
-        <tr class="table-rows">
-            {% for row in percentual_costs %}
-                <td class="table-data">{{ row.kostennaam }}</td>
-                <td class="table-data">{{ row.kostenomschrijving }}</td>
-                <td class="table-data">{{ row.percentage }}</td>
-            {% endfor %}
-        </tr>
-        </tbody>
-    </table>
-</div>
-<div id="fixed_costs_table">
-    <table class="table">
-        <thead class="table-head">Vaste Kosten
-        <th class="table-heading">Kostennaam</th>
-        <th class="table-heading">Omschrijving</th>
-        <th class="table-heading">Kosten</th>
-        </thead>
-        <tbody>
-        <tr class="table-rows">
-            {% for row in fixed_costs %}
-                <td class="table-data">{{ row.kostennaam }}</td>
-                <td class="table-data">{{ row.kostenomschrijving }}</td>
-                <td class="table-data">{{ row.kosten }}</td>
-            {% endfor %}
-        </tr>
-        </tbody>
-    </table>
-</div>
-<div id="variable_costs_table">
-    <table class="table">
-        <thead class="table-head">Variable kosten
-        <th class="table-heading">Kostennaam</th>
-        <th class="table-heading">Omschrijving</th>
-        <th class="table-heading">Kosten</th>
-        <th class="table-heading">Vermenigvuldinging (1=order, 2=hoofdgerecht)</th>
-        </thead>
-        <tbody>
-        <tr class="table-rows">
-            {% for row in variable_costs %}
-                <td class="table-data">{{ row.kostennaam }}</td>
-                <td class="table-data">{{ row.kostenomschrijving }}</td>
-                <td class="table-data">{{ row.kosten_per_eenheid }}</td>
-                {% if row.vermenigvuldiging == 1 %}
-                    <td class="table-data">Per order</td>
-                {% elif row.vermenigvuldiging == 2 %}
-                    <td class="table-data">Per Hoofdgerecht</td>
-                {% endif %}
-            {% endfor %}
-        </tr>
-        </tbody>
-    </table>
-</div>
 </body>
 </html>

@@ -1,8 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 from hefs.models import Orders, PickOrders, Orderline, PickItems, Productextra, Productinfo, \
-    VerpakkingsCombinaties, Orderextra
+    VerpakkingsCombinaties, Orderextra, AlgemeneInformatie
 
 
 class CalculateOrders():
@@ -11,7 +11,7 @@ class CalculateOrders():
         PickOrders.objects.all().delete()
         PickItems.objects.all().delete()
         self.make_pickfile()
-        # self.make_veh()
+        self.calculate_variables()
 
     def make_pickfile(self):
         print('MAKE PICKFILE')
@@ -82,9 +82,17 @@ class CalculateOrders():
                                  pick_order=PickOrders.objects.get(order_id=order.id),
                                  product=productinfo)
 
-    def make_veh(self):
-        print('MAKE VEH')
-        self.veh = PickItems.objects.select_related('pick_order__order').values_list('product_id',
-            'pick_order__order__afleverdatum').annotate(totaal=Count('hoeveelheid'))
-
-        return self.veh
+    def calculate_variables(self):
+        print('Calculate variables')
+        #aantal orders
+        aantal_orders = Orders.objects.all().count()
+        AlgemeneInformatie.objects.filter(naam='aantalOrders').delete()
+        AlgemeneInformatie.objects.create(naam='aantalOrders', waarde=aantal_orders)
+        #aantal hoofdgerechten
+        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[5,7])
+        hoofdgerechten_array = []
+        for hoofdgerecht in hoofdgerechten:
+            hoofdgerechten_array.append(hoofdgerecht.productcode)
+        aantal_hoofdgerechten = Orderline.objects.filter(productSKU__in=hoofdgerechten_array).aggregate(Sum('aantal'))
+        AlgemeneInformatie.objects.filter(naam='aantalHoofdgerechten').delete()
+        AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten', waarde=aantal_hoofdgerechten.get('aantal__sum'))

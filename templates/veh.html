@@ -24,27 +24,29 @@
 
 
 <h1 class="page-title">Producten overzicht</h1>
-{#Tabel met: <br>#}
-{#Aantal orders <br>#}
-{#Aantal personen <br>#}
-{#Aantal hoofdgerechten per order <br>#}
-{#Gemiddelde omzet per order <br>#}
-{#<br><br>#}
-{#VEH tabel#}
-<br>
-<button onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
-<br><br>
+<div class="information-div">
+<p>
+    Aantal orders: {{ aantal_orders }} <br>
+    Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
+    Prognose: {{ prognosegetal }} personen (Prognoseberekening: (prognosegetal / aantal hoofdgerechten) * Totaal <br>
+    <i>Ga naar de adminpagina om het prognosegetal aan te passen</i>
+</p>
+</div>
+<button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+
 <p>
     <h3>{{ veh_is_empty }}</h3>
 </p>
 <table id="vehTable">
     <thead class="table-head">
-    <th class="table-heading">omschrijving</th>
+    <th class="table-heading">Omschrijving</th>
     {% for column in column_headers %}
         <th class="table-heading">
             {{ column.0 | date:"d-m-Y" }}
         </th>
     {% endfor %}
+    <th class="table-heading">Totaal</th>
+    <th class="table-heading">Voor {{ prognosegetal }} Personen</th>
     </thead>
     {% for row in table %}
         {% define newrow as False %}

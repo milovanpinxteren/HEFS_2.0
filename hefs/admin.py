@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
-    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls
+    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie
 
 
 @admin.register(Orders)
@@ -60,6 +60,11 @@ class VasteKostenAdmin(admin.ModelAdmin):
 class VasteKostenAdmin(admin.ModelAdmin):
     list_display = ['kostennaam', 'kostenomschrijving', 'percentage']
 
+
 @admin.register(ApiUrls)
 class ApiUrlAdmin(admin.ModelAdmin):
     list_display = ['api', 'organisatieIDs']
+
+@admin.register(AlgemeneInformatie)
+class AlgemeneInformatieAdmin(admin.ModelAdmin):
+    list_display = ['naam', 'waarde']
