@@ -13,6 +13,11 @@
     text-decoration: none;
 }
 
+.page-container {
+    width: 100%;
+    height: 100%;
+}
+
 .page-title {
     font-size: 70px;
     text-transform: uppercase;
@@ -290,8 +295,33 @@
     border: 1px solid red;
 }
 
+#customer-location-plot-div {
+    width: 49%;
+    /*height: 100%;*/
+    float: left;
+    display: inline-block;
+}
+
 #customer-location-plot {
-    /*max-width: 40%;*/
+    height: 100%;
+
+}
+
+#orders-per-date-plot-div {
+    width: 49%;
+    float: left;
+    display: inline-block;
+}
+
+#orders-per-date-plot {
+    width: 100%;
+    height: 100%;
+}
+
+#important-numbers-table {
+    padding-left: 1%;
+    display: inline-block;
+    float: left;
 }
 
 .loader {

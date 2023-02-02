@@ -41,10 +41,14 @@ def show_veh(request):
 
 
 def show_customerinfo(request):
+    userid = request.user.id
     customerinfo = CustomerInfo()
-    customer_location_plot = customerinfo.customer_location_plot()
-
-    context = {'customer_location_plot': customer_location_plot._repr_html_()}
+    customer_location_plot = customerinfo.customer_location_plot(userid)
+    orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
+    important_numbers = customerinfo.important_numbers_table(userid)
+    context = {'customer_location_plot': customer_location_plot._repr_html_(), 'orders_per_date_plot': orders_per_date_plot,
+               'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
+               'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3]}
     return render(request, 'customerinfo.html', context)
 
 
