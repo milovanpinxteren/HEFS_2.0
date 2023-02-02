@@ -1,13 +1,21 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
-    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie
+    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline
 
 
 @admin.register(Orders)
 class OrderInfoAdmin(admin.ModelAdmin):
-    list_display = ['conversieID', 'besteldatum', 'afleverdatum', 'orderprijs', 'voornaam',
+    list_display = ['id', 'conversieID', 'besteldatum', 'afleverdatum', 'orderprijs', 'voornaam',
                     'achternaam']
     search_fields = ("conversieID__contains", "voornaam__contains", "achternaam__contains")
+
+@admin.register(Orderline)
+class OrderlineAdmin(admin.ModelAdmin):
+    list_display = ["conversieID", 'product', 'productSKU', 'aantal']
+    search_fields = ("order_id__conversieID__contains", "product__contains")
+
+    def conversieID(self, obj):
+        return obj.order.conversieID
 
 
 @admin.register(Productinfo)

@@ -172,7 +172,7 @@
 .costs_tables_div {
     border-style: solid;
     border-color: lightcoral;
-    padding: 1%;
+    padding: 2%;
 }
 
 #percentual_costs_table {
@@ -196,6 +196,7 @@
     border-color: lightgreen;
     padding: 1%;
     margin-top: 1%;
+    margin-bottom: 1%;
 }
 
 
@@ -261,4 +262,30 @@
 
 .get-orders-div {
     text-align: center;
+}
+
+#total-percentual-costs {
+    float: left;
+    display: inline-block;
+    /*margin-right: 7%;*/
+    width: 30%;
+}
+
+#total-fixed-costs {
+    display: inline-block;
+    width: 30%;
+}
+
+#total-variable-costs {
+    display: inline-block;
+    width: 30%;
+}
+
+#total-costs-div {
+    padding: 3% 1% 2% 1%;
+    display: inline-block;
+    /*width: 100%;*/
+    text-align: left;
+    font-weight: bold;
+    border: 1px solid red;
 }

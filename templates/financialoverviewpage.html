@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+{% load mathfilters %}
 <head>
     <meta charset="UTF-8">
     <title>Financieel Overzicht</title>
@@ -10,68 +11,7 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Financieel Overzicht</h1>
-<div class="costs_tables_div">
-    <div id="percentual_costs_table">
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Percentuele kosten</span>
-            <th class="table-heading">Kostennaam</th>
-            <th class="table-heading">Omschrijving</th>
-            <th class="table-heading">Percentage</th>
-            </thead>
-            <tbody>
-            <tr class="table-rows">
-                {% for row in percentual_costs %}
-                    <td class="table-data">{{ row.kostennaam }}</td>
-                    <td class="table-data">{{ row.kostenomschrijving }}</td>
-                    <td class="table-data">{{ row.percentage }}</td>
-                {% endfor %}
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div id="fixed_costs_table">
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Vaste kosten</span>
-            <th class="table-heading">Kostennaam</th>
-            <th class="table-heading">Omschrijving</th>
-            <th class="table-heading">Kosten</th>
-            </thead>
-            <tbody>
-            <tr class="table-rows">
-                {% for row in fixed_costs %}
-                    <td class="table-data">{{ row.kostennaam }}</td>
-                    <td class="table-data">{{ row.kostenomschrijving }}</td>
-                    <td class="table-data">{{ row.kosten }}</td>
-                {% endfor %}
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div id="variable_costs_table">
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Variable kosten</span>
-            <th class="table-heading">Kostennaam</th>
-            <th class="table-heading">Omschrijving</th>
-            <th class="table-heading">Kosten</th>
-            <th class="table-heading">Vermenigvuldinging</th>
-            </thead>
-            <tbody>
-            <tr class="table-rows">
-                {% for row in variable_costs %}
-                    <td class="table-data">{{ row.kostennaam }}</td>
-                    <td class="table-data">{{ row.kostenomschrijving }}</td>
-                    <td class="table-data">{{ row.kosten_per_eenheid }}</td>
-                    {% if row.vermenigvuldiging == 1 %}
-                        <td class="table-data">Per order</td>
-                    {% elif row.vermenigvuldiging == 2 %}
-                        <td class="table-data">Per Hoofdgerecht</td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+
 <div class="profit-table">
     <div id="fixed_costs_table">
         <table class="table">
@@ -86,7 +26,7 @@
                 <td class="table-data">Orderprijzen van alle orders opgeteld</td>
                 <td class="table-data">{{ totale_inkomsten }}</td>
             </tr>
-            <tr>
+            <tr class="table-rows">
                 <td class="table-data">Totale inkomsten zonder verzendkosten</td>
                 <td class="table-data">Totale inkomsten - Totale verzendkosten</td>
                 <td class="table-data">{{ inkomsten_zonder_verzendkosten }}</td>
@@ -95,6 +35,103 @@
         </table>
     </div>
 </div>
+
+<div class="costs_tables_div">
+    <div id="percentual_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Percentuele kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Percentage</th>
+            </thead>
+            <tbody>
+            {% for row in percentual_costs_table %}
+                <tr class="table-rows">
+                    <td class="table-data">{{ row.kostennaam }}</td>
+                    <td class="table-data">{{ row.kostenomschrijving }}</td>
+                    <td class="table-data">{{ row.percentage }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="fixed_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Vaste kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Kosten</th>
+            <th class="table-heading">Kosten incl BTW</th>
+            </thead>
+            <tbody>
+            {% for row in fixed_costs %}
+                <tr class="table-rows">
+                    <td class="table-data">{{ row.kostennaam }}</td>
+                    <td class="table-data">{{ row.kostenomschrijving }}</td>
+                    <td class="table-data">{{ row.kosten }}</td>
+                    <td class="table-data">{{ row.kosten|mul:1.09|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="variable_costs_table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Variable kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Kosten per eenheid</th>
+            <th class="table-heading">Vermenigvuldinging</th>
+            <th class="table-heading">Kosten</th>
+            <th class="table-heading">Kosten incl BTW</th>
+            {#            <th class="table-heading">Totale kosten</th>#}
+            </thead>
+            <tbody>
+            {% for row in variable_costs %}
+                <tr class="table-rows">
+                    <td class="table-data">{{ row.kostennaam }}</td>
+                    <td class="table-data">{{ row.kostenomschrijving }}</td>
+                    <td class="table-data">{{ row.kosten_per_eenheid }}</td>
+                    {% if row.vermenigvuldiging == 1 %}
+                        <td class="table-data">Per order</td>
+                        <td class="table-data">{{ row.kosten_per_eenheid|mul:aantal_orders|floatformat:2 }}</td>
+                        <td class="table-data">{{ row.kosten_per_eenheid|mul:aantal_orders|mul:1.09|floatformat:2 }}</td>
+                    {% elif row.vermenigvuldiging == 2 %}
+                        <td class="table-data">Per Hoofdgerecht</td>
+                        <td class="table-data">{{ row.kosten_per_eenheid|mul:aantal_hoofdgerechten|floatformat:2 }}</td>
+                        <td class="table-data">{{ row.kosten_per_eenheid|mul:aantal_hoofdgerechten|mul:1.09|floatformat:2 }}</td>
+                    {% endif %}
+                    {#                <td class="table-data">{{ row.kosten_per_eenheid }}</td>#}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="total-percentual-costs">
+        <p>
+            Totale percentuele kosten excl BTW = {{ percentual_costs|floatformat:2 }}
+            <br>Totale percentuele kosten incl BTW = {{ percentual_costs_incl_btw|floatformat:2 }}
+            {#            <br>(Orderprijs zonder verzendkosten * totale percentage)#}
+        </p>
+    </div>
+    <div id="total-fixed-costs">
+        <p>
+            Totale vaste kosten excl BTW = {{ total_fixed_costs|floatformat:2 }}<br>
+            Totale vaste kosten incl BTW = {{ fixed_costs_incl_btw|floatformat:2 }}
+        </p>
+    </div>
+    <div id="total-variable-costs">
+        <p>
+            Totale variable kosten excl BTW = {{ total_variable_costs|floatformat:2 }}<br>
+            Totale variable kosten incl BTW = {{ total_variable_costs_incl_btw|floatformat:2 }}
+        </p>
+    </div>
+    <div id="total-costs-div">
+        Totale kosten excl BTW = {{ total_costs|floatformat:2 }}<br>
+        Totale kosten incl BTW = {{ total_costs_incl_btw|floatformat:2 }}
+    </div>
+</div>
+
 
 </body>
 </html>

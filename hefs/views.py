@@ -1,9 +1,9 @@
-import requests
-from django.db.models import Sum
+
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
+from .classes.financecalculator import FinanceCalculator
 from .forms import PickbonnenForm
 from hefs.classes.get_orders import GetOrders
 from .models import PickItems, Orders, ApiUrls, PercentueleKosten, VasteKosten, VariableKosten, AlgemeneInformatie
@@ -117,14 +117,19 @@ def get_pickbonnen(request):
 
 
 def financial_overview_page(request):
-    percentual_costs = PercentueleKosten.objects.all()
-    fixed_costs = VasteKosten.objects.all()
-    variable_costs = VariableKosten.objects.all()
-    organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
-    totale_inkomsten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(Sum('orderprijs')).get('orderprijs__sum')
-    totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(Sum('verzendkosten')).get('verzendkosten__sum')
-    inkomsten_zonder_verzendkosten = totale_inkomsten - totale_verzendkosten
-    context = {'percentual_costs': percentual_costs, 'fixed_costs': fixed_costs,
-               'variable_costs': variable_costs, 'totale_inkomsten': totale_inkomsten,
-               'inkomsten_zonder_verzendkosten': inkomsten_zonder_verzendkosten}
+    userid = request.user.id
+    financecalculator = FinanceCalculator(userid)
+
+    costs = financecalculator.calculate_costs()
+    profit = financecalculator.calculate_profit(userid)
+
+
+    context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
+               'variable_costs': costs[2], 'percentual_costs': costs[3],'percentual_costs_incl_btw': costs[4],
+               'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
+               'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
+               'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
+               'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
+
+               }
     return render(request, 'financialoverviewpage.html', context)
