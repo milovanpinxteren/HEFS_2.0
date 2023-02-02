@@ -60,6 +60,9 @@ class Orders(models.Model):
     land = models.CharField(max_length=250, null=True, blank=True)
     routenr = models.IntegerField(null=True, blank=True)
 
+    def __str__(self):
+        return str(self.conversieID)
+
 class Orderline(models.Model):
     order = models.ForeignKey(Orders, on_delete=models.CASCADE, default='', blank=True)
     product = models.CharField(max_length=250, null=True, blank=True)

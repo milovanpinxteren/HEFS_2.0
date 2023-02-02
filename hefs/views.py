@@ -3,6 +3,7 @@ from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
+from .classes.customer_info import CustomerInfo
 from .classes.financecalculator import FinanceCalculator
 from .forms import PickbonnenForm
 from hefs.classes.get_orders import GetOrders
@@ -40,7 +41,11 @@ def show_veh(request):
 
 
 def show_customerinfo(request):
-    return render(request, 'customerinfo.html')
+    customerinfo = CustomerInfo()
+    customer_location_plot = customerinfo.customer_location_plot()
+
+    context = {'customer_location_plot': customer_location_plot._repr_html_()}
+    return render(request, 'customerinfo.html', context)
 
 
 def getorderspage(request):
@@ -123,13 +128,11 @@ def financial_overview_page(request):
     costs = financecalculator.calculate_costs()
     profit = financecalculator.calculate_profit(userid)
 
-
     context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
                'variable_costs': costs[2], 'percentual_costs': costs[3],'percentual_costs_incl_btw': costs[4],
                'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
                'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
                'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
                'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
-
                }
     return render(request, 'financialoverviewpage.html', context)

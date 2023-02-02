@@ -10,6 +10,12 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Klantenoverzicht</h1>
+
+
+<div id="customer-location-plot"><h3>Klantenlocaties</h3>
+    {{ customer_location_plot|safe }}
+</div>
+
 Grafiek met aantal orders en orders afgelopen jaren <br>
 Grafiek met locaties <br>
 <br><br>

@@ -1,11 +1,18 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Even geduld a.u.b.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
 </head>
 <body>
-<h1>WACHTEENNNN</h1>
-<h1>{{ status }}</h1>
+{% include 'navbar.html' %}
+{#<h1 class="page-title">Even geduld a.u.b.</h1>#}
+<h1 class="page-title" >Percentage voltooid: {{ status }}%</h1>
+<br><br><br><br>
+<div class="loader"></div>
+
 </body>
 </html>
