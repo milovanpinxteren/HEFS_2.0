@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Klantinformatie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+</head>
+<body>
+{% include "navbar.html" %}
+
+<h1 class="page-title">Nieuwe orders ophalen</h1>
+
+<div>
+    <form action="get_orders" method="post" enctype="multipart/form-data" autocomplete="off">
+        <div class="get-orders-div">
+            {% csrf_token %}
+            <p>
+                <br>
+                <button class="button-48" type="submit">Haal nieuwe orders op</button>
+            </p>
+
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Klantinformatie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+</head>
+<body>
+{% include "navbar.html" %}
+<h1 class="page-title">Klantenoverzicht</h1>
+
+<div class="page-container">
+
+    <div id="customer-location-plot-div"><span class="table-title">Klantenlocaties</span>
+        <div id="customer-location-plot">
+            {{ customer_location_plot|safe }}
+        </div>
+    </div>
+
+    <div id="orders-per-date-plot-div">
+        <div orders-per-date-plot>
+            {{ orders_per_date_plot|safe }}
+        </div>
+
+    </div>
+
+    <div id="important-numbers-table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Kerngetallen</span>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Waarde</th>
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                <td class="table-data">Aantal personen/hoofdgerechten</td>
+                <td class="table-data">{{ aantal_hoofdgerechten }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">Aantal orders</td>
+                <td class="table-data">{{ aantal_orders }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">Aantal hoofdgerechten per order</td>
+                <td class="table-data">{{ hoofdgerechten_per_order }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">Gemiddelde omzet per order (zonder verzendkosten)</td>
+                <td class="table-data">{{ gem_omzet_per_order }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    {#    Grafiek met aantal orders en orders afgelopen jaren <br>#}
+    {#    Grafiek met locaties <br>#}
+    {#    <br><br>#}
+    {#    tabel met: <br>#}
+    {#    Aantal orders nu <br>#}
+    {#    Aantal personen nu <br>#}
+    {#    Aantal orders verleden <br>#}
+    {#    Aantal personen verleden <br>#}
+    {#    Voorspelde aantal orders <br>#}
+    {#    Voorspelde aantal personen <br>#}
+</div>
+</body>
+</html>
