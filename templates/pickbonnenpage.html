@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Pickbonnen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+</head>
+<body>
+{% include "navbar.html" %}
+<h1 class="page-title">Pickbonnen pagina</h1>
+<h3>Kies hier welke pickbonnen u wilt uitdraaien</h3>
+<p>
+    Optie 1: Kies een begin <b>en</b> einddatum. -> Pickbonnen worden gegenereerd voor die datums
+    (wil je alleen orders van 1 dag? Vul dan als begin- en einddatum die dag in)<br>
+    Optie 2: Typ een ConversieID -> Pickbon van dat ConversieID wordt gegenereerd
+</p>
+<form action="./get_pickbonnen" method="post" enctype="multipart/form-data" autocomplete="off">
+    <div class="pickbonnen-form">
+        {% csrf_token %}
+        <p>
+           {{ form.begindatum.label_tag }} <br>{{ form.begindatum }}
+        </p>
+        <p>
+            {{ form.einddatum.label_tag }} <br>{{ form.einddatum }}
+        </p>
+        <p>
+            {{ form.conversieID.label_tag }} <br>{{ form.conversieID }}
+        </p>
+        <p>
+            {{ form.routenr.label_tag }} (voor nu leeg laten, nog niet functioneel) <br>{{ form.routenr }}
+        </p>
+        <p>
+            <br>
+            <button class="button-48" type="submit">Genereer Pickbonnen</button>
+        </p>
+    </div>
+
+</form>
+</body>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.datepicker').datepicker();
+    });
+    $.datepicker.setDefaults(
+        $.extend(
+            {'dateFormat': 'yy/mm/dd'},
+            $.datepicker.regional['en']
+        )
+    );
+</script>
+</html>
