@@ -15,7 +15,10 @@ class FinanceCalculator():
             Sum('orderprijs')).get('orderprijs__sum')
         totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('verzendkosten')).get('verzendkosten__sum')
-        self.inkomsten_zonder_verzendkosten = self.totale_inkomsten - totale_verzendkosten
+        try:
+            self.inkomsten_zonder_verzendkosten = self.totale_inkomsten - totale_verzendkosten
+        except TypeError:
+            self.inkomsten_zonder_verzendkosten = 0
         self.aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
         self.aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
         return self.totale_inkomsten, self.inkomsten_zonder_verzendkosten, self.aantal_hoofdgerechten, self.aantal_orders
