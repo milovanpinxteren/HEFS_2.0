@@ -8,15 +8,15 @@ Finance
 Analytics
 
 
-Users:
-kerstdiner2022
-hohoho2022
+Users: <br>
+pasen2023 <br>
+paasdiner123
 
-paasdiner2023
-paashaas123
-
-vaderdagdiner2023
-test2023
-
-moederdiner2023
-test2023
+paasdiner2023 <br>
+pasen123 <br>
+## Database info
+#### ApiUrls
+api: <className> (e.g.: Paasdiner2023API())
+user_id: id of corresponding user
+begindatum: date of first order
+organisatieIDs: {id1, id2}
