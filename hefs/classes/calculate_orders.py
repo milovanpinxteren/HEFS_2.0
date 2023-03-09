@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Sum
+from django.db import IntegrityError
+from django.db.models import Sum
 
 from hefs.models import Orders, PickOrders, Orderline, PickItems, Productextra, Productinfo, \
     VerpakkingsCombinaties, Orderextra, AlgemeneInformatie
@@ -24,15 +25,15 @@ class CalculateOrders():
             self.pickorderlines = Orderline.objects.filter(order=self.pickorder.order_id)
             for product in self.pickorderlines:
                 self.make_picks(product, 'Geen productextra', 'Geen productextra')
+                # TODO: if product+1 == product -> product aantal + 1 en product+1 weg
                 self.make_product_extras(product)
-
 
     def make_picks(self, product, aantal, order_id):
         if aantal == 'Geen productextra':
             bestelde_hoeveelheid = product.aantal
             productSKU = product.productSKU
             order_id = product.order_id
-        else: #if it is a productextra
+        else:  # if it is a productextra
             bestelde_hoeveelheid = aantal
             productSKU = product.productcode
             order_id = order_id
@@ -40,9 +41,11 @@ class CalculateOrders():
         productinfo = Productinfo.objects.filter(productcode=productSKU).first()
         gang_id = productinfo.gang_id
         verpakkingmogelijkheid_id = productinfo.verpakkingscombinatie_id
-        verpakkingsmogelijkheden = VerpakkingsCombinaties.objects.filter(verpakkingsmogelijkheid_id=verpakkingmogelijkheid_id)
+        verpakkingsmogelijkheden = VerpakkingsCombinaties.objects.filter(
+            verpakkingsmogelijkheid_id=verpakkingmogelijkheid_id)
         try:
-            verpakkingsaantallen = verpakkingsmogelijkheden.get(bestelde_hoeveelheid=bestelde_hoeveelheid).verpakkingscombinatie
+            verpakkingsaantallen = verpakkingsmogelijkheden.get(
+                bestelde_hoeveelheid=bestelde_hoeveelheid).verpakkingscombinatie
             for verpakking in verpakkingsaantallen:
                 if verpakking != ',':
                     productID = str(gang_id) + productSKU + verpakking
@@ -55,13 +58,12 @@ class CalculateOrders():
                         # TODO: User feedback
                         print('Geen product gevonden Productinfo voor: ', productinfo.productnaam, productID)
         except ObjectDoesNotExist:
-            #TODO: User feedback
-            print("Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden")
-
-
+            # TODO: User feedback
+            print(
+                "Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden")
 
     def make_product_extras(self, product):
-        #TODO: als 1x brunch fixen en 1x brunch dasher -> samenvoegen en dan pas picks maken
+        # TODO: als 1x brunch fixen en 1x brunch dasher -> samenvoegen en dan pas picks maken (miss aparte functie (def optimze_packing oid)
         print('MAKE PRODUCT EXTRAS')
         productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
         aantal = product.aantal
@@ -70,7 +72,6 @@ class CalculateOrders():
             extra_product = productextra.extra_productnaam
             self.make_picks(extra_product, aantal, order_id)
 
-
     def make_order_extras(self, order):
         print('MAKE ORDER EXTRAS')
         orderextras = Orderextra.objects.all()
@@ -78,21 +79,25 @@ class CalculateOrders():
             productID = orderextra.productnaam_id
             productinfo = Productinfo.objects.filter(productID=productID).first()
 
-        PickItems.objects.create(omschrijving=productinfo.picknaam, hoeveelheid=1,
-                                 pick_order=PickOrders.objects.get(order_id=order.id),
-                                 product=productinfo)
+            PickItems.objects.create(omschrijving=productinfo.picknaam, hoeveelheid=1,
+                                     pick_order=PickOrders.objects.get(order_id=order.id),
+                                     product=productinfo)
 
     def calculate_variables(self):
         print('Calculate variables')
-        #aantal orders
+        # aantal orders
         aantal_orders = Orders.objects.all().count()
         AlgemeneInformatie.objects.filter(naam='aantalOrders').delete()
         AlgemeneInformatie.objects.create(naam='aantalOrders', waarde=aantal_orders)
-        #aantal hoofdgerechten
-        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[5,7])
+        # aantal hoofdgerechten
+        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[5, 7])
         hoofdgerechten_array = []
         for hoofdgerecht in hoofdgerechten:
             hoofdgerechten_array.append(hoofdgerecht.productcode)
         aantal_hoofdgerechten = Orderline.objects.filter(productSKU__in=hoofdgerechten_array).aggregate(Sum('aantal'))
         AlgemeneInformatie.objects.filter(naam='aantalHoofdgerechten').delete()
-        AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten', waarde=aantal_hoofdgerechten.get('aantal__sum'))
+        try:
+            AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten',
+                                              waarde=aantal_hoofdgerechten.get('aantal__sum'))
+        except IntegrityError:
+            AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten', waarde=0)
