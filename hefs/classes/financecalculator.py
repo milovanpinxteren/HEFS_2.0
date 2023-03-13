@@ -27,22 +27,36 @@ class FinanceCalculator():
     def calculate_costs(self):
         percentual_costs_table = PercentueleKosten.objects.all()
         total_percentage = PercentueleKosten.objects.aggregate(Sum('percentage'))
-        percentual_costs = self.inkomsten_zonder_verzendkosten * (total_percentage.get('percentage__sum') / 100)
-        percentual_costs_incl_btw = float(percentual_costs) * 1.09
+        try:
+            percentual_costs = self.inkomsten_zonder_verzendkosten * (total_percentage.get('percentage__sum') / 100)
+            percentual_costs_incl_btw = float(percentual_costs) * 1.09
+        except TypeError:
+            percentual_costs = 0
+            percentual_costs_incl_btw = 0
 
         fixed_costs = VasteKosten.objects.all()
         total_fixed_costs_dict = VasteKosten.objects.aggregate(Sum('kosten'))
-        total_fixed_costs = total_fixed_costs_dict.get('kosten__sum')
-        fixed_costs_incl_btw = float(total_fixed_costs) * 1.09
+        try:
+            total_fixed_costs = total_fixed_costs_dict.get('kosten__sum')
+            fixed_costs_incl_btw = float(total_fixed_costs) * 1.09
+        except TypeError:
+            total_fixed_costs = 0
+            fixed_costs_incl_btw = 0
 
         variable_costs = VariableKosten.objects.all()
         costs_per_order_dict = VariableKosten.objects.filter(vermenigvuldiging=1).aggregate(Sum('kosten_per_eenheid'))
         total_costs_per_order = costs_per_order_dict.get('kosten_per_eenheid__sum')
-        total_order_costs = total_costs_per_order * self.aantal_orders
+        try:
+            total_order_costs = total_costs_per_order * self.aantal_orders
+        except TypeError:
+            total_order_costs = 0
 
         costs_per_hoofdgerecht_dict = VariableKosten.objects.filter(vermenigvuldiging=2).aggregate(Sum('kosten_per_eenheid'))
         total_costs_per_hoofdgerecht = costs_per_hoofdgerecht_dict.get('kosten_per_eenheid__sum')
-        total_hoofdgerechten_costs = total_costs_per_hoofdgerecht * self.aantal_hoofdgerechten
+        try:
+            total_hoofdgerechten_costs = total_costs_per_hoofdgerecht * self.aantal_hoofdgerechten
+        except TypeError:
+            total_hoofdgerechten_costs = 0
         total_variable_costs = total_order_costs + total_hoofdgerechten_costs
         total_variable_costs_incl_btw = float(total_variable_costs) * 1.09
 
