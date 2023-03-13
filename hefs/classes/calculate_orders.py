@@ -12,6 +12,7 @@ class CalculateOrders():
         PickOrders.objects.all().delete()
         PickItems.objects.all().delete()
         self.make_pickfile()
+        self.optimize_picks()
         self.calculate_variables()
 
     def make_pickfile(self):
@@ -25,7 +26,6 @@ class CalculateOrders():
             self.pickorderlines = Orderline.objects.filter(order=self.pickorder.order_id)
             for product in self.pickorderlines:
                 self.make_picks(product, 'Geen productextra', 'Geen productextra')
-                # TODO: if product+1 == product -> product aantal + 1 en product+1 weg
                 self.make_product_extras(product)
 
     def make_picks(self, product, aantal, order_id):
@@ -51,19 +51,18 @@ class CalculateOrders():
                     productID = str(gang_id) + productSKU + verpakking
                     try:
                         product_to_pick = Productinfo.objects.get(productID=productID)
-                        PickItems.objects.create(omschrijving=productinfo.picknaam, hoeveelheid=1,
+                        PickItems.objects.create(omschrijving=product_to_pick.picknaam, hoeveelheid=1,
                                                  pick_order=PickOrders.objects.get(order_id=order_id),
                                                  product=product_to_pick)
+                        print("Pickitem gecreerd")
                     except ObjectDoesNotExist:
                         # TODO: User feedback
                         print('Geen product gevonden Productinfo voor: ', productinfo.productnaam, productID)
         except ObjectDoesNotExist:
             # TODO: User feedback
-            print(
-                "Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden")
+            print("Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden")
 
     def make_product_extras(self, product):
-        # TODO: als 1x brunch fixen en 1x brunch dasher -> samenvoegen en dan pas picks maken (miss aparte functie (def optimze_packing oid)
         print('MAKE PRODUCT EXTRAS')
         productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
         aantal = product.aantal
@@ -82,6 +81,26 @@ class CalculateOrders():
             PickItems.objects.create(omschrijving=productinfo.picknaam, hoeveelheid=1,
                                      pick_order=PickOrders.objects.get(order_id=order.id),
                                      product=productinfo)
+
+    def optimize_picks(self):
+        for pickorder in PickOrders.objects.all():
+            self.pickorderlines = PickItems.objects.filter(pick_order_id=pickorder)
+            for product in self.pickorderlines:
+                occurences = self.pickorderlines.filter(product_id=product.product_id).count()
+                if occurences > 1:  #zelfde product, samenvoegen en 2e instance verwijderen uit db en for loop
+                    double_picks = self.pickorderlines.filter(product_id=product.product_id)
+                    omschrijving = double_picks.first().omschrijving
+                    pick_order_id = double_picks.first().pick_order_id
+                    product_id = double_picks.first().product_id
+                    new_amount = double_picks.aggregate(Sum('hoeveelheid')).get('hoeveelheid__sum')
+                    PickItems.objects.filter(pick_order_id=pick_order_id, product_id=product_id).delete()
+                    PickItems.objects.create(omschrijving=omschrijving, hoeveelheid=new_amount,
+                                             pick_order_id=pick_order_id, product_id=product_id)
+
+
+
+
+
 
     def calculate_variables(self):
         print('Calculate variables')

@@ -1,4 +1,4 @@
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from hefs.classes.add_orders import AddOrders
@@ -20,10 +20,17 @@ def index(request):
 
 def show_veh(request):
     organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
-    prognosegetal = AlgemeneInformatie.objects.get(naam='prognosegetal').waarde
-    aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-    aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
-    prognosefractie = prognosegetal / aantal_hoofdgerechten
+    try:
+        prognosegetal = AlgemeneInformatie.objects.get(naam='prognosegetal').waarde
+        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
+        prognosefractie = prognosegetal / aantal_hoofdgerechten
+    except ObjectDoesNotExist:
+        prognosegetal = 0
+        aantal_hoofdgerechten = 0
+        aantal_orders = 0
+        prognosefractie = 0
+
     dates = Orders.objects.filter(organisatieID__in=organisations_to_show).order_by('afleverdatum').values_list('afleverdatum').distinct()
     if not dates:
         context = {'table': '', 'column_headers': '', 'veh_is_empty': 'Geen producten gevonden, weet u zeker dat u met de juiste account bent ingelogd?'}
@@ -70,9 +77,9 @@ def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
             request.session['status'] = '10'
-            get_new_orders(request.user.id)
+            # get_new_orders(request.user.id)
             request.session['status'] = '50'
-            add_orders()
+            # add_orders()
             request.session['status'] = '75'
             calculate_orders()
             request.session['status'] = '100'

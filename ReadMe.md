@@ -20,3 +20,8 @@ api: <className> (e.g.: Paasdiner2023API())
 user_id: id of corresponding user
 begindatum: date of first order
 organisatieIDs: {id1, id2}
+
+#### AlgemeneInformatie
+prognosegetal <br>
+aantalHoofdgerechten <br>
+aantalOrders
