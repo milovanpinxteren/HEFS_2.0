@@ -77,9 +77,9 @@ def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
             request.session['status'] = '10'
-            # get_new_orders(request.user.id)
+            get_new_orders(request.user.id)
             request.session['status'] = '50'
-            # add_orders()
+            add_orders()
             request.session['status'] = '75'
             calculate_orders()
             request.session['status'] = '100'

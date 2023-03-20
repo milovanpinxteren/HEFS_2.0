@@ -59,7 +59,6 @@ class AddOrders():
     def check_orders(self):
         print('Check orders, en verwijder newOrders')
         #TODO check if all neworders are in orders and orderline (miss overdreven)
-
-        # NewOrders.objects.all().delete()
+        NewOrders.objects.all().delete()
 
 

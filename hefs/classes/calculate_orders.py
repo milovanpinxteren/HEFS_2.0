@@ -41,6 +41,7 @@ class CalculateOrders():
         productinfo = Productinfo.objects.filter(productcode=productSKU).first()
         gang_id = productinfo.gang_id
         verpakkingmogelijkheid_id = productinfo.verpakkingscombinatie_id
+        #TODO: als verpakkingmogelijk = 0, niet naar pickitems
         verpakkingsmogelijkheden = VerpakkingsCombinaties.objects.filter(
             verpakkingsmogelijkheid_id=verpakkingmogelijkheid_id)
         try:
@@ -60,7 +61,7 @@ class CalculateOrders():
                         print('Geen product gevonden Productinfo voor: ', productinfo.productnaam, productID)
         except ObjectDoesNotExist:
             # TODO: User feedback
-            print("Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden")
+            print("Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden", productinfo.productnaam)
 
     def make_product_extras(self, product):
         print('MAKE PRODUCT EXTRAS')
