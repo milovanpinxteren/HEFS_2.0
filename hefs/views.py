@@ -84,7 +84,7 @@ def get_orders(request):
             calculate_orders()
             request.session['status'] = '100'
         else:
-            get_new_orders(request.user.id).delay()
+            get_new_orders(request.user.id)
             request.session['status'] = '25'
             add_orders()
             request.session['status'] = '75'
