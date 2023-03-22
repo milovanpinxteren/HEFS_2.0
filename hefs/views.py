@@ -84,11 +84,11 @@ def get_orders(request):
             calculate_orders()
             request.session['status'] = '100'
         else:
-            get_new_orders(request.user.id)
+            get_new_orders.delay(request.user.id)
             request.session['status'] = '25'
-            add_orders()
+            add_orders.delay()
             request.session['status'] = '75'
-            calculate_orders()
+            calculate_orders.delay()
             request.session['status'] = '100'
         return show_busy(request)
     else:
