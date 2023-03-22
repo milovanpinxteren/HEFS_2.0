@@ -11,7 +11,7 @@ from .models import PickItems, Orders, ApiUrls, PercentueleKosten, VasteKosten, 
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from django.db import connection
 from .sql_commands import SqlCommands
-
+from django_rq import job
 
 
 def index(request):
@@ -97,17 +97,17 @@ def get_orders(request):
         return show_busy(request)
 
 
-# @job
+@job
 def get_new_orders(user_id):
     GetOrders(user_id)
 
 
-# @job
+@job
 def calculate_orders():
     CalculateOrders()
 
 
-# @job
+@job
 def add_orders():
     AddOrders()
 
@@ -117,7 +117,7 @@ def pickbonnen_page(request):
     context = {'form': form}
     return render(request, 'pickbonnenpage.html', context)
 
-# @job
+@job
 def get_pickbonnen(request):
     if request.method == 'POST':
         form = PickbonnenForm(request.POST, request.FILES)
