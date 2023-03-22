@@ -1,5 +1,7 @@
 {
   "scripts": {
-    "postdeploy": "python manage.py rqworker high default low &"
+    "dokku": {
+      "postdeploy": "python manage.py rqworker high default low &"
+    }
   }
 }
