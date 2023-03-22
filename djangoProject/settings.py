@@ -127,7 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'hefs/static')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
@@ -137,3 +137,22 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+
+RQ_QUEUES = {
+    'default': {
+        'URL': redis_url,
+        'DEFAULT_TIMEOUT': os.getenv('REDIS_TIMEOUT', 2100),
+    },
+    'high': {
+        'URL': redis_url,
+            },
+    'low': {
+        'URL': redis_url,
+
+    }
+}
