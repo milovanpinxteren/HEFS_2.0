@@ -1,17 +1,18 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
+from django_rq import job
+
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
+from hefs.classes.get_orders import GetOrders
+from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
 from .classes.financecalculator import FinanceCalculator
 from .forms import PickbonnenForm
-from hefs.classes.get_orders import GetOrders
-from .models import PickItems, Orders, ApiUrls, PercentueleKosten, VasteKosten, VariableKosten, AlgemeneInformatie
-from hefs.classes.pickbonnengenerator import PickbonnenGenerator
-from django.db import connection
+from .models import Orders, ApiUrls, AlgemeneInformatie
 from .sql_commands import SqlCommands
-from django_rq import job
 
 
 def index(request):
@@ -31,9 +32,11 @@ def show_veh(request):
         aantal_orders = 0
         prognosefractie = 0
 
-    dates = Orders.objects.filter(organisatieID__in=organisations_to_show).order_by('afleverdatum').values_list('afleverdatum').distinct()
+    dates = Orders.objects.filter(organisatieID__in=organisations_to_show).order_by('afleverdatum').values_list(
+        'afleverdatum').distinct()
     if not dates:
-        context = {'table': '', 'column_headers': '', 'veh_is_empty': 'Geen producten gevonden, weet u zeker dat u met de juiste account bent ingelogd?'}
+        context = {'table': '', 'column_headers': '',
+                   'veh_is_empty': 'Geen producten gevonden, weet u zeker dat u met de juiste account bent ingelogd?'}
     else:
         date_array = []
         for date in dates:
@@ -53,7 +56,8 @@ def show_customerinfo(request):
     customer_location_plot = customerinfo.customer_location_plot(userid)
     orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
     important_numbers = customerinfo.important_numbers_table(userid)
-    context = {'customer_location_plot': customer_location_plot._repr_html_(), 'orders_per_date_plot': orders_per_date_plot,
+    context = {'customer_location_plot': customer_location_plot._repr_html_(),
+               'orders_per_date_plot': orders_per_date_plot,
                'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
                'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3]}
     return render(request, 'customerinfo.html', context)
@@ -99,6 +103,8 @@ def get_orders(request):
 
 @job
 def get_new_orders(user_id):
+    print("Get new orders")
+    print(user_id)
     GetOrders(user_id)
 
 
@@ -117,6 +123,7 @@ def pickbonnen_page(request):
     context = {'form': form}
     return render(request, 'pickbonnenpage.html', context)
 
+
 @job
 def get_pickbonnen(request):
     if request.method == 'POST':
@@ -131,7 +138,6 @@ def get_pickbonnen(request):
     return response
 
 
-
 def financial_overview_page(request):
     userid = request.user.id
     financecalculator = FinanceCalculator(userid)
@@ -140,7 +146,7 @@ def financial_overview_page(request):
     profit = financecalculator.calculate_profit(userid)
 
     context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
-               'variable_costs': costs[2], 'percentual_costs': costs[3],'percentual_costs_incl_btw': costs[4],
+               'variable_costs': costs[2], 'percentual_costs': costs[3], 'percentual_costs_incl_btw': costs[4],
                'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
                'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
                'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
