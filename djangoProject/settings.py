@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'hefs.apps.HighendfoodsolutionsConfig',
     'django_pivot',
     'mathfilters',
+    'django_rq',
 ]
 
 MIDDLEWARE = [
