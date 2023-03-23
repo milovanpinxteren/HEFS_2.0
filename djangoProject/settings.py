@@ -140,8 +140,6 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
-
 redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 
 RQ_QUEUES = {

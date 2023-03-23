@@ -1,5 +1,6 @@
 # Organisatieid = 634
 # https://depaascateraar.nl/assortiment/
+import datetime
 
 import requests
 import pandas as pd
@@ -21,7 +22,7 @@ class Paasdiner2023API:
         export_url = "https://admin-panel.hapjesaanhuis.nl/accessifynet/accessifynet/OrderExport/exportOrdersToExcel"
         last_date_dict = Orders.objects.aggregate(Max('besteldatum'))
         if next(iter(last_date_dict.values())) != None:
-            begindatum = next(iter(last_date_dict.values()))
+            begindatum = next(iter(last_date_dict.values())) - datetime.timedelta(1)
         else:
             begindatum = ApiUrls.objects.filter(api='Paasdiner2023API()').first().begindatum
         # begindatum = Orders.objects.aggregate(Max('besteldatum')).values().strftime("%d/%m/%Y")
