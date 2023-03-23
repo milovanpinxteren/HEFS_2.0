@@ -57,7 +57,7 @@ class Paasdiner2023API:
             r = s.post(export_url, data=payload)
 
         self.new_orders = pd.read_excel(r.content)
-        print('GOT ORDERS')
+        print(f'GOT {len(self.new_orders)} ORDERS')
 
     def clean_orders(self):
         relevant_org_ids = [634]
