@@ -36,7 +36,7 @@ class PickbonnenGenerator:
             pickcount = 0
             for pick in pickqueryset:
                 print(pick)
-                pickbonnen.pick_function(pick, pickcount)
+                pickbonnen.pick_function(pick, pickcount, order.conversieID)
                 pickcount += 1
 
 
