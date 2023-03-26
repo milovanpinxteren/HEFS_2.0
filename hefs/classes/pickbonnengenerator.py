@@ -2,6 +2,7 @@ from hefs.classes.pickbonnen import Pickbonnen
 from hefs.models import Orders, PickOrders, PickItems
 from datetime import datetime
 
+#TODO als product > length van column dan maakt hij een nieuwe pagina aan ipv rechtercolumn
 
 class PickbonnenGenerator:
     def __init__(self, begindatum, einddatum, conversieID, routenr):
