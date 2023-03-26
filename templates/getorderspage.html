@@ -24,6 +24,21 @@
         </div>
     </form>
 </div>
+<hr>
+
+<div>
+    <form action="handle_alterated_new_orders" method="post" enctype="multipart/form-data" autocomplete="off">
+        <div class="get-orders-div">
+            {% csrf_token %}
+            <p>
+                <p>Deze knop ↓ alleen indrukken als je de SKU's in NewOrders hebt verandert en deze wil triggeren</p>
+                <br>
+                <button class="button-48" type="submit">Bereken aangepaste nieuwe orders</button>
+            </p>
+
+        </div>
+    </form>
+</div>
 
 </body>
 </html>

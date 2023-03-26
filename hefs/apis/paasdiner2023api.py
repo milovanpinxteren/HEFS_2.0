@@ -27,6 +27,7 @@ class Paasdiner2023API:
             begindatum = ApiUrls.objects.filter(api='Paasdiner2023API()').first().begindatum
         # begindatum = Orders.objects.aggregate(Max('besteldatum')).values().strftime("%d/%m/%Y")
         # einddatum = datetime.now() + timedelta(1)
+        begindatum = '10/1/2023'
         einddatum = '10/4/2023'
         resp = requests.get(login_url)
 
