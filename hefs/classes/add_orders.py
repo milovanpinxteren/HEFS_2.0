@@ -1,9 +1,9 @@
-from hefs.models import NewOrders, Orders, Orderline
+from hefs.models import NewOrders, Orders, Orderline, Productinfo
 
 
 class AddOrders():
     def __init__(self):
-        self.validate_orders()
+        # self.validate_orders()
         self.add_to_orderfile()
         self.check_orders()
 
@@ -58,7 +58,19 @@ class AddOrders():
 
     def check_orders(self):
         print('Check orders, en verwijder newOrders')
-        #TODO check if all neworders are in orders and orderline (miss overdreven)
-        NewOrders.objects.all().delete()
+        productcodes = Productinfo.objects.values_list('productcode', flat=True)
+        for orderline in NewOrders.objects.all():
+            if orderline.productSKU not in productcodes:
+                print('ProductSKU komt niet overeen met ProductInfo')
+                print(orderline.productSKU)
+                Orderline.objects.filter(order__conversieID=orderline.conversieID).delete()
+                Orders.objects.filter(conversieID=orderline.conversieID).delete()
+
+
+        #Delete only NewOrders which are succesfully imported in Orders
+        # NewOrders.objects.all().delete()
+        qs = Orders.objects.all()
+        ids_to_delete = list(qs.values_list('conversieID', flat=True))
+        NewOrders.objects.filter(conversieID__in=ids_to_delete).delete()
 
 

@@ -101,6 +101,11 @@ def get_orders(request):
         return show_busy(request)
 
 
+def handle_alterated_new_orders(request):
+    add_orders()
+    calculate_orders()
+    return show_veh(request)
+
 @job
 def get_new_orders(user_id):
     print("Get new orders")
