@@ -49,6 +49,9 @@ class Pickbonnen(fpdf.FPDF):
         self.set_font('helvetica', '', 10)
         self.klantcell(naw)
 
+    def qr_codecell(self, img):
+        self.image(img, 130, 200, 70, 70)
+
     def next_page_cell(self, conversieID, page_nr):
         self.set_font('helvetica', 'B', 25)
         self.write(0, '                                ' + str(conversieID) + ' Pagina ' + str(page_nr))
@@ -64,12 +67,8 @@ class Pickbonnen(fpdf.FPDF):
         if pickcount == 35:
             self.next_page_cell(conversieID, 2)
         if 35 < pickcount < 60:
-            print('asdfasdf')
-            print(pick)
-            # self.add_page()
             offset_x = 8
             self.set_y(10 + ((pickcount - 35) * 10))
-            # self.set_y(55)
         if 60 <= pickcount < 85:
             offset_x = 100
             self.set_y(15 + ((pickcount - 60) * 10))

@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import IntegrityError
 from django.db.models import Sum
 
@@ -45,8 +45,11 @@ class CalculateOrders():
         verpakkingsmogelijkheden = VerpakkingsCombinaties.objects.filter(
             verpakkingsmogelijkheid_id=verpakkingmogelijkheid_id)
         try:
+            # try:
             verpakkingsaantallen = verpakkingsmogelijkheden.get(
                 bestelde_hoeveelheid=bestelde_hoeveelheid).verpakkingscombinatie
+            # except MultipleObjectsReturned:
+            #     print('asdf')
             for verpakking in verpakkingsaantallen:
                 if verpakking != ',':
                     productID = str(gang_id) + productSKU + verpakking
