@@ -1,12 +1,12 @@
+import qrcode as qrcode
+
 from hefs.classes.pickbonnen import Pickbonnen
 from hefs.models import Orders, PickOrders, PickItems
 from datetime import datetime
 
-#TODO als product > length van column dan maakt hij een nieuwe pagina aan ipv rechtercolumn
 
 class PickbonnenGenerator:
     def __init__(self, begindatum, einddatum, conversieID, routenr):
-        print(begindatum, einddatum, conversieID)
         self.get_data(begindatum, einddatum, conversieID, routenr)
 
     def get_data(self, begindatum, einddatum, conversieID, routenr):
@@ -34,12 +34,18 @@ class PickbonnenGenerator:
             pick_order = PickOrders.objects.get(order=order)
             pickqueryset = PickItems.objects.filter(pick_order=pick_order)
             pickcount = 0
+            qr_text = str(order.conversieID) + ' \n '
             for pick in pickqueryset:
-                print(pick)
-                pickbonnen.pick_function(pick, pickcount, order.conversieID)
-                pickcount += 1
-
-
+                if pick.product.verpakkingscombinatie_id != 6:
+                    pickbonnen.pick_function(pick, pickcount, order.conversieID)
+                    pickcount += 1
+                    # pick.hoeveelheid
+                    # pick.product_id
+                    qr_text += '\t' + str(pick.hoeveelheid) + ' \t' + str(pick.product_id) + ' \n'
+            print(qr_text)
+            qr_code = qrcode.make(qr_text)
+            img = qr_code.get_image()
+            pickbonnen.qr_codecell(img)
         pickbonnen.output('pickbonnen.pdf', "rb")
 
 
