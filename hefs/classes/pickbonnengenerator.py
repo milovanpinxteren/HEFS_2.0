@@ -32,7 +32,7 @@ class PickbonnenGenerator:
             pickbonnen.add_page()
             pickbonnen.naw_function(naw)
             pick_order = PickOrders.objects.get(order=order)
-            pickqueryset = PickItems.objects.filter(pick_order=pick_order)
+            pickqueryset = PickItems.objects.filter(pick_order=pick_order).order_by('product__pickvolgorde')
             pickcount = 0
             qr_text = str(order.conversieID) + ' \n '
             for pick in pickqueryset:
