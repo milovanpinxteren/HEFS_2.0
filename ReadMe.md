@@ -25,3 +25,11 @@ organisatieIDs: {id1, id2}
 prognosegetal <br>
 aantalHoofdgerechten <br>
 aantalOrders
+
+
+#### Shopify API
+Apps en verkoopkanalen <br>
+App maken <br>
+configureren <br>
+Toegangstoken beheerders API <br>
+![img.png](img.png)
