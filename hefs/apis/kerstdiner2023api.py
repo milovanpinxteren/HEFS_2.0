@@ -24,4 +24,7 @@ class Kerstdiner2023API:
 
 
     def handle_shopify_orders(self, orders):
+        #Step 1 -> all orders in NewOrders
+
+        #Next step in add_orders.py
         print(orders)
