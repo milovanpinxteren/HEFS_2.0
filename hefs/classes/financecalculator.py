@@ -68,4 +68,4 @@ class FinanceCalculator():
                total_costs, total_costs_incl_btw
 
     def calculate_revenue(self):
-        print('test')
+        print('revenue')

@@ -6,9 +6,14 @@ from django.contrib.postgres.fields import ArrayField
 
 
 #############################################Orders below###############################################################
+class VerzendOpties(models.Model):
+    verzendoptie = models.CharField(max_length=250)
+    verzendkosten = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
+
 class NewOrders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
     besteldatum = models.DateTimeField(null=True, blank=True)
+    verzendoptie = models.ForeignKey(VerzendOpties, on_delete=models.CASCADE, default='', blank=True)
     afleverdatum = models.DateTimeField(null=True, blank=True, db_index=True)
     aflevertijd = models.TimeField(null=True, blank=True)
     verzendkosten = models.IntegerField(default=0, null=True, blank=True)
@@ -187,3 +192,5 @@ class ApiUrls(models.Model):
     user_id = models.IntegerField(default=0)
     begindatum = models.DateField(null=True)
     organisatieIDs = ArrayField(models.IntegerField(default=0), blank=True, default=[])
+
+
