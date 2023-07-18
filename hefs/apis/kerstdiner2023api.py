@@ -1,6 +1,6 @@
 from datetime import datetime
 import requests
-
+from django.conf import settings
 
 
 from hefs.models import Orders, NewOrders, VerzendOpties
@@ -11,7 +11,7 @@ class Kerstdiner2023API:
         self.get_shopify_orders()
 
     def get_shopify_orders(self):
-        shopify_access_token = "dameugdeniewete"
+        shopify_access_token = settings.SHOPIFY_ACCESS_TOKEN
         headers = {"Accept": "application/json", "Content-Type": "application/json",
                    "X-Shopify-Access-Token": shopify_access_token}
         response = requests.get(url="https://d36867-2.myshopify.com/admin/api/2023-04/orders.json", headers=headers)
