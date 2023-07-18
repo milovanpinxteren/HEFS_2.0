@@ -1,7 +1,12 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
-    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline
+    VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
+    VerzendOpties
 
+
+@admin.register(VerzendOpties)
+class VerzendOptiesAdmin(admin.ModelAdmin):
+    list_display = ['verzendoptie', 'verzendkosten']
 
 @admin.register(Orders)
 class OrderInfoAdmin(admin.ModelAdmin):
