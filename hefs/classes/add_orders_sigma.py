@@ -5,14 +5,13 @@ from hefs.models import NewOrders, Orders, Orderline, Productinfo
 
 class AddOrders():
     def __init__(self):
-        self.validate_orders()
+        # self.validate_orders()
         self.add_to_orderfile()
         self.check_orders()
 
-    def validate_orders(self): #Checks if the orders in Neworders exist and Orderlines are the same
-        # Step 2 -> Check if order is still the same, if yes -> delete, if no -> delete old and calculate
+    def validate_orders(self):
         print('VALIDEER ORDERS')
-
+        #Optional
 
     def add_to_orderfile(self):
         print('ADD TO ORDERFILE')
@@ -21,7 +20,12 @@ class AddOrders():
         for conversieID in self.unique_conversieIDS:
             neworderlines = NewOrders.objects.filter(conversieID=conversieID['conversieID'])
             neworder_first = neworderlines.first()
-            Orders.objects.create(conversieID=neworder_first.conversieID,
+            existing_order = Orders.objects.filter(conversieID=neworder_first.conversieID)
+            if existing_order:
+                print('Order al aanwezig in Orders model')
+                # TODO: give feedback to user
+            else:
+                Orders.objects.create(conversieID=neworder_first.conversieID,
                                       besteldatum=neworder_first.besteldatum,
                                       afleverdatum=neworder_first.afleverdatum,
                                       aflevertijd=neworder_first.aflevertijd,
@@ -42,7 +46,14 @@ class AddOrders():
                                       land=neworder_first.land)
             for neworderline in neworderlines:
                 order = Orders.objects.get(conversieID=neworderline.conversieID)
-                Orderline.objects.create(order=order,
+                existing_order = Orderline.objects.filter(order=order, product=neworderline.product,
+                                                          productSKU=neworderline.productSKU,
+                                                          aantal=neworderline.aantal)
+                if existing_order:
+                    print('Orderline al aanwezig in Orderline model')
+                    # TODO: give feedback to user
+                else:
+                    Orderline.objects.create(order=order,
                                              product=neworderline.product,
                                              productSKU=neworderline.productSKU,
                                              aantal=neworderline.aantal)
