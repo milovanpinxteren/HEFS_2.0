@@ -9,6 +9,7 @@ from django.contrib.postgres.fields import ArrayField
 class VerzendOpties(models.Model):
     verzendoptie = models.CharField(max_length=250)
     verzendkosten = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
+    verzenddatum = models.DateField(null=True, blank=True)
 
 class NewOrders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
