@@ -26,7 +26,7 @@ def show_veh(request):
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
         aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
         prognosefractie = prognosegetal / aantal_hoofdgerechten
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, ZeroDivisionError):
         prognosegetal = 0
         aantal_hoofdgerechten = 0
         aantal_orders = 0
