@@ -1,9 +1,8 @@
-from datetime import datetime
-
+import time
+from datetime import datetime, timedelta
 import requests
 from django.conf import settings
-
-from hefs.models import Orders, NewOrders, VerzendOpties, Orderline
+from hefs.models import Orders, NewOrders, VerzendOpties, Orderline, AlgemeneInformatie
 
 
 class Kerstdiner2023API:
@@ -23,20 +22,32 @@ class Kerstdiner2023API:
             return []
 
     def handle_shopify_orders(self, orders):
+        last_api_call = AlgemeneInformatie.objects.get(naam='lastApiCall')
+        last_api_call_date = datetime.fromtimestamp(last_api_call.waarde)
         for order in orders:
-            if '#' in order['name']:
-                order['name'] = order['name'].replace('#', '9')
-            conversieID = order['name']  # get OrderID, and check if OrderID already exists.
-            existing_order = Orders.objects.filter(conversieID=conversieID)
-            existing_new_order = NewOrders.objects.filter(conversieID=conversieID)
-            if existing_order or existing_new_order:
-                self.detect_changes(order, existing_order, existing_new_order)
-            else:
-                print('ADD TO NEWORDERS')
-                self.add_to_new_orders(order)
+            conversieID = order['name']
+            if order['created_at'] != order['updated_at']: #something changed, remove old order and go again
+                updated_at = datetime.strptime(order['updated_at'][:9], '%Y-%m-%d')
+                if updated_at > (last_api_call_date - timedelta(days=1)):
+                    print('order changed', conversieID)
+                    Orders.objects.filter(conversieID=conversieID).delete() #TODO: check if this deletes orderlines
+                    NewOrders.objects.filter(conversieID=conversieID).delete()
+                    self.add_to_new_orders(order)
+                else:
+                    print('order change already handled', conversieID)
+            elif order['created_at'] == order['updated_at']:
+                existing_order = Orders.objects.filter(conversieID=conversieID)
+                existing_new_order = NewOrders.objects.filter(conversieID=conversieID)
+                if not existing_order and not existing_new_order:
+                    print('order does not exist, added')
+                    self.add_to_new_orders(order)
+                else:
+                    print("order exists", conversieID)
+        last_api_call.waarde = time.time()
+        last_api_call.save()
 
-    #TODO: test this!
-    def detect_changes(self, order, existing_order, existing_new_order):
+
+    def detect_changes(self, order, existing_order, existing_new_order): #not called, might use later
         shopify_order_lines = []
         shopify_order_quantities = []
 
