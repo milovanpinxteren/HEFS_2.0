@@ -53,14 +53,25 @@ def show_veh(request):
 def show_customerinfo(request):
     userid = request.user.id
     customerinfo = CustomerInfo()
-    customer_location_plot = customerinfo.customer_location_plot(userid)
+    returning_customers_overview = customerinfo.returning_customers_overview(userid)
     orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
     important_numbers = customerinfo.important_numbers_table(userid)
-    context = {'customer_location_plot': customer_location_plot._repr_html_(),
+    context = {'returning_customers_overview': returning_customers_overview,
                'orders_per_date_plot': orders_per_date_plot,
                'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
-               'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3]}
+               'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
+               'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
+               'customers_2022': returning_customers_overview[2], 'returning_customers_2021': returning_customers_overview[3],
+               'returning_customers_2022': returning_customers_overview[4],'returning_customers_21_22': returning_customers_overview[5],
+               'returning_customers_2023': returning_customers_overview[6]}
     return render(request, 'customerinfo.html', context)
+
+def show_customerlocationplot(request):
+    userid = request.user.id
+    customerinfo = CustomerInfo()
+    customer_location_plot = customerinfo.customer_location_plot(userid)
+    context = {'customer_location_plot': customer_location_plot._repr_html_()}
+    return render(request, 'customerlocationplot.html', context)
 
 
 def getorderspage(request):

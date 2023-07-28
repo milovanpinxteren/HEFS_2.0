@@ -26,15 +26,21 @@ class Kerstdiner2023API:
         last_api_call_date = datetime.fromtimestamp(last_api_call.waarde)
         for order in orders:
             conversieID = order['name']
-            if order['created_at'] != order['updated_at']: #something changed, remove old order and go again
-                updated_at = datetime.strptime(order['updated_at'][:9], '%Y-%m-%d')
-                if updated_at > (last_api_call_date - timedelta(days=1)):
-                    print('order changed', conversieID)
-                    Orders.objects.filter(conversieID=conversieID).delete() #TODO: check if this deletes orderlines
-                    NewOrders.objects.filter(conversieID=conversieID).delete()
+            if order['created_at'] != order['updated_at']: #order was updated
+                existing_order = Orders.objects.filter(conversieID=conversieID)
+                existing_new_order = NewOrders.objects.filter(conversieID=conversieID)
+                if not existing_order and not existing_new_order:
+                    print('order does not exist, added')
                     self.add_to_new_orders(order)
                 else:
-                    print('order change already handled', conversieID)
+                    updated_at = datetime.strptime(order['updated_at'][:9], '%Y-%m-%d')
+                    if updated_at > (last_api_call_date - timedelta(days=1)):
+                        print('order changed', conversieID)
+                        Orders.objects.filter(conversieID=conversieID).delete() #TODO: check if this deletes orderlines
+                        NewOrders.objects.filter(conversieID=conversieID).delete()
+                        self.add_to_new_orders(order)
+                    else:
+                        print('order change already handled', conversieID)
             elif order['created_at'] == order['updated_at']:
                 existing_order = Orders.objects.filter(conversieID=conversieID)
                 existing_new_order = NewOrders.objects.filter(conversieID=conversieID)
@@ -42,7 +48,7 @@ class Kerstdiner2023API:
                     print('order does not exist, added')
                     self.add_to_new_orders(order)
                 else:
-                    print("order exists", conversieID)
+                    print("order exists and not alternated", conversieID)
         last_api_call.waarde = time.time()
         last_api_call.save()
 

@@ -2,11 +2,11 @@
 import folium
 import pandas as pd
 import pgeocode
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from folium.plugins import HeatMap
 from plotly import express as px, offline as opy
 
-from hefs.models import Orders, AlgemeneInformatie, ApiUrls
+from hefs.models import Orders, AlgemeneInformatie, ApiUrls, Customers
 
 
 class CustomerInfo():
@@ -246,3 +246,23 @@ class CustomerInfo():
         gem_omzet_per_order = inkomsten_zonder_verzendkosten / aantal_orders
 
         return aantal_hoofdgerechten, aantal_orders, hoofdgerechten_per_order, gem_omzet_per_order
+
+    def returning_customers_overview(self, userid):
+        organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
+
+        customers_2020 = Customers.objects.exclude(ordered_2020__isnull=True).count()
+        customers_2021 = Customers.objects.exclude(ordered_2021__isnull=True).count()
+        customers_2022 = Customers.objects.exclude(ordered_2022__isnull=True).count()
+
+        returning_customers_2021 = Customers.objects.exclude(ordered_2020__isnull=True).exclude(ordered_2021__isnull=True).count()
+        returning_customers_2022 = Customers.objects.exclude(ordered_2021__isnull=True).exclude(ordered_2022__isnull=True).count()
+        returning_customers_2022 += Customers.objects.exclude(ordered_2020__isnull=True).exclude(ordered_2022__isnull=True).count()
+        returning_customers_21_22 = Customers.objects.exclude(ordered_2020__isnull=True).exclude(ordered_2021__isnull=True).exclude(ordered_2022__isnull=True).count()
+
+        # customers_2023 = Orders.objects.filter(organisatieID__in=organisations_to_show)
+        values_model1 = Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('emailadres', flat=True).distinct()
+        values_model2 = Customers.objects.values_list('emailadres', flat=True).distinct()
+
+        # Find the overlapping values
+        returning_customers_2023 = len(set(values_model1) & set(values_model2))
+        return customers_2020, customers_2021, customers_2022, returning_customers_2021, returning_customers_2022, returning_customers_21_22, returning_customers_2023
