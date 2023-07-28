@@ -4,7 +4,7 @@ class SqlCommands:
 
     def get_veh_command(self, dates, prognosefractie):
         make_veh_command = """
-        SELECT "hefs_productinfo"."omschrijving",
+        SELECT "hefs_productinfo"."omschrijving","productID",
         """
 
         for date in dates:
@@ -24,6 +24,6 @@ class SqlCommands:
                      LEFT OUTER JOIN "hefs_productinfo" ON ("hefs_pickitems"."product_id" = "hefs_productinfo"."productID")
                      INNER JOIN "hefs_pickorders" ON ("hefs_pickitems"."pick_order_id" = "hefs_pickorders"."id")
                      INNER JOIN "hefs_orders" ON ("hefs_pickorders"."order_id" = "hefs_orders"."id")
-            GROUP BY "hefs_productinfo"."omschrijving"            
+            GROUP BY "hefs_productinfo"."omschrijving","productID"            
         """
         return make_veh_command

@@ -194,4 +194,6 @@ class ApiUrls(models.Model):
     begindatum = models.DateField(null=True)
     organisatieIDs = ArrayField(models.IntegerField(default=0), blank=True, default=[])
 
+# class Customers(models.Model):
+
 

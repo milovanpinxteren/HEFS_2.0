@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
     <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
     <script>
         function ExportToExcel(type, fn, dl) {
@@ -18,6 +19,33 @@
                 XLSX.writeFile(wb, fn || ('overzicht-VEH.' + (type || 'xlsx')));
         }
     </script>
+    <script>
+        function filterVEH(type) {
+            table = document.getElementById("vehTable");
+            tr = table.getElementsByTagName("tr");
+            console.log("loop")
+            for (i = 1; i < tr.length; i++) {
+                $(tr[i]).show()
+                let tdElem = tr[i].getElementsByTagName("td")[1]
+                let gang = tdElem.innerText[0]
+                if (type === "diner") {
+                    if (gang === "3") {
+                        $(tr[i]).hide()
+                    } else if (gang !== "3") {
+                        $(tr[i]).show()
+                    }
+                } else if (type === "brunch") {
+                    if (gang !== "3") {
+                        $(tr[i]).hide()
+                    } else if (gang === "3") {
+                        $(tr[i]).show()
+                    }
+                } else if (type === "all") {
+                    $(tr[i]).show()
+                }
+            }
+        }
+    </script>
 </head>
 <body>
 {% include "navbar.html" %}
@@ -25,21 +53,30 @@
 
 <h1 class="page-title">Producten overzicht</h1>
 <div class="information-div">
-<p>
-    Aantal orders: {{ aantal_orders }} <br>
-    Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
-    Prognose: {{ prognosegetal }} personen (Prognoseberekening: (prognosegetal / aantal hoofdgerechten) * Totaal <br>
-    <i>Ga naar de adminpagina om het prognosegetal aan te passen</i>
-</p>
+    <p>
+        Aantal orders: {{ aantal_orders }} <br>
+        Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
+        Prognose: {{ prognosegetal }} personen (Prognoseberekening: (prognosegetal / aantal hoofdgerechten) * Totaal
+        <br>
+        <i>Ga naar de adminpagina om het prognosegetal aan te passen</i>
+    </p>
 </div>
+<div>
+    Filter VEH:
+    <button onclick="filterVEH('diner')">Diner</button>
+    <button onclick="filterVEH('brunch')">Brunch</button>
+    <button onclick="filterVEH('all')">Alles</button>
+</div>
+<br>
 <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
 
 <p>
-    <h3>{{ veh_is_empty }}</h3>
+<h3>{{ veh_is_empty }}</h3>
 </p>
 <table id="vehTable">
     <thead class="table-head">
     <th class="table-heading">Omschrijving</th>
+    <th class="table-heading">ProductID</th>
     {% for column in column_headers %}
         <th class="table-heading">
             {{ column.0 | date:"d-m-Y" }}
