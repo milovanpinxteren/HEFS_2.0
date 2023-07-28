@@ -1,3 +1,4 @@
+{% load mathfilters %}
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
@@ -13,14 +14,8 @@
 
 <div class="page-container">
 
-    <div id="customer-location-plot-div"><span class="table-title">Klantenlocaties</span>
-        <div id="customer-location-plot">
-            {{ customer_location_plot|safe }}
-        </div>
-    </div>
-
     <div id="orders-per-date-plot-div">
-        <div orders-per-date-plot>
+        <div id="orders-per-date-plot">
             {{ orders_per_date_plot|safe }}
         </div>
 
@@ -28,7 +23,7 @@
 
     <div id="important-numbers-table">
         <table class="table">
-            <thead class="table-head"><span class="table-title">Kerngetallen</span>
+            <thead class="table-head"><span class="table-title">Kerngetallen</span><br><br>
             <th class="table-heading">Omschrijving</th>
             <th class="table-heading">Waarde</th>
             </thead>
@@ -52,16 +47,49 @@
             </tbody>
         </table>
     </div>
-    {#    Grafiek met aantal orders en orders afgelopen jaren <br>#}
-    {#    Grafiek met locaties <br>#}
-    {#    <br><br>#}
-    {#    tabel met: <br>#}
-    {#    Aantal orders nu <br>#}
-    {#    Aantal personen nu <br>#}
-    {#    Aantal orders verleden <br>#}
-    {#    Aantal personen verleden <br>#}
-    {#    Voorspelde aantal orders <br>#}
-    {#    Voorspelde aantal personen <br>#}
+    <br><br>
+    <div id="returning-customers-table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Terugkerende klanten</span><br><br>
+            <th class="table-heading">Jaar</th>
+            <th class="table-heading">Aantal klanten</th>
+            <th class="table-heading">Terugkerende klanten</th>
+            <th class="table-heading">Terugkerend percentage</th>
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                <td class="table-data">2020</td>
+                <td class="table-data">{{ customers_2020 }}</td>
+                <td class="table-data">N.v.t.</td>
+                <td class="table-data">N.v.t.</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">2021</td>
+                <td class="table-data">{{ customers_2021 }}</td>
+                <td class="table-data">{{ returning_customers_2021 }}</td>
+                <td class="table-data">{{ returning_customers_2021|div:customers_2021|mul:100|floatformat:2 }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">2022</td>
+                <td class="table-data">{{ customers_2022 }}</td>
+                <td class="table-data">{{ returning_customers_2022 }}</td>
+                <td class="table-data">{{ returning_customers_2022|div:customers_2022|mul:100|floatformat:2 }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">2023</td>
+                <td class="table-data">{{ aantal_orders }}</td>
+                <td class="table-data">{{ returning_customers_2023 }}</td>
+                <td class="table-data">{{ returning_customers_2023|div:aantal_orders|mul:100|floatformat:2 }}</td>
+            </tr>
+{#            <tr class="table-rows">#}
+{#                <td class="table-data">2020,2021 en 2022</td>#}
+{#                <td class="table-data">2238</td>#}
+{#                <td class="table-data">{{ returning_customers_21_22 }}</td>#}
+{#                <td class="table-data">{{ returning_customers_21_22|div:2238|mul:100|floatformat:2 }}</td>#}
+{#            </tr>#}
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>

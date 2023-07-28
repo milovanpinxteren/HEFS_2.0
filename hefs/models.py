@@ -194,6 +194,15 @@ class ApiUrls(models.Model):
     begindatum = models.DateField(null=True)
     organisatieIDs = ArrayField(models.IntegerField(default=0), blank=True, default=[])
 
-# class Customers(models.Model):
-
+class Customers(models.Model):
+    emailadres = models.CharField(max_length=300, default='', unique=True)
+    voornaam = models.CharField(max_length=300, default='', null=True)
+    tussenvoegsel = models.CharField(max_length=300, default='', null=True)
+    achternaam = models.CharField(max_length=300, default='', null=True)
+    postcode = models.CharField(max_length=300, default='', null=True)
+    plaats = models.CharField(max_length=300, default='', null=True)
+    ordered_2020 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2021 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2022 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2023 = models.BinaryField(blank=True, default=0, null=True)
 

@@ -11,11 +11,16 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Financieel Overzicht</h1>
-
+<div>
+    <div>
+        Totale omzet excl BTW zonder verzendkosten = {{ inkomsten_zonder_verzendkosten|sub:total_costs|floatformat:2 }}<br>
+        Totale omzet incl BTW zonder verzendkosten = {{ inkomsten_zonder_verzendkosten|sub:total_costs_incl_btw|floatformat:2 }}
+    </div>
+</div>
 <div class="profit-table">
     <div id="fixed_costs_table">
         <table class="table">
-            <thead class="table-head"><span class="table-title">Winst</span>
+            <thead class="table-head"><span class="table-title">Inkomsten</span>
             <th class="table-heading">Kostennaam</th>
             <th class="table-heading">Omschrijving</th>
             <th class="table-heading">Bedrag</th>
@@ -131,7 +136,6 @@
         Totale kosten incl BTW = {{ total_costs_incl_btw|floatformat:2 }}
     </div>
 </div>
-
 
 </body>
 </html>
