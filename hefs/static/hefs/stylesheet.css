@@ -117,6 +117,16 @@
     vertical-align: top;
 }
 
+.general-numbers-form {
+    width: 25%;
+}
+
+.small-submit-button {
+    padding: 1%;
+    margin: 1%;
+    /*background-color: #346751;*/
+}
+
 .pickbonnen-form {
     background-color: lightgray;
     width: 25%;

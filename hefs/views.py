@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
+from django.db.models import Sum, OuterRef, Subquery
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from django_rq import job
@@ -10,9 +11,11 @@ from hefs.classes.get_orders import GetOrders
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
 from .classes.financecalculator import FinanceCalculator
-from .forms import PickbonnenForm
-from .models import Orders, ApiUrls, AlgemeneInformatie
+from .classes.veh_handler import VehHandler
+from .forms import PickbonnenForm, GeneralNumbersForm
+from .models import Orders, ApiUrls, AlgemeneInformatie, PickItems, Productinfo, Orderline
 from .sql_commands import SqlCommands
+from django.db.models import F
 
 
 def index(request):
@@ -21,34 +24,28 @@ def index(request):
 
 def show_veh(request):
     organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
-    try:
-        prognosegetal = AlgemeneInformatie.objects.get(naam='prognosegetal').waarde
-        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
-        prognosefractie = prognosegetal / aantal_hoofdgerechten
-    except (ObjectDoesNotExist, ZeroDivisionError):
-        prognosegetal = 0
-        aantal_hoofdgerechten = 0
-        aantal_orders = 0
-        prognosefractie = 0
-
-    dates = Orders.objects.filter(organisatieID__in=organisations_to_show).order_by('afleverdatum').values_list(
-        'afleverdatum').distinct()
-    if not dates:
-        context = {'table': '', 'column_headers': '',
-                   'veh_is_empty': 'Geen producten gevonden, weet u zeker dat u met de juiste account bent ingelogd?'}
-    else:
-        date_array = []
-        for date in dates:
-            date_array.append(date)
-        cursor = connection.cursor()
-        sql_veh = SqlCommands().get_veh_command(date_array, prognosefractie)
-        cursor.execute(sql_veh)
-        veh = cursor.fetchall()
-        context = {'table': veh, 'column_headers': date_array, 'prognosegetal': prognosegetal,
-                   'aantal_hoofdgerechten': aantal_hoofdgerechten, 'aantal_orders': aantal_orders}
+    veh_handler = VehHandler()
+    context = veh_handler.handle_veh(organisations_to_show)
+    form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
+                                       'prognosegetal_brunch': context['prognosegetal_brunch'],
+                                       'prognosegetal_gourmet': context['prognosegetal_gourmet']})
+    context['form'] = form
     return render(request, 'veh.html', context)
 
+def update_general_numbers(request):
+    if request.method == 'POST':
+        form = GeneralNumbersForm(request.POST, request.FILES)
+        if form.is_valid():
+            prognosegetal_diner = form['prognosegetal_diner'].value()
+            prognosegetal_brunch = form['prognosegetal_brunch'].value()
+            prognosegetal_gourmet = form['prognosegetal_gourmet'].value()
+            AlgemeneInformatie.objects.filter(naam='prognosegetal_diner').delete()
+            AlgemeneInformatie.objects.create(naam='prognosegetal_diner', waarde=prognosegetal_diner)
+            AlgemeneInformatie.objects.filter(naam='prognosegetal_brunch').delete()
+            AlgemeneInformatie.objects.create(naam='prognosegetal_brunch', waarde=prognosegetal_brunch)
+            AlgemeneInformatie.objects.filter(naam='prognosegetal_gourmet').delete()
+            AlgemeneInformatie.objects.create(naam='prognosegetal_gourmet', waarde=prognosegetal_gourmet)
+    return show_veh(request)
 
 def show_customerinfo(request):
     userid = request.user.id
