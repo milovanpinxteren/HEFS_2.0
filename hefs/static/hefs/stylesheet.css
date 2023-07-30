@@ -351,6 +351,15 @@
     float: left;
 }
 
+#orders-worth-table {
+    padding-left: 1%;
+    padding-top: 2%;
+    /*margin-top: 5%;*/
+    /*display: inline-block;*/
+    position: relative;
+    float: left;
+}
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);

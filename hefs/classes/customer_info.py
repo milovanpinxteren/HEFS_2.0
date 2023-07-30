@@ -2,7 +2,7 @@
 import folium
 import pandas as pd
 import pgeocode
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Avg
 from folium.plugins import HeatMap
 from plotly import express as px, offline as opy
 
@@ -266,3 +266,13 @@ class CustomerInfo():
         # Find the overlapping values
         returning_customers_2023 = len(set(values_model1) & set(values_model2))
         return customers_2020, customers_2021, customers_2022, returning_customers_2021, returning_customers_2022, returning_customers_21_22, returning_customers_2023
+
+    def orders_worth_table(self, userid):
+        organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
+
+        avg_orders_worth_2020 = 174.02307692307696
+        avg_orders_worth_2021 = 172.8445392491467
+        avg_orders_worth_2022 = 229.55841371918822
+        avg_orders_worth_2023 = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(Avg('orderprijs'))['orderprijs__avg']
+
+        return avg_orders_worth_2020, avg_orders_worth_2021, avg_orders_worth_2022, avg_orders_worth_2023

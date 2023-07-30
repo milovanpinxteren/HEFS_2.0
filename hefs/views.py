@@ -53,6 +53,7 @@ def show_customerinfo(request):
     returning_customers_overview = customerinfo.returning_customers_overview(userid)
     orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
     important_numbers = customerinfo.important_numbers_table(userid)
+    orders_worth_table = customerinfo.orders_worth_table(userid)
     context = {'returning_customers_overview': returning_customers_overview,
                'orders_per_date_plot': orders_per_date_plot,
                'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
@@ -60,7 +61,9 @@ def show_customerinfo(request):
                'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
                'customers_2022': returning_customers_overview[2], 'returning_customers_2021': returning_customers_overview[3],
                'returning_customers_2022': returning_customers_overview[4],'returning_customers_21_22': returning_customers_overview[5],
-               'returning_customers_2023': returning_customers_overview[6]}
+               'returning_customers_2023': returning_customers_overview[6], 'avg_orders_worth_2020': orders_worth_table[0],
+               'avg_orders_worth_2021': orders_worth_table[1], 'avg_orders_worth_2022': orders_worth_table[2],
+               'avg_orders_worth_2023': orders_worth_table[3]}
     return render(request, 'customerinfo.html', context)
 
 def show_customerlocationplot(request):

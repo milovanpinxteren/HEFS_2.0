@@ -44,6 +44,10 @@
                 <td class="table-data">Gemiddelde omzet per order (zonder verzendkosten)</td>
                 <td class="table-data">{{ gem_omzet_per_order }}</td>
             </tr>
+            <tr class="table-rows">
+                <td class="table-data">Gemiddelde omzet per persoon (zonder verzendkosten)</td>
+                <td class="table-data">{{ gem_omzet_per_order|div:hoofdgerechten_per_order }}</td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -52,41 +56,83 @@
         <table class="table">
             <thead class="table-head"><span class="table-title">Terugkerende klanten</span><br><br>
             <th class="table-heading">Jaar</th>
-            <th class="table-heading">Aantal klanten</th>
-            <th class="table-heading">Terugkerende klanten</th>
+            <th class="table-heading">Aantal orders</th>
+            <th class="table-heading">Aantal gasten</th>
+            <th class="table-heading">Terugkerende orders</th>
             <th class="table-heading">Terugkerend percentage</th>
             </thead>
             <tbody>
             <tr class="table-rows">
                 <td class="table-data">2020</td>
                 <td class="table-data">{{ customers_2020 }}</td>
+                <td class="table-data">{{ customers_2020|mul:5.7|floatformat:0 }}</td>
                 <td class="table-data">N.v.t.</td>
                 <td class="table-data">N.v.t.</td>
             </tr>
             <tr class="table-rows">
                 <td class="table-data">2021</td>
                 <td class="table-data">{{ customers_2021 }}</td>
+                <td class="table-data">{{ customers_2021|mul:5.8|floatformat:0 }}</td>
                 <td class="table-data">{{ returning_customers_2021 }}</td>
                 <td class="table-data">{{ returning_customers_2021|div:customers_2021|mul:100|floatformat:2 }}</td>
             </tr>
             <tr class="table-rows">
                 <td class="table-data">2022</td>
                 <td class="table-data">{{ customers_2022 }}</td>
+                <td class="table-data">{{ customers_2022|mul:5.7|floatformat:0 }}</td>
                 <td class="table-data">{{ returning_customers_2022 }}</td>
                 <td class="table-data">{{ returning_customers_2022|div:customers_2022|mul:100|floatformat:2 }}</td>
             </tr>
             <tr class="table-rows">
                 <td class="table-data">2023</td>
                 <td class="table-data">{{ aantal_orders }}</td>
+                <td class="table-data">{{ aantal_hoofdgerechten }}</td>
                 <td class="table-data">{{ returning_customers_2023 }}</td>
                 <td class="table-data">{{ returning_customers_2023|div:aantal_orders|mul:100|floatformat:2 }}</td>
             </tr>
-{#            <tr class="table-rows">#}
-{#                <td class="table-data">2020,2021 en 2022</td>#}
-{#                <td class="table-data">2238</td>#}
-{#                <td class="table-data">{{ returning_customers_21_22 }}</td>#}
-{#                <td class="table-data">{{ returning_customers_21_22|div:2238|mul:100|floatformat:2 }}</td>#}
-{#            </tr>#}
+            {#            <tr class="table-rows">#}
+            {#                <td class="table-data">2020,2021 en 2022</td>#}
+            {#                <td class="table-data">2238</td>#}
+            {#                <td class="table-data">{{ returning_customers_21_22 }}</td>#}
+            {#                <td class="table-data">{{ returning_customers_21_22|div:2238|mul:100|floatformat:2 }}</td>#}
+            {#            </tr>#}
+            </tbody>
+        </table>
+    </div>
+    <div id="orders-worth-table">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Orderwaarde vergelijking</span><br><br>
+            <th class="table-heading">Jaar</th>
+            <th class="table-heading">Aantal orders</th>
+            <th class="table-heading">Gemiddelde orderwaarde</th>
+            <th class="table-heading">Gemiddelde persoonwaarde</th>
+            {#            <th class="table-heading">Terugkerend percentage</th>#}
+            </thead>
+            <tbody>
+            <tr class="table-rows">
+                <td class="table-data">2020</td>
+                <td class="table-data">{{ customers_2020 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2020|floatformat:2 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2020|div:5.7|floatformat:2 }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">2021</td>
+                <td class="table-data">{{ customers_2021 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2021|floatformat:2 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2021|div:5.8|floatformat:2 }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">2022</td>
+                <td class="table-data">{{ customers_2022 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2022|floatformat:2 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2022|div:5.7|floatformat:2 }}</td>
+            </tr>
+            <tr class="table-rows">
+                <td class="table-data">2023</td>
+                <td class="table-data">{{ aantal_orders }}</td>
+                <td class="table-data">{{ avg_orders_worth_2023|floatformat:2 }}</td>
+                <td class="table-data">{{ avg_orders_worth_2023|div:aantal_hoofdgerechten|floatformat:2 }}</td>
+            </tr>
             </tbody>
         </table>
     </div>
