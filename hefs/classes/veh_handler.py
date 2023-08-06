@@ -19,7 +19,7 @@ class VehHandler():
             prognosefractie_brunch = prognosegetal_brunch / aantal_brunch
             prognosefractie_gourmet = prognosegetal_gourmet / aantal_gourmet
             aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
-        except (ObjectDoesNotExist, ZeroDivisionError):
+        except Exception as e:
             prognosegetal_diner = 0
             prognosegetal_brunch = 0
             prognosegetal_gourmet = 0
