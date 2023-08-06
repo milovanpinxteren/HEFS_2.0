@@ -19,7 +19,10 @@ class CustomerInfo():
         df_dates = pd.DataFrame.from_records(
             Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('besteldatum'),
             columns=['besteldatum'])
-        df_dates['besteldatum'] = df_dates['besteldatum'].dt.strftime("%Y-%m-%d")
+        try:
+            df_dates['besteldatum'] = df_dates['besteldatum'].dt.strftime("%Y-%m-%d")
+        except AttributeError:
+            df_dates['besteldatum'] = '2023-12-01'
         df_dates['orders'] = 1
         df_dates_grouped = pd.DataFrame(df_dates.groupby(by=['besteldatum'])['orders'].sum())
         df_dates_grouped['Totaal aantal orders'] = df_dates_grouped['orders'].cumsum()
