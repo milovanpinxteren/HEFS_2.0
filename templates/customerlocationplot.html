@@ -10,13 +10,16 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Klantenoverzicht</h1>
-
-<div class="page-container">
-    <div id="customer-location-plot-div"><span class="table-title">Klantenlocaties</span>
-        <div id="customer-location-plot">
-            {{ customer_location_plot|safe }}
+{% if not error %}
+    <div class="page-container">
+        <div id="customer-location-plot-div"><span class="table-title">Klantenlocaties</span>
+            <div id="customer-location-plot">
+                {{ customer_location_plot|safe }}
+            </div>
         </div>
     </div>
-</div>
+{% else %}
+    <h2>{{ ErrorMessage }}</h2>
+{% endif %}
 </body>
 </html>

@@ -57,74 +57,79 @@
 
 
 <h1 class="page-title">Producten overzicht</h1>
-<div class="information-div">
-    <p>
-        Aantal orders: {{ aantal_orders }} <br>
-        Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
-        Aantal brunch: {{ aantal_brunch }} <br>
-        Aantal gourmet: {{ aantal_gourmet }} <br>
-    </p>
-    <div>
-        <form class="general-numbers-form" action="./update-general-numbers" method="post" enctype="multipart/form-data" autocomplete="off">
-            {% csrf_token %}
-            {{ form }}
-            <button class="small-submit-button" type="submit">Verander prognoses</button>
-        </form>
+{% if not error %}
+    <div class="information-div">
+        <p>
+            Aantal orders: {{ aantal_orders }} <br>
+            Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
+            Aantal brunch: {{ aantal_brunch }} <br>
+            Aantal gourmet: {{ aantal_gourmet }} <br>
+        </p>
+        <div>
+            <form class="general-numbers-form" action="./update-general-numbers" method="post"
+                  enctype="multipart/form-data"
+                  autocomplete="off">
+                {% csrf_token %}
+                {{ form }}
+                <button class="small-submit-button" type="submit">Verander prognoses</button>
+            </form>
+        </div>
     </div>
-</div>
-<div>
-    Filter VEH:
-    <button onclick="filterVEH('diner')">Diner</button>
-    <button onclick="filterVEH('brunch')">Brunch</button>
-    <button onclick="filterVEH('all')">Alles</button>
-</div>
-<br>
-<button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+    <div>
+        Filter VEH:
+        <button onclick="filterVEH('diner')">Diner</button>
+        <button onclick="filterVEH('brunch')">Brunch</button>
+        <button onclick="filterVEH('all')">Alles</button>
+    </div>
+    <br>
+    <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
 
-<p>
-<h3>{{ veh_is_empty }}</h3>
-</p>
-<table id="vehTable">
-    <thead class="table-head">
-    <th class="table-heading">Omschrijving</th>
-    <th class="table-heading">ProductID</th>
-    <th class="table-heading">Productcode</th>
-    {% for column in column_headers %}
-        <th class="table-heading">
-            {{ column.0 | date:"d-m-Y" }}
-        </th>
-    {% endfor %}
-    <th class="table-heading">Totaal</th>
-    <th class="table-heading">Totaal product</th>
-    <th class="table-heading">Prognose</th>
-    <th class="table-heading">Prognose product</th>
-    </thead>
-    {% for row in table %}
-        {% define newrow as False %}
-        {% if omschrijving != row.0 %}
-            {% define row.0 as omschrijving %}
-            {% define newrow as True %}
-            <tr class="table-rows">
-        {% endif %}
-    {% for column in row %}
-        <td class="table-data" onload="calculatePrognoses()">
-            {% if column != None %}
-                {% if column|length < 4 %}
-                    <span class="number-span">{{ column|floatformat }}</span>
-                {% elif column|length > 4 %}
-                    {{ column }}
-                {% endif %}
-            {% elif column == None %}
-                <span class="number-span">0</span>
+    <p>
+    <h3>{{ veh_is_empty }}</h3>
+    </p>
+    <table id="vehTable">
+        <thead class="table-head">
+        <th class="table-heading">Omschrijving</th>
+        <th class="table-heading">ProductID</th>
+        <th class="table-heading">Productcode</th>
+
+        {% for column in column_headers %}
+            <th class="table-heading">
+                {{ column.0 | date:"d-m-Y" }}
+            </th>
+        {% endfor %}
+        <th class="table-heading">Totaal</th>
+        <th class="table-heading">Totaal product</th>
+        <th class="table-heading">Prognose</th>
+        <th class="table-heading">Prognose product</th>
+        </thead>
+        {% for row in table %}
+            {% define newrow as False %}
+            {% if omschrijving != row.0 %}
+                {% define row.0 as omschrijving %}
+                {% define newrow as True %}
+                <tr class="table-rows">
             {% endif %}
-        </td>
-    {% endfor %}
-    {% if newrow %}
-        </tr>
-    {% endif %}
-    {% endfor %}
-</table>
-
+        {% for column in row %}
+            <td class="table-data" onload="calculatePrognoses()">
+                {% if column != None %}
+                    {% if column|length < 4 %}
+                        <span class="number-span">{{ column|floatformat }}</span>
+                    {% elif column|length > 4 %}
+                        {{ column }}
+                    {% endif %}
+                {% elif column == None %}
+                    <span class="number-span">0</span>
+                {% endif %}
+            </td>
+        {% endfor %}
+        {% if newrow %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+{% else %}
+    <h2>{{ ErrorMessage }}</h2>
+{% endif %}
 </body>
-
 </html>
