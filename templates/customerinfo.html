@@ -136,6 +136,29 @@
                 </tbody>
             </table>
         </div>
+        <div id="dinner-type-comparison-div">
+            <table id="dinner-type-comparison-table">
+                <thead class="table-head">
+                <th class="table-heading">Jaar</th>
+                    {% for key in dinner_type_comparison.0.keys %}
+                        <th class="table-heading">{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+                <tr class="table-rows">
+                <td class="table-data">2022</td>
+                    {% for value in dinner_type_comparison.0.values %}
+                        <td class="table-data">{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-rows">
+                <td class="table-data">2023</td>
+                    {% for value in dinner_type_comparison.1.values %}
+                        <td class="table-data">{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
     </div>
 {% else %}
     <h2>{{ ErrorMessage }}</h2>

@@ -206,3 +206,6 @@ class Customers(models.Model):
     ordered_2022 = models.BinaryField(blank=True, default=0, null=True)
     ordered_2023 = models.BinaryField(blank=True, default=0, null=True)
 
+class JSONData(models.Model):
+    key = models.CharField(max_length=25)
+    value = models.JSONField()

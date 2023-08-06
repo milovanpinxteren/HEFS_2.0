@@ -10,6 +10,7 @@ from hefs.classes.calculate_orders import CalculateOrders
 from hefs.classes.get_orders import GetOrders
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
+from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
 from .classes.veh_handler import VehHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
@@ -54,31 +55,16 @@ def update_general_numbers(request):
 def show_customerinfo(request):
     try:
         userid = request.user.id
-        customerinfo = CustomerInfo()
-        returning_customers_overview = customerinfo.returning_customers_overview(userid)
-        orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
-        important_numbers = customerinfo.important_numbers_table(userid)
-        orders_worth_table = customerinfo.orders_worth_table(userid)
-        context = {'returning_customers_overview': returning_customers_overview,
-                   'orders_per_date_plot': orders_per_date_plot,
-                   'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
-                   'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
-                   'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
-                   'customers_2022': returning_customers_overview[2], 'returning_customers_2021': returning_customers_overview[3],
-                   'returning_customers_2022': returning_customers_overview[4],'returning_customers_21_22': returning_customers_overview[5],
-                   'returning_customers_2023': returning_customers_overview[6], 'avg_orders_worth_2020': orders_worth_table[0],
-                   'avg_orders_worth_2021': orders_worth_table[1], 'avg_orders_worth_2022': orders_worth_table[2],
-                   'avg_orders_worth_2023': orders_worth_table[3]}
+        context = CustomerInfo().prepare_view(userid)
         return render(request, 'customerinfo.html', context)
     except Exception as e:
-        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        context = {'error': True, 'ErrorMessage': e}
         return render(request, 'customerinfo.html', context)
 
 def show_customerlocationplot(request):
     try:
         userid = request.user.id
-        customerinfo = CustomerInfo()
-        customer_location_plot = customerinfo.customer_location_plot(userid)
+        customer_location_plot = CustomerLocationPlot().customer_location_plot(userid)
         context = {'customer_location_plot': customer_location_plot._repr_html_()}
         return render(request, 'customerlocationplot.html', context)
     except Exception as e:

@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import Sum
 
@@ -41,7 +41,7 @@ class CalculateOrders():
         productinfo = Productinfo.objects.filter(productcode=productSKU).first()
         gang_id = productinfo.gang_id
         verpakkingmogelijkheid_id = productinfo.verpakkingscombinatie_id
-        #TODO: als verpakkingmogelijk = 0, niet naar pickitems
+        # TODO: als verpakkingmogelijk = 0, niet naar pickitems
         verpakkingsmogelijkheden = VerpakkingsCombinaties.objects.filter(
             verpakkingsmogelijkheid_id=verpakkingmogelijkheid_id)
         try:
@@ -64,7 +64,9 @@ class CalculateOrders():
                         print('Geen product gevonden Productinfo voor: ', productinfo.productnaam, productID)
         except ObjectDoesNotExist:
             # TODO: User feedback
-            print("Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden", productinfo.productnaam)
+            print(
+                "Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden",
+                productinfo.productnaam)
 
     def make_product_extras(self, product):
         print('MAKE PRODUCT EXTRAS')
@@ -91,7 +93,7 @@ class CalculateOrders():
             self.pickorderlines = PickItems.objects.filter(pick_order_id=pickorder)
             for product in self.pickorderlines:
                 occurences = self.pickorderlines.filter(product_id=product.product_id).count()
-                if occurences > 1:  #zelfde product, samenvoegen en 2e instance verwijderen uit db en for loop
+                if occurences > 1:  # zelfde product, samenvoegen en 2e instance verwijderen uit db en for loop
                     double_picks = self.pickorderlines.filter(product_id=product.product_id)
                     omschrijving = double_picks.first().omschrijving
                     pick_order_id = double_picks.first().pick_order_id
@@ -100,11 +102,6 @@ class CalculateOrders():
                     PickItems.objects.filter(pick_order_id=pick_order_id, product_id=product_id).delete()
                     PickItems.objects.create(omschrijving=omschrijving, hoeveelheid=new_amount,
                                              pick_order_id=pick_order_id, product_id=product_id)
-
-
-
-
-
 
     def calculate_variables(self):
         print('Calculate variables')
@@ -118,9 +115,30 @@ class CalculateOrders():
         for hoofdgerecht in hoofdgerechten:
             hoofdgerechten_array.append(hoofdgerecht.productcode)
         aantal_hoofdgerechten = Orderline.objects.filter(productSKU__in=hoofdgerechten_array).aggregate(Sum('aantal'))
+        # aantal brunch
+        brunches = Productinfo.objects.filter(productcode__in=[700, 701])
+        brunch_array = []
+        for brunch in brunches:
+            brunch_array.append(brunch.productcode)
+        aantal_brunch = Orderline.objects.filter(productSKU__in=brunch_array).aggregate(Sum('aantal'))
+        # aantal gourmet
+        gourmets = Productinfo.objects.filter(productcode__in=[750])
+        gourmet_array = []
+        for gourmet in gourmets:
+            gourmet_array.append(gourmet.productcode)
+        aantal_gourmets = Orderline.objects.filter(productSKU__in=gourmet_array).aggregate(Sum('aantal'))
+
         AlgemeneInformatie.objects.filter(naam='aantalHoofdgerechten').delete()
+        AlgemeneInformatie.objects.filter(naam='aantalBrunch').delete()
+        AlgemeneInformatie.objects.filter(naam='aantalGourmet').delete()
         try:
             AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten',
                                               waarde=aantal_hoofdgerechten.get('aantal__sum'))
+            AlgemeneInformatie.objects.create(naam='aantalBrunch',
+                                              waarde=aantal_brunch.get('aantal__sum'))
+            AlgemeneInformatie.objects.create(naam='aantalGourmet',
+                                              waarde=aantal_gourmets.get('aantal__sum'))
         except IntegrityError:
             AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten', waarde=0)
+            AlgemeneInformatie.objects.create(naam='aantalBrunch', waarde=0)
+            AlgemeneInformatie.objects.create(naam='aantalGourmet', waarde=0)
