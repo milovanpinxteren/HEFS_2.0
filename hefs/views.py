@@ -23,14 +23,14 @@ def index(request):
 
 
 def show_veh(request):
-    organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
-    veh_handler = VehHandler()
-    context = veh_handler.handle_veh(organisations_to_show)
-    form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
-                                       'prognosegetal_brunch': context['prognosegetal_brunch'],
-                                       'prognosegetal_gourmet': context['prognosegetal_gourmet']})
-    context['form'] = form
     try:
+        organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
+        veh_handler = VehHandler()
+        context = veh_handler.handle_veh(organisations_to_show)
+        form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
+                                           'prognosegetal_brunch': context['prognosegetal_brunch'],
+                                           'prognosegetal_gourmet': context['prognosegetal_gourmet']})
+        context['form'] = form
         return render(request, 'veh.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
@@ -52,34 +52,34 @@ def update_general_numbers(request):
     return show_veh(request)
 
 def show_customerinfo(request):
-    userid = request.user.id
-    customerinfo = CustomerInfo()
-    returning_customers_overview = customerinfo.returning_customers_overview(userid)
-    orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
-    important_numbers = customerinfo.important_numbers_table(userid)
-    orders_worth_table = customerinfo.orders_worth_table(userid)
-    context = {'returning_customers_overview': returning_customers_overview,
-               'orders_per_date_plot': orders_per_date_plot,
-               'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
-               'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
-               'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
-               'customers_2022': returning_customers_overview[2], 'returning_customers_2021': returning_customers_overview[3],
-               'returning_customers_2022': returning_customers_overview[4],'returning_customers_21_22': returning_customers_overview[5],
-               'returning_customers_2023': returning_customers_overview[6], 'avg_orders_worth_2020': orders_worth_table[0],
-               'avg_orders_worth_2021': orders_worth_table[1], 'avg_orders_worth_2022': orders_worth_table[2],
-               'avg_orders_worth_2023': orders_worth_table[3]}
     try:
+        userid = request.user.id
+        customerinfo = CustomerInfo()
+        returning_customers_overview = customerinfo.returning_customers_overview(userid)
+        orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
+        important_numbers = customerinfo.important_numbers_table(userid)
+        orders_worth_table = customerinfo.orders_worth_table(userid)
+        context = {'returning_customers_overview': returning_customers_overview,
+                   'orders_per_date_plot': orders_per_date_plot,
+                   'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
+                   'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
+                   'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
+                   'customers_2022': returning_customers_overview[2], 'returning_customers_2021': returning_customers_overview[3],
+                   'returning_customers_2022': returning_customers_overview[4],'returning_customers_21_22': returning_customers_overview[5],
+                   'returning_customers_2023': returning_customers_overview[6], 'avg_orders_worth_2020': orders_worth_table[0],
+                   'avg_orders_worth_2021': orders_worth_table[1], 'avg_orders_worth_2022': orders_worth_table[2],
+                   'avg_orders_worth_2023': orders_worth_table[3]}
         return render(request, 'customerinfo.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
         return render(request, 'customerinfo.html', context)
 
 def show_customerlocationplot(request):
-    userid = request.user.id
-    customerinfo = CustomerInfo()
-    customer_location_plot = customerinfo.customer_location_plot(userid)
-    context = {'customer_location_plot': customer_location_plot._repr_html_()}
     try:
+        userid = request.user.id
+        customerinfo = CustomerInfo()
+        customer_location_plot = customerinfo.customer_location_plot(userid)
+        context = {'customer_location_plot': customer_location_plot._repr_html_()}
         return render(request, 'customerlocationplot.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
@@ -168,20 +168,20 @@ def get_pickbonnen(request):
 
 
 def financial_overview_page(request):
-    userid = request.user.id
-    financecalculator = FinanceCalculator(userid)
-
-    costs = financecalculator.calculate_costs()
-    profit = financecalculator.calculate_profit(userid)
-
-    context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
-               'variable_costs': costs[2], 'percentual_costs': costs[3], 'percentual_costs_incl_btw': costs[4],
-               'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
-               'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
-               'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
-               'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
-               }
     try:
+        userid = request.user.id
+        financecalculator = FinanceCalculator(userid)
+
+        costs = financecalculator.calculate_costs()
+        profit = financecalculator.calculate_profit(userid)
+
+        context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
+                   'variable_costs': costs[2], 'percentual_costs': costs[3], 'percentual_costs_incl_btw': costs[4],
+                   'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
+                   'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
+                   'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
+                   'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
+                   }
         return render(request, 'financialoverviewpage.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
