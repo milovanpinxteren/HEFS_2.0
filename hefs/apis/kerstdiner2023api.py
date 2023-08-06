@@ -33,7 +33,7 @@ class Kerstdiner2023API:
                     print('order does not exist, added')
                     self.add_to_new_orders(order)
                 else:
-                    updated_at = datetime.strptime(order['updated_at'][:9], '%Y-%m-%d')
+                    updated_at = datetime.strptime(order['updated_at'][:10], '%Y-%m-%d')
                     if updated_at > (last_api_call_date - timedelta(days=1)):
                         print('order changed', conversieID)
                         Orders.objects.filter(conversieID=conversieID).delete() #TODO: check if this deletes orderlines
