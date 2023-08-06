@@ -30,7 +30,11 @@ def show_veh(request):
                                        'prognosegetal_brunch': context['prognosegetal_brunch'],
                                        'prognosegetal_gourmet': context['prognosegetal_gourmet']})
     context['form'] = form
-    return render(request, 'veh.html', context)
+    try:
+        return render(request, 'veh.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'veh.html', context)
 
 def update_general_numbers(request):
     if request.method == 'POST':
@@ -64,14 +68,23 @@ def show_customerinfo(request):
                'returning_customers_2023': returning_customers_overview[6], 'avg_orders_worth_2020': orders_worth_table[0],
                'avg_orders_worth_2021': orders_worth_table[1], 'avg_orders_worth_2022': orders_worth_table[2],
                'avg_orders_worth_2023': orders_worth_table[3]}
-    return render(request, 'customerinfo.html', context)
+    try:
+        return render(request, 'customerinfo.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'customerinfo.html', context)
 
 def show_customerlocationplot(request):
     userid = request.user.id
     customerinfo = CustomerInfo()
     customer_location_plot = customerinfo.customer_location_plot(userid)
     context = {'customer_location_plot': customer_location_plot._repr_html_()}
-    return render(request, 'customerlocationplot.html', context)
+    try:
+        return render(request, 'customerlocationplot.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'customerlocationplot.html', context)
+
 
 
 def getorderspage(request):
@@ -168,4 +181,8 @@ def financial_overview_page(request):
                'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
                'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
                }
-    return render(request, 'financialoverviewpage.html', context)
+    try:
+        return render(request, 'financialoverviewpage.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'financialoverviewpage.html', context)
