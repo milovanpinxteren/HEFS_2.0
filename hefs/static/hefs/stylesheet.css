@@ -360,6 +360,18 @@
     float: left;
 }
 
+#dinner-type-comparison-div {
+    position: relative;
+    float: left;
+    width: 40%;
+    margin-top: -12%;
+}
+
+#dinner-type-comparison-table {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);
