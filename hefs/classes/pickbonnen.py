@@ -7,7 +7,7 @@ class Pickbonnen(fpdf.FPDF):
         self.set_y(-15)
         self.set_font('helvetica', 'B', 10)
         self.write(0,
-                   'www.kerstdiner.nl                                                                  contact: bestellen@kerstdiner.nl')
+                   'www.kerstdiner.nl         Vragen? Neem contact op via bestellen@kerstdiner.nl of in de chat op de website')
         self.set_font('helvetica', 'B', 10)
 
     def klantcell(self, naw):
@@ -22,15 +22,11 @@ class Pickbonnen(fpdf.FPDF):
         self.set_font('helvetica', 'B', 13)
         # self.cell(1, 3, 'Route: ' + str(naw[15]), ln=1)
 
+    def klant_qr_cell(self, img):
         self.set_y(10)
-        self.set_x(130)
-        self.set_font('helvetica', 'B', 30)
-        self.cell(100, 10, str(naw[0]), ln=1)
-        self.set_x(130)
-        self.set_font('helvetica', '', 12)
-        naw_string = f'{naw[1]} {naw[2]}\n {naw[3]} {naw[4]}\n{naw[5]}\n{naw[6]}\n{str(naw[7])}'
-        self.multi_cell(100, 5, naw_string)
-        self.line(0, 48, 210, 48)
+        self.set_x(135)
+        self.write(0, 'Scan om label te printen:')
+        self.image(img, 137, 12, 40, 40)
 
     def pickcell(self, pick, offset_x):
         self.set_x(offset_x)

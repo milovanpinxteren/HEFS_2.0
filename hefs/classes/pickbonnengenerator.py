@@ -43,9 +43,14 @@ class PickbonnenGenerator:
                     # pick.product_id
                     qr_text += '\t' + str(pick.hoeveelheid) + ' \t' + str(pick.product_id) + ' \n'
             print(qr_text)
-            qr_code = qrcode.make(qr_text)
-            img = qr_code.get_image()
-            pickbonnen.qr_codecell(img)
+            naw_qr_text = naw
+            naw_qr_code = qrcode.make(naw_qr_text)
+            naw_qr_img = naw_qr_code.get_image()
+
+            pick_qr_code = qrcode.make(qr_text)
+            pick_qr_img = pick_qr_code.get_image()
+            pickbonnen.qr_codecell(pick_qr_img)
+            pickbonnen.klant_qr_cell(naw_qr_img)
         pickbonnen.output('pickbonnen.pdf', "rb")
 
 
