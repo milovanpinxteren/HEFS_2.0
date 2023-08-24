@@ -1,8 +1,12 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
-    VerzendOpties
+    VerzendOpties, JSONData
 
+
+@admin.register(JSONData)
+class JSONDataJSONDataAdmin(admin.ModelAdmin):
+    list_display = ['key']
 
 @admin.register(VerzendOpties)
 class VerzendOptiesAdmin(admin.ModelAdmin):
