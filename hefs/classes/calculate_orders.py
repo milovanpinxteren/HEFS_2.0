@@ -110,10 +110,11 @@ class CalculateOrders():
         AlgemeneInformatie.objects.filter(naam='aantalOrders').delete()
         AlgemeneInformatie.objects.create(naam='aantalOrders', waarde=aantal_orders)
         # aantal hoofdgerechten
-        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[5, 7])
+        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[4, 7])
+        # hoofdgerechten_array = list(hoofdgerechten.values_list('productcode', flat=True))
         hoofdgerechten_array = []
         for hoofdgerecht in hoofdgerechten:
-            hoofdgerechten_array.append(hoofdgerecht.productcode)
+            hoofdgerechten_array.append(int(hoofdgerecht.productcode))
         aantal_hoofdgerechten = Orderline.objects.filter(productSKU__in=hoofdgerechten_array).aggregate(Sum('aantal'))
         # aantal brunch
         brunches = Productinfo.objects.filter(productcode__in=[700, 701])

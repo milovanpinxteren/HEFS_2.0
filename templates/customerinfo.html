@@ -38,15 +38,15 @@
                 </tr>
                 <tr class="table-rows">
                     <td class="table-data">Aantal hoofdgerechten per order</td>
-                    <td class="table-data">{{ hoofdgerechten_per_order }}</td>
+                    <td class="table-data">{{ hoofdgerechten_per_order|floatformat:1 }}</td>
                 </tr>
                 <tr class="table-rows">
                     <td class="table-data">Gemiddelde omzet per order (zonder verzendkosten)</td>
-                    <td class="table-data">{{ gem_omzet_per_order }}</td>
+                    <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
                 </tr>
                 <tr class="table-rows">
                     <td class="table-data">Gemiddelde omzet per persoon (zonder verzendkosten)</td>
-                    <td class="table-data">{{ gem_omzet_per_order|div:hoofdgerechten_per_order }}</td>
+                    <td class="table-data">{{ gem_omzet_per_order|div:hoofdgerechten_per_order|floatformat:2 }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -90,12 +90,6 @@
                     <td class="table-data">{{ returning_customers_2023 }}</td>
                     <td class="table-data">{{ returning_customers_2023|div:aantal_orders|mul:100|floatformat:2 }}</td>
                 </tr>
-                {#            <tr class="table-rows">#}
-                {#                <td class="table-data">2020,2021 en 2022</td>#}
-                {#                <td class="table-data">2238</td>#}
-                {#                <td class="table-data">{{ returning_customers_21_22 }}</td>#}
-                {#                <td class="table-data">{{ returning_customers_21_22|div:2238|mul:100|floatformat:2 }}</td>#}
-                {#            </tr>#}
                 </tbody>
             </table>
         </div>
@@ -154,7 +148,7 @@
                 <tr class="table-rows">
                 <td class="table-data">2023</td>
                     {% for value in dinner_type_comparison.1.values %}
-                        <td class="table-data">{{ value }}</td>
+                        <td class="table-data">{{ value|floatformat:1 }}</td>
                     {% endfor %}
                 </tr>
             </table>
