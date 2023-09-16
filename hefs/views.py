@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
+from django.db.models import Sum, OuterRef, Subquery
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from django_rq import job
@@ -9,10 +10,13 @@ from hefs.classes.calculate_orders import CalculateOrders
 from hefs.classes.get_orders import GetOrders
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
+from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
-from .forms import PickbonnenForm
-from .models import Orders, ApiUrls, AlgemeneInformatie
+from .classes.veh_handler import VehHandler
+from .forms import PickbonnenForm, GeneralNumbersForm
+from .models import Orders, ApiUrls, AlgemeneInformatie, PickItems, Productinfo, Orderline
 from .sql_commands import SqlCommands
+from django.db.models import F
 
 
 def index(request):
@@ -20,47 +24,53 @@ def index(request):
 
 
 def show_veh(request):
-    organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
     try:
-        prognosegetal = AlgemeneInformatie.objects.get(naam='prognosegetal').waarde
-        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
-        prognosefractie = prognosegetal / aantal_hoofdgerechten
-    except ObjectDoesNotExist:
-        prognosegetal = 0
-        aantal_hoofdgerechten = 0
-        aantal_orders = 0
-        prognosefractie = 0
+        organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
+        veh_handler = VehHandler()
+        context = veh_handler.handle_veh(organisations_to_show)
+        form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
+                                           'prognosegetal_brunch': context['prognosegetal_brunch'],
+                                           'prognosegetal_gourmet': context['prognosegetal_gourmet']})
+        context['form'] = form
+        return render(request, 'veh.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'veh.html', context)
 
-    dates = Orders.objects.filter(organisatieID__in=organisations_to_show).order_by('afleverdatum').values_list(
-        'afleverdatum').distinct()
-    if not dates:
-        context = {'table': '', 'column_headers': '',
-                   'veh_is_empty': 'Geen producten gevonden, weet u zeker dat u met de juiste account bent ingelogd?'}
-    else:
-        date_array = []
-        for date in dates:
-            date_array.append(date)
-        cursor = connection.cursor()
-        sql_veh = SqlCommands().get_veh_command(date_array, prognosefractie)
-        cursor.execute(sql_veh)
-        veh = cursor.fetchall()
-        context = {'table': veh, 'column_headers': date_array, 'prognosegetal': prognosegetal,
-                   'aantal_hoofdgerechten': aantal_hoofdgerechten, 'aantal_orders': aantal_orders}
-    return render(request, 'veh.html', context)
-
+def update_general_numbers(request):
+    if request.method == 'POST':
+        form = GeneralNumbersForm(request.POST, request.FILES)
+        if form.is_valid():
+            prognosegetal_diner = form['prognosegetal_diner'].value()
+            prognosegetal_brunch = form['prognosegetal_brunch'].value()
+            prognosegetal_gourmet = form['prognosegetal_gourmet'].value()
+            AlgemeneInformatie.objects.filter(naam='prognosegetal_diner').delete()
+            AlgemeneInformatie.objects.create(naam='prognosegetal_diner', waarde=prognosegetal_diner)
+            AlgemeneInformatie.objects.filter(naam='prognosegetal_brunch').delete()
+            AlgemeneInformatie.objects.create(naam='prognosegetal_brunch', waarde=prognosegetal_brunch)
+            AlgemeneInformatie.objects.filter(naam='prognosegetal_gourmet').delete()
+            AlgemeneInformatie.objects.create(naam='prognosegetal_gourmet', waarde=prognosegetal_gourmet)
+    return show_veh(request)
 
 def show_customerinfo(request):
-    userid = request.user.id
-    customerinfo = CustomerInfo()
-    customer_location_plot = customerinfo.customer_location_plot(userid)
-    orders_per_date_plot = customerinfo.orders_per_date_plot(userid)
-    important_numbers = customerinfo.important_numbers_table(userid)
-    context = {'customer_location_plot': customer_location_plot._repr_html_(),
-               'orders_per_date_plot': orders_per_date_plot,
-               'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
-               'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3]}
-    return render(request, 'customerinfo.html', context)
+    try:
+        userid = request.user.id
+        context = CustomerInfo().prepare_view(userid)
+        return render(request, 'customerinfo.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': e}
+        return render(request, 'customerinfo.html', context)
+
+def show_customerlocationplot(request):
+    try:
+        userid = request.user.id
+        customer_location_plot = CustomerLocationPlot().customer_location_plot(userid)
+        context = {'customer_location_plot': customer_location_plot._repr_html_()}
+        return render(request, 'customerlocationplot.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'customerlocationplot.html', context)
+
 
 
 def getorderspage(request):
@@ -144,17 +154,21 @@ def get_pickbonnen(request):
 
 
 def financial_overview_page(request):
-    userid = request.user.id
-    financecalculator = FinanceCalculator(userid)
+    try:
+        userid = request.user.id
+        financecalculator = FinanceCalculator(userid)
 
-    costs = financecalculator.calculate_costs()
-    profit = financecalculator.calculate_profit(userid)
+        costs = financecalculator.calculate_costs()
+        profit = financecalculator.calculate_profit(userid)
 
-    context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
-               'variable_costs': costs[2], 'percentual_costs': costs[3], 'percentual_costs_incl_btw': costs[4],
-               'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
-               'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
-               'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
-               'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
-               }
-    return render(request, 'financialoverviewpage.html', context)
+        context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
+                   'variable_costs': costs[2], 'percentual_costs': costs[3], 'percentual_costs_incl_btw': costs[4],
+                   'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
+                   'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
+                   'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
+                   'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
+                   }
+        return render(request, 'financialoverviewpage.html', context)
+    except Exception as e:
+        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        return render(request, 'financialoverviewpage.html', context)

@@ -9,6 +9,7 @@ from django.contrib.postgres.fields import ArrayField
 class VerzendOpties(models.Model):
     verzendoptie = models.CharField(max_length=250)
     verzendkosten = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
+    verzenddatum = models.DateField(null=True, blank=True)
 
 class NewOrders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
@@ -193,4 +194,18 @@ class ApiUrls(models.Model):
     begindatum = models.DateField(null=True)
     organisatieIDs = ArrayField(models.IntegerField(default=0), blank=True, default=[])
 
+class Customers(models.Model):
+    emailadres = models.CharField(max_length=300, default='', unique=True)
+    voornaam = models.CharField(max_length=300, default='', null=True)
+    tussenvoegsel = models.CharField(max_length=300, default='', null=True)
+    achternaam = models.CharField(max_length=300, default='', null=True)
+    postcode = models.CharField(max_length=300, default='', null=True)
+    plaats = models.CharField(max_length=300, default='', null=True)
+    ordered_2020 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2021 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2022 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2023 = models.BinaryField(blank=True, default=0, null=True)
 
+class JSONData(models.Model):
+    key = models.CharField(max_length=25)
+    value = models.JSONField()

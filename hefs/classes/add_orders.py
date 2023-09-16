@@ -10,7 +10,6 @@ class AddOrders():
         self.check_orders()
 
     def validate_orders(self): #Checks if the orders in Neworders exist and Orderlines are the same
-        # Step 2 -> Check if order is still the same, if yes -> delete, if no -> delete old and calculate
         print('VALIDEER ORDERS')
 
 
@@ -52,14 +51,10 @@ class AddOrders():
         productcodes = Productinfo.objects.values_list('productcode', flat=True)
         for orderline in NewOrders.objects.all():
             if orderline.productSKU not in productcodes:
-                print('ProductSKU komt niet overeen met ProductInfo')
-                print(orderline.productSKU)
+                print('ProductSKU komt niet overeen met ProductInfo', orderline.productSKU)
                 Orderline.objects.filter(order__conversieID=orderline.conversieID).delete()
                 Orders.objects.filter(conversieID=orderline.conversieID).delete()
-
-
         #Delete only NewOrders which are succesfully imported in Orders
-        # NewOrders.objects.all().delete()
         qs = Orders.objects.all()
         ids_to_delete = list(qs.values_list('conversieID', flat=True))
         NewOrders.objects.filter(conversieID__in=ids_to_delete).delete()
