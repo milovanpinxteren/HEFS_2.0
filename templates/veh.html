@@ -2,12 +2,14 @@
 <html lang="en">
 {% load define_action %}
 {% load static %}
+{% csrf_token %}
 <head>
     <meta charset="UTF-8">
     <title>Producten overzicht</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
     <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
     <script>
         function ExportToExcel(type, fn, dl) {
@@ -18,62 +20,118 @@
                 XLSX.writeFile(wb, fn || ('overzicht-VEH.' + (type || 'xlsx')));
         }
     </script>
+    <script>
+        function filterVEH(type) {
+            table = document.getElementById("vehTable");
+            tr = table.getElementsByTagName("tr");
+            var els = document.getElementsByClassName('prognose-span');
+            while (els.length) {
+                els[0].innerHTML = 'none';
+            }
+            console.log("loop")
+            for (i = 1; i < tr.length; i++) {
+                $(tr[i]).show()
+                let tdElem = tr[i].getElementsByTagName("td")[1]
+                let gang = tdElem.innerText[0]
+                if (type === "diner") {
+                    if (gang === "7") {
+                        $(tr[i]).hide()
+                    } else if (gang !== "7") {
+                        $(tr[i]).show()
+                    }
+                } else if (type === "brunch") {
+                    if (gang !== "7") {
+                        $(tr[i]).hide()
+                    } else if (gang === "7") {
+                        $(tr[i]).show()
+                    }
+                } else if (type === "all") {
+                    $(tr[i]).show()
+                }
+            }
+        }
+    </script>
 </head>
 <body>
 {% include "navbar.html" %}
 
 
 <h1 class="page-title">Producten overzicht</h1>
-<div class="information-div">
-<p>
-    Aantal orders: {{ aantal_orders }} <br>
-    Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
-    Prognose: {{ prognosegetal }} personen (Prognoseberekening: (prognosegetal / aantal hoofdgerechten) * Totaal <br>
-    <i>Ga naar de adminpagina om het prognosegetal aan te passen</i>
-</p>
-</div>
-<button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+{% if not error %}
+    <div class="information-div">
+        <p>
+            Aantal orders: {{ aantal_orders }} <br>
+            Aantal hoofdgerechten: {{ aantal_hoofdgerechten }} <br>
+            Aantal brunch: {{ aantal_brunch }} <br>
+            Aantal gourmet: {{ aantal_gourmet }} <br>
+        </p>
+        <div>
+            <form class="general-numbers-form" action="./update-general-numbers" method="post"
+                  enctype="multipart/form-data"
+                  autocomplete="off">
+                {% csrf_token %}
+                {{ form }}
+                <button class="small-submit-button" type="submit">Verander prognoses</button>
+            </form>
+        </div>
+    </div>
+    <div>
+        Filter VEH:
+        <button onclick="filterVEH('diner')">Diner</button>
+        <button onclick="filterVEH('brunch')">Brunch</button>
+        <button onclick="filterVEH('all')">Alles</button>
+    </div>
+    <br>
+    <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
 
-<p>
+    <p>
     <h3>{{ veh_is_empty }}</h3>
-</p>
-<table id="vehTable">
-    <thead class="table-head">
-    <th class="table-heading">Omschrijving</th>
-    {% for column in column_headers %}
-        <th class="table-heading">
-            {{ column.0 | date:"d-m-Y" }}
-        </th>
-    {% endfor %}
-    <th class="table-heading">Totaal</th>
-    <th class="table-heading">Voor {{ prognosegetal }} Personen</th>
-    </thead>
-    {% for row in table %}
-        {% define newrow as False %}
-        {% if omschrijving != row.0 %}
-            {% define row.0 as omschrijving %}
-            {% define newrow as True %}
-            <tr class="table-rows">
-        {% endif %}
-    {% for column in row %}
-        <td class="table-data">
-            {% if column != None %}
-                {% if column|length < 4 %}
-                    <span class="number-span">{{ column|floatformat }}</span>
-                {% elif column|length > 4 %}
-                    {{ column }}
+    </p>
+    <table id="vehTable">
+        <thead class="table-head">
+        <th class="table-heading">Omschrijving</th>
+        <th class="table-heading">ProductID</th>
+        <th class="table-heading">Productcode</th>
+
+        {% for column in column_headers %}
+            <th class="table-heading">
+                {{ column.0 | date:"d-m-Y" }}
+            </th>
+        {% endfor %}
+        <th class="table-heading">Totaal</th>
+        <th class="table-heading">Totaal product</th>
+        <th class="table-heading">Prognose</th>
+        <th class="table-heading">Prognose product</th>
+        </thead>
+        {% for row in table %}
+            {% if row.1.4 != '0' %}
+                {% define newrow as False %}
+                {% if omschrijving != row.0 %}
+                    {% define row.0 as omschrijving %}
+                    {% define newrow as True %}
+                    <tr class="table-rows">
                 {% endif %}
-            {% elif column == None %}
-                <span class="number-span">0</span>
+            {% for column in row %}
+                <td class="table-data" onload="calculatePrognoses()">
+                    {% if column != None %}
+                        {% if column|length < 4 %}
+                            <span class="number-span">{{ column|floatformat }}</span>
+                        {% elif column|length > 4 %}
+                            {{ column }}
+                        {% endif %}
+                    {% elif column == None %}
+                        <span class="number-span">0</span>
+                    {% endif %}
+                </td>
+            {% endfor %}
+            {% if newrow %}
+                </tr>
             {% endif %}
-        </td>
-    {% endfor %}
-    {% if newrow %}
-        </tr>
-    {% endif %}
-    {% endfor %}
-</table>
-
+            {% endif %}
+        {% endfor %}
+    </table>
+{% else %}
+    <h2>{{ ErrorMessage }}</h2>
+{% endif %}
 </body>
-
 </html>
