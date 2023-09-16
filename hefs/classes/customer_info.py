@@ -11,6 +11,7 @@ from hefs.models import Orders, AlgemeneInformatie, ApiUrls, Customers, JSONData
 
 class CustomerInfo():
     def orders_per_date_plot(self, userid):
+        persons_per_order = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde / AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
 
         data_2020 = JSONData.objects.get(key='data_2020').value
         data_2021 = JSONData.objects.get(key='data_2021').value
@@ -20,17 +21,18 @@ class CustomerInfo():
             Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('besteldatum'),
             columns=['besteldatum'])
         try:
-            df_dates['besteldatum'] = df_dates['besteldatum'].dt.strftime("%Y-%m-%d")
+            df_dates['Besteldatum'] = df_dates['besteldatum'].dt.strftime("%Y-%m-%d")
         except AttributeError:
-            df_dates['besteldatum'] = '2023-12-01'
-        df_dates['orders'] = 1
-        df_dates_grouped = pd.DataFrame(df_dates.groupby(by=['besteldatum'])['orders'].sum())
-        df_dates_grouped['Totaal aantal orders'] = df_dates_grouped['orders'].cumsum()
+            df_dates['Besteldatum'] = '2023-12-01'
+        df_dates['Bestellingen per dag'] = 1
+        df_dates_grouped = pd.DataFrame(df_dates.groupby(by=['Besteldatum'], as_index=False)['Bestellingen per dag'].sum())
+        df_dates_grouped['Totaal aantal bestellingen'] = df_dates_grouped['Bestellingen per dag'].cumsum()
+        df_dates_grouped['Totaal aantal personen'] = df_dates_grouped['Totaal aantal bestellingen'] * persons_per_order
         df_dates_grouped['Jaar'] = 2023
 
         frames = [pd.DataFrame(data=data_2020), pd.DataFrame(data=data_2021), pd.DataFrame(data=data_2022),
                   df_dates_grouped]
-        df_merged = pd.concat(frames)
+        df_merged = pd.concat(frames).reset_index(drop=True)
 
         fig = px.line(df_merged, x="Besteldatum", y="Totaal aantal personen", color='Jaar',
                       title="Aantal personen per datum")

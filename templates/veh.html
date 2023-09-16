@@ -34,15 +34,15 @@
                 let tdElem = tr[i].getElementsByTagName("td")[1]
                 let gang = tdElem.innerText[0]
                 if (type === "diner") {
-                    if (gang === "3") {
+                    if (gang === "7") {
                         $(tr[i]).hide()
-                    } else if (gang !== "3") {
+                    } else if (gang !== "7") {
                         $(tr[i]).show()
                     }
                 } else if (type === "brunch") {
-                    if (gang !== "3") {
+                    if (gang !== "7") {
                         $(tr[i]).hide()
-                    } else if (gang === "3") {
+                    } else if (gang === "7") {
                         $(tr[i]).show()
                     }
                 } else if (type === "all") {
@@ -104,28 +104,30 @@
         <th class="table-heading">Prognose product</th>
         </thead>
         {% for row in table %}
-            {% define newrow as False %}
-            {% if omschrijving != row.0 %}
-                {% define row.0 as omschrijving %}
-                {% define newrow as True %}
-                <tr class="table-rows">
-            {% endif %}
-        {% for column in row %}
-            <td class="table-data" onload="calculatePrognoses()">
-                {% if column != None %}
-                    {% if column|length < 4 %}
-                        <span class="number-span">{{ column|floatformat }}</span>
-                    {% elif column|length > 4 %}
-                        {{ column }}
-                    {% endif %}
-                {% elif column == None %}
-                    <span class="number-span">0</span>
+            {% if row.1.4 != '0' %}
+                {% define newrow as False %}
+                {% if omschrijving != row.0 %}
+                    {% define row.0 as omschrijving %}
+                    {% define newrow as True %}
+                    <tr class="table-rows">
                 {% endif %}
-            </td>
-        {% endfor %}
-        {% if newrow %}
-            </tr>
-        {% endif %}
+            {% for column in row %}
+                <td class="table-data" onload="calculatePrognoses()">
+                    {% if column != None %}
+                        {% if column|length < 4 %}
+                            <span class="number-span">{{ column|floatformat }}</span>
+                        {% elif column|length > 4 %}
+                            {{ column }}
+                        {% endif %}
+                    {% elif column == None %}
+                        <span class="number-span">0</span>
+                    {% endif %}
+                </td>
+            {% endfor %}
+            {% if newrow %}
+                </tr>
+            {% endif %}
+            {% endif %}
         {% endfor %}
     </table>
 {% else %}

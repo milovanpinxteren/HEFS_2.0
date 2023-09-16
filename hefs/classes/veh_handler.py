@@ -13,11 +13,18 @@ class VehHandler():
             prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
             prognosegetal_gourmet = AlgemeneInformatie.objects.get(naam='prognosegetal_gourmet').waarde
             aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-            aantal_brunch = Orderline.objects.filter(productSKU__in=[110, 111]).aggregate(Sum('aantal'))['aantal__sum']  # TODO: change to brunch
-            aantal_gourmet = Orderline.objects.filter(productSKU__in=[110, 111]).aggregate(Sum('aantal'))['aantal__sum']  # TODO: change to gourmet
+            aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
+            # aantal_gourmet = Orderline.objects.filter(productSKU__in=[110, 111]).aggregate(Sum('aantal'))['aantal__sum']  # TODO: change to gourmet
+            aantal_gourmet = 0
             prognosefractie_diner = prognosegetal_diner / aantal_hoofdgerechten
-            prognosefractie_brunch = prognosegetal_brunch / aantal_brunch
-            prognosefractie_gourmet = prognosegetal_gourmet / aantal_gourmet
+            try:
+                prognosefractie_brunch = prognosegetal_brunch / aantal_brunch
+            except ZeroDivisionError:
+                prognosefractie_brunch = 0
+            try:
+                prognosefractie_gourmet = prognosegetal_gourmet / aantal_gourmet
+            except ZeroDivisionError:
+                prognosefractie_gourmet = 0
             aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
         except Exception as e:
             prognosegetal_diner = 0
@@ -44,7 +51,7 @@ class VehHandler():
             sql_veh = SqlCommands().get_veh_command(date_array)
             cursor.execute(sql_veh)
             veh = cursor.fetchall()
-
+        veh = sorted(veh, key=lambda tup: tup[1])
         for i, row in enumerate(veh):
             productcode = row[2]
             products = [tup for tup in veh if productcode in tup]
@@ -56,15 +63,15 @@ class VehHandler():
                 updated_row = (*row, total_of_product)
             row_total = row[3 + len(date_array)]
             gang = row[1][0]
-            if gang == "3":  # TODO: change to "7"
+            if gang == "7":
                 prognose = row_total * prognosefractie_brunch
                 total_prognose = total_of_product * prognosefractie_brunch
                 updated_row = (*updated_row, prognose, total_prognose)
-            elif gang == "9":  # Gourmet
-                prognose = row_total * prognosefractie_gourmet
-                total_prognose = total_of_product * prognosefractie_gourmet
-                updated_row = (*updated_row, prognose, total_prognose)
-            elif gang != "7" and gang != "9":
+            # elif gang == "9":  # Gourmet
+            #     prognose = row_total * prognosefractie_gourmet
+            #     total_prognose = total_of_product * prognosefractie_gourmet
+            #     updated_row = (*updated_row, prognose, total_prognose)
+            elif gang != "7":
                 prognose = row_total * prognosefractie_diner
                 total_prognose = total_of_product * prognosefractie_diner
                 updated_row = (*updated_row, prognose, total_prognose)
