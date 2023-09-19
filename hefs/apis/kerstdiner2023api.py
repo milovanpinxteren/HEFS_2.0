@@ -91,7 +91,7 @@ class Kerstdiner2023API:
 
     def add_to_new_orders(self, order):
         verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['code'])[0]
-        besteldatum = datetime.strptime(order['created_at'][:9], '%Y-%m-%d')
+        besteldatum = datetime.strptime(order['created_at'][:10], '%Y-%m-%d')
         for newOrderLine in order['line_items']:
             if newOrderLine['fulfillable_quantity'] > 0:
                 NewOrders.objects.create(conversieID=order['name'],

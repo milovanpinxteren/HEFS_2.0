@@ -135,11 +135,15 @@ class CalculateOrders():
         try:
             AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten',
                                               waarde=aantal_hoofdgerechten.get('aantal__sum'))
+        except IntegrityError:
+            AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten', waarde=0)
+        try:
             AlgemeneInformatie.objects.create(naam='aantalBrunch',
                                               waarde=aantal_brunch.get('aantal__sum'))
+        except IntegrityError:
+            AlgemeneInformatie.objects.create(naam='aantalBrunch', waarde=0)
+        try:
             AlgemeneInformatie.objects.create(naam='aantalGourmet',
                                               waarde=aantal_gourmets.get('aantal__sum'))
         except IntegrityError:
-            AlgemeneInformatie.objects.create(naam='aantalHoofdgerechten', waarde=0)
-            AlgemeneInformatie.objects.create(naam='aantalBrunch', waarde=0)
             AlgemeneInformatie.objects.create(naam='aantalGourmet', waarde=0)
