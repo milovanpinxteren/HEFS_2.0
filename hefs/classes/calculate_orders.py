@@ -26,7 +26,7 @@ class CalculateOrders():
             self.pickorderlines = Orderline.objects.filter(order=self.pickorder.order_id)
             for product in self.pickorderlines:
                 self.make_picks(product, 'Geen productextra', 'Geen productextra')
-                self.make_product_extras(product)
+            self.make_product_extras(self.pickorderlines)
 
     def make_picks(self, product, aantal, order_id):
         if aantal == 'Geen productextra':
@@ -35,7 +35,7 @@ class CalculateOrders():
             order_id = product.order_id
         else:  # if it is a productextra
             bestelde_hoeveelheid = aantal
-            productSKU = product.productcode
+            productSKU = product[1:4]
             order_id = order_id
 
         productinfo = Productinfo.objects.filter(productcode=productSKU).first()
@@ -45,11 +45,8 @@ class CalculateOrders():
         verpakkingsmogelijkheden = VerpakkingsCombinaties.objects.filter(
             verpakkingsmogelijkheid_id=verpakkingmogelijkheid_id)
         try:
-            # try:
             verpakkingsaantallen = verpakkingsmogelijkheden.get(
                 bestelde_hoeveelheid=bestelde_hoeveelheid).verpakkingscombinatie
-            # except MultipleObjectsReturned:
-            #     print('asdf')
             for verpakking in verpakkingsaantallen:
                 if verpakking != ',':
                     productID = str(gang_id) + productSKU + verpakking
@@ -68,14 +65,20 @@ class CalculateOrders():
                 "Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden",
                 productinfo.productnaam)
 
-    def make_product_extras(self, product):
+    def make_product_extras(self, pickorderlines):
         print('MAKE PRODUCT EXTRAS')
-        productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
-        aantal = product.aantal
-        order_id = product.order_id
-        for productextra in productextras:
-            extra_product = productextra.extra_productnaam
-            self.make_picks(extra_product, aantal, order_id)
+        product_extras_dict = {}
+        for product in pickorderlines:
+            productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
+            for productextra in productextras:
+                if productextra.extra_productnaam_id in product_extras_dict:
+                    product_extras_dict[productextra.extra_productnaam_id] += product.aantal
+                else:
+                    product_extras_dict[productextra.extra_productnaam_id] = product.aantal
+        order_id = pickorderlines[0].order_id
+        for key, value in product_extras_dict.items():
+            self.make_picks(key, value, order_id)
+
 
     def make_order_extras(self, order):
         print('MAKE ORDER EXTRAS')
