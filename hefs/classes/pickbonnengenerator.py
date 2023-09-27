@@ -1,8 +1,9 @@
+from datetime import datetime
+
 import qrcode as qrcode
 
 from hefs.classes.pickbonnen import Pickbonnen
 from hefs.models import Orders, PickOrders, PickItems
-from datetime import datetime
 
 
 class PickbonnenGenerator:
@@ -26,24 +27,25 @@ class PickbonnenGenerator:
         for order in ordersqueryset:
             naw = []
             naw.extend(
-                [order.conversieID, order.voornaam, order.achternaam, order.postcode, order.plaats, order.emailadres,
-                 order.telefoonnummer, order.afleverdatum])
-
+                [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, order.huisnummer, order.plaats, order.postcode, order.afleverdatum])
+            # TODO: for label: "[addr] '\n' conversieID '\n' adres '\n' plaats '\n' postcode '\n' voornaam '\n' achternaam
             pickbonnen.add_page()
             pickbonnen.naw_function(naw)
             pick_order = PickOrders.objects.get(order=order)
             pickqueryset = PickItems.objects.filter(pick_order=pick_order).order_by('product__pickvolgorde')
             pickcount = 0
-            qr_text = str(order.conversieID) + ' \n '
+            qr_text = str(order.conversieID) + '\n'
             for pick in pickqueryset:
                 if pick.product.verpakkingscombinatie_id != 6:
                     pickbonnen.pick_function(pick, pickcount, order.conversieID)
                     pickcount += 1
-                    # pick.hoeveelheid
-                    # pick.product_id
-                    qr_text += '\t' + str(pick.hoeveelheid) + ' \t' + str(pick.product_id) + ' \n'
+                    qr_text += str(pick.hoeveelheid) + '\t' + str(pick.product_id) + '\n'
             print(qr_text)
-            naw_qr_text = naw
+            if order.huisnummer != None:
+                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '\n' + str(order.straatnaam) + str(order.huisnummer) + '\n' + str(order.plaats) + '\n' + str(order.postcode) + '\n' + str(order.voornaam) + '\n' + str(order.achternaam) + '\n' + str(order.afleverdatum)
+            else:
+                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '\n' + str(order.straatnaam) + '\n' + str(order.plaats) + '\n' + str(order.postcode) + '\n' + str(order.voornaam) + '\n' + str(order.achternaam) + '\n' + str(order.afleverdatum)
+
             naw_qr_code = qrcode.make(naw_qr_text)
             naw_qr_img = naw_qr_code.get_image()
 
@@ -52,5 +54,3 @@ class PickbonnenGenerator:
             pickbonnen.qr_codecell(pick_qr_img)
             pickbonnen.klant_qr_cell(naw_qr_img)
         pickbonnen.output('pickbonnen.pdf', "rb")
-
-
