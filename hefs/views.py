@@ -20,7 +20,7 @@ from django.db.models import F
 
 
 def index(request):
-    return HttpResponse("TEST")
+    return HttpResponse("test")
 
 
 def show_veh(request):
