@@ -1,6 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection
-from django.db.models import Sum, OuterRef, Subquery
+from django.http import HttpResponse, FileResponse
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from django_rq import job
@@ -14,9 +12,7 @@ from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
 from .classes.veh_handler import VehHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
-from .models import Orders, ApiUrls, AlgemeneInformatie, PickItems, Productinfo, Orderline
-from .sql_commands import SqlCommands
-from django.db.models import F
+from .models import ApiUrls, AlgemeneInformatie
 
 
 def index(request):
@@ -37,6 +33,7 @@ def show_veh(request):
         context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
         return render(request, 'veh.html', context)
 
+
 def update_general_numbers(request):
     if request.method == 'POST':
         form = GeneralNumbersForm(request.POST, request.FILES)
@@ -52,6 +49,7 @@ def update_general_numbers(request):
             AlgemeneInformatie.objects.create(naam='prognosegetal_gourmet', waarde=prognosegetal_gourmet)
     return show_veh(request)
 
+
 def show_customerinfo(request):
     try:
         userid = request.user.id
@@ -60,6 +58,7 @@ def show_customerinfo(request):
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
         return render(request, 'customerinfo.html', context)
+
 
 def show_customerlocationplot(request):
     try:
@@ -70,7 +69,6 @@ def show_customerlocationplot(request):
     except Exception as e:
         context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
         return render(request, 'customerlocationplot.html', context)
-
 
 
 def getorderspage(request):
@@ -116,6 +114,7 @@ def handle_alterated_new_orders(request):
     calculate_orders()
     return show_veh(request)
 
+
 @job
 def get_new_orders(user_id):
     print("Get new orders")
@@ -156,19 +155,17 @@ def get_pickbonnen(request):
 def financial_overview_page(request):
     try:
         userid = request.user.id
-        financecalculator = FinanceCalculator(userid)
+        financecalculator = FinanceCalculator()
 
-        costs = financecalculator.calculate_costs()
-        profit = financecalculator.calculate_profit(userid)
 
-        context = {'percentual_costs_table': costs[0], 'fixed_costs': costs[1],
-                   'variable_costs': costs[2], 'percentual_costs': costs[3], 'percentual_costs_incl_btw': costs[4],
-                   'total_fixed_costs': costs[5], 'fixed_costs_incl_btw': costs[6], 'total_variable_costs': costs[7],
-                   'total_variable_costs_incl_btw': costs[8], 'total_costs': costs[9], 'total_costs_incl_btw': costs[10],
-                   'totale_inkomsten': profit[0], 'inkomsten_zonder_verzendkosten': profit[1],
-                   'aantal_hoofdgerechten': profit[2], 'aantal_orders': profit[3]
-                   }
+        profit_table, total_ex_btw, total_incl_btw = financecalculator.calculate_profit_table(userid)
+        costs_table, total_costs_ex_btw, total_costs_incl_btw = financecalculator.calculate_costs_table(userid)
+        revenue_table = financecalculator.calculate_revenue_table(total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw)
+
+        context = {
+            'profit_table': profit_table, 'costs_table': costs_table, 'revenue_table': revenue_table
+        }
         return render(request, 'financialoverviewpage.html', context)
     except Exception as e:
-        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        context = {'error': True, 'ErrorMessage': e}
         return render(request, 'financialoverviewpage.html', context)
