@@ -124,8 +124,8 @@
                 <tr class="table-rows">
                     <td class="table-data">2023</td>
                     <td class="table-data">{{ aantal_orders }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2023|floatformat:2 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2023|div:aantal_hoofdgerechten|floatformat:2 }}</td>
+                    <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
+                    <td class="table-data">{{ gem_omzet_per_order|div:hoofdgerechten_per_order|floatformat:2 }}</td>
                 </tr>
                 </tbody>
             </table>
