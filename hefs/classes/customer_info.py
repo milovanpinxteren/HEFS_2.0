@@ -11,7 +11,8 @@ from hefs.models import Orders, AlgemeneInformatie, ApiUrls, Customers, JSONData
 
 class CustomerInfo():
     def orders_per_date_plot(self, userid):
-        persons_per_order = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde / AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
+        persons_per_order = AlgemeneInformatie.objects.get(
+            naam='aantalHoofdgerechten').waarde / AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
 
         data_2020 = JSONData.objects.get(key='data_2020').value
         data_2021 = JSONData.objects.get(key='data_2021').value
@@ -25,7 +26,8 @@ class CustomerInfo():
         except AttributeError:
             df_dates['Besteldatum'] = '2023-12-01'
         df_dates['Bestellingen per dag'] = 1
-        df_dates_grouped = pd.DataFrame(df_dates.groupby(by=['Besteldatum'], as_index=False)['Bestellingen per dag'].sum())
+        df_dates_grouped = pd.DataFrame(
+            df_dates.groupby(by=['Besteldatum'], as_index=False)['Bestellingen per dag'].sum())
         df_dates_grouped['Totaal aantal bestellingen'] = df_dates_grouped['Bestellingen per dag'].cumsum()
         df_dates_grouped['Totaal aantal personen'] = df_dates_grouped['Totaal aantal bestellingen'] * persons_per_order
         df_dates_grouped['Jaar'] = 2023
@@ -52,8 +54,8 @@ class CustomerInfo():
     def important_numbers_table(self, userid):
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
 
-        totale_inkomsten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
-            Sum('orderprijs')).get('orderprijs__sum')
+        totale_inkomsten = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
+            Sum('orderprijs')).get('orderprijs__sum'))
         totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('verzendkosten')).get('verzendkosten__sum')
         inkomsten_zonder_verzendkosten = totale_inkomsten - totale_verzendkosten
@@ -72,13 +74,18 @@ class CustomerInfo():
         customers_2021 = Customers.objects.exclude(ordered_2021__isnull=True).count()
         customers_2022 = Customers.objects.exclude(ordered_2022__isnull=True).count()
 
-        returning_customers_2021 = Customers.objects.exclude(ordered_2020__isnull=True).exclude(ordered_2021__isnull=True).count()
-        returning_customers_2022 = Customers.objects.exclude(ordered_2021__isnull=True).exclude(ordered_2022__isnull=True).count()
-        returning_customers_2022 += Customers.objects.exclude(ordered_2020__isnull=True).exclude(ordered_2022__isnull=True).count()
-        returning_customers_21_22 = Customers.objects.exclude(ordered_2020__isnull=True).exclude(ordered_2021__isnull=True).exclude(ordered_2022__isnull=True).count()
+        returning_customers_2021 = Customers.objects.exclude(ordered_2020__isnull=True).exclude(
+            ordered_2021__isnull=True).count()
+        returning_customers_2022 = Customers.objects.exclude(ordered_2021__isnull=True).exclude(
+            ordered_2022__isnull=True).count()
+        returning_customers_2022 += Customers.objects.exclude(ordered_2020__isnull=True).exclude(
+            ordered_2022__isnull=True).count()
+        returning_customers_21_22 = Customers.objects.exclude(ordered_2020__isnull=True).exclude(
+            ordered_2021__isnull=True).exclude(ordered_2022__isnull=True).count()
 
         # customers_2023 = Orders.objects.filter(organisatieID__in=organisations_to_show)
-        values_model1 = Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('emailadres', flat=True).distinct()
+        values_model1 = Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('emailadres',
+                                                                                                   flat=True).distinct()
         values_model2 = Customers.objects.values_list('emailadres', flat=True).distinct()
 
         # Find the overlapping values
@@ -91,9 +98,8 @@ class CustomerInfo():
         avg_orders_worth_2020 = 174.02307692307696
         avg_orders_worth_2021 = 172.8445392491467
         avg_orders_worth_2022 = 229.55841371918822
-        avg_orders_worth_2023 = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(Avg('orderprijs'))['orderprijs__avg']
 
-        return avg_orders_worth_2020, avg_orders_worth_2021, avg_orders_worth_2022, avg_orders_worth_2023
+        return avg_orders_worth_2020, avg_orders_worth_2021, avg_orders_worth_2022
 
     def dinner_type_comparison(self, userid):
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
@@ -110,7 +116,6 @@ class CustomerInfo():
                              "percentage gourmet": percentage_gourmet}
         return distribution_2022, distribution_2023
 
-
     def prepare_view(self, userid):
         returning_customers_overview = self.returning_customers_overview(userid)
         orders_per_date_plot = self.orders_per_date_plot(userid)
@@ -122,9 +127,12 @@ class CustomerInfo():
                    'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
                    'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
                    'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
-                   'customers_2022': returning_customers_overview[2], 'returning_customers_2021': returning_customers_overview[3],
-                   'returning_customers_2022': returning_customers_overview[4],'returning_customers_21_22': returning_customers_overview[5],
-                   'returning_customers_2023': returning_customers_overview[6], 'avg_orders_worth_2020': orders_worth_table[0],
+                   'customers_2022': returning_customers_overview[2],
+                   'returning_customers_2021': returning_customers_overview[3],
+                   'returning_customers_2022': returning_customers_overview[4],
+                   'returning_customers_21_22': returning_customers_overview[5],
+                   'returning_customers_2023': returning_customers_overview[6],
+                   'avg_orders_worth_2020': orders_worth_table[0],
                    'avg_orders_worth_2021': orders_worth_table[1], 'avg_orders_worth_2022': orders_worth_table[2],
-                   'avg_orders_worth_2023': orders_worth_table[3], 'dinner_type_comparison': dinner_type_comparison}
+                   'dinner_type_comparison': dinner_type_comparison}
         return context
