@@ -4,68 +4,100 @@ from hefs.models import PercentueleKosten, VasteKosten, VariableKosten, ApiUrls,
 
 
 class FinanceCalculator():
-    def __init__(self, userid):
-        self.calculate_profit(userid)
-        self.calculate_costs()
-        self.calculate_revenue()
 
-    def calculate_profit(self, userid):
+    def calculate_profit_table(self, userid):
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
-        self.totale_inkomsten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
+        #omzet brunch
+        brunch_orders = Orders.objects.filter(organisatieID__in=organisations_to_show, orderline__productSKU__in=[700, 701])
+        sum_brunch_incl_btw = brunch_orders.aggregate(total_orderprijs=Sum('orderprijs'))
+        sum_brunch_incl_btw = float(sum_brunch_incl_btw['total_orderprijs'])
+        sum_brunch_ex_btw = float(sum_brunch_incl_btw) / 1.09
+
+        #omzet gourmet
+
+        # omzet diners
+        diner_orders = Orders.objects.exclude(organisatieID__in=organisations_to_show, orderline__productSKU__in=[700, 701, 750, 751])
+        sum_diner_incl_btw = diner_orders.aggregate(total_orderprijs=Sum('orderprijs'))
+        sum_diner_incl_btw = float(sum_diner_incl_btw['total_orderprijs'])
+        sum_diner_ex_btw = float(sum_diner_incl_btw) / 1.09
+
+        sum_verzendkosten_incl_btw = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
+            Sum('verzendkosten')).get('verzendkosten__sum'))
+        sum_verzendkosten_ex_btw = float(sum_verzendkosten_incl_btw) / 1.09
+        total_incl_btw = sum_brunch_incl_btw + sum_diner_incl_btw + sum_verzendkosten_incl_btw
+        total_ex_btw = sum_brunch_ex_btw + sum_diner_ex_btw + sum_verzendkosten_ex_btw
+
+        profit_table = [] #omschrijving, ex btw, incl btw
+
+        profit_table.append(['Omzet diners', sum_diner_ex_btw, sum_diner_incl_btw])
+        profit_table.append(['Omzet brunch', sum_brunch_ex_btw, sum_brunch_incl_btw])
+        profit_table.append(['Omzet verzendkosten', sum_verzendkosten_ex_btw, sum_verzendkosten_incl_btw])
+        profit_table.append(['Omzet Totaal', total_ex_btw, total_incl_btw])
+        return profit_table, total_ex_btw, total_incl_btw
+
+
+
+    def calculate_costs_table(self, userid):
+        organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
+        totale_inkomsten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('orderprijs')).get('orderprijs__sum')
         totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('verzendkosten')).get('verzendkosten__sum')
         try:
-            self.inkomsten_zonder_verzendkosten = self.totale_inkomsten - totale_verzendkosten
+            inkomsten_zonder_verzendkosten = float(totale_inkomsten) - float(totale_verzendkosten)
+            inkomsten_zonder_verzendkosten_ex_btw = inkomsten_zonder_verzendkosten / 1.09
         except TypeError:
-            self.inkomsten_zonder_verzendkosten = 0
-        self.aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        self.aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
-        return self.totale_inkomsten, self.inkomsten_zonder_verzendkosten, self.aantal_hoofdgerechten, self.aantal_orders
+            inkomsten_zonder_verzendkosten = 0
+            inkomsten_zonder_verzendkosten_ex_btw = 0
 
 
-    def calculate_costs(self):
-        percentual_costs_table = PercentueleKosten.objects.all()
-        total_percentage = PercentueleKosten.objects.aggregate(Sum('percentage'))
-        try:
-            percentual_costs = self.inkomsten_zonder_verzendkosten * (total_percentage.get('percentage__sum') / 100)
-            percentual_costs_incl_btw = float(percentual_costs) * 1.09
-        except TypeError:
-            percentual_costs = 0
-            percentual_costs_incl_btw = 0
 
-        fixed_costs = VasteKosten.objects.all()
-        total_fixed_costs_dict = VasteKosten.objects.aggregate(Sum('kosten'))
-        try:
-            total_fixed_costs = total_fixed_costs_dict.get('kosten__sum')
-            fixed_costs_incl_btw = float(total_fixed_costs) * 1.09
-        except TypeError:
-            total_fixed_costs = 0
-            fixed_costs_incl_btw = 0
 
+        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
+
+
+        costs_table_tuple = [] #name, percentage, kosten per eenheid, vermenigvuldiging, kosten ex, kosten incl
+        percentual_costs = PercentueleKosten.objects.all()
         variable_costs = VariableKosten.objects.all()
-        costs_per_order_dict = VariableKosten.objects.filter(vermenigvuldiging=1).aggregate(Sum('kosten_per_eenheid'))
-        total_costs_per_order = costs_per_order_dict.get('kosten_per_eenheid__sum')
-        try:
-            total_order_costs = total_costs_per_order * self.aantal_orders
-        except TypeError:
-            total_order_costs = 0
+        fixed_costs = VasteKosten.objects.all()
 
-        costs_per_hoofdgerecht_dict = VariableKosten.objects.filter(vermenigvuldiging=2).aggregate(Sum('kosten_per_eenheid'))
-        total_costs_per_hoofdgerecht = costs_per_hoofdgerecht_dict.get('kosten_per_eenheid__sum')
-        try:
-            total_hoofdgerechten_costs = total_costs_per_hoofdgerecht * self.aantal_hoofdgerechten
-        except TypeError:
-            total_hoofdgerechten_costs = 0
-        total_variable_costs = total_order_costs + total_hoofdgerechten_costs
-        total_variable_costs_incl_btw = float(total_variable_costs) * 1.09
 
-        total_costs = percentual_costs + total_fixed_costs + total_variable_costs
-        total_costs_incl_btw = percentual_costs_incl_btw + fixed_costs_incl_btw + total_variable_costs_incl_btw
+        for percentual_cost in percentual_costs:
+            percentage = float(percentual_cost.percentage)
+            amount_ex_btw = float((percentage / 100) * inkomsten_zonder_verzendkosten_ex_btw)
+            amount_incl_btw = float((percentage / 100) * inkomsten_zonder_verzendkosten)
+            costs_table_tuple.append([percentual_cost.kostennaam, percentage, '', '', amount_ex_btw, amount_incl_btw])
 
-        return percentual_costs_table, fixed_costs, variable_costs, percentual_costs, percentual_costs_incl_btw, \
-               total_fixed_costs, fixed_costs_incl_btw, total_variable_costs, total_variable_costs_incl_btw, \
-               total_costs, total_costs_incl_btw
+        for variable_cost in variable_costs:
+            if variable_cost.vermenigvuldiging == 1: #per order
+                amount_ex_btw = float(variable_cost.kosten_per_eenheid) * aantal_orders
+                amount_incl_btw = amount_ex_btw * 1.09
+                costs_table_tuple.append([variable_cost.kostennaam, '', float(variable_cost.kosten_per_eenheid), 'Per order', amount_ex_btw, amount_incl_btw])
+            if variable_cost.vermenigvuldiging == 2: #per hoofdgerecht
+                amount_ex_btw = float(variable_cost.kosten_per_eenheid) * aantal_hoofdgerechten
+                amount_incl_btw = amount_ex_btw * 1.09
+                costs_table_tuple.append([variable_cost.kostennaam, '', float(variable_cost.kosten_per_eenheid), 'Per hoofdgerecht', amount_ex_btw, amount_incl_btw])
 
-    def calculate_revenue(self):
-        print('revenue')
+
+        for fixed_cost in fixed_costs:
+            costs_ex_btw = float(fixed_cost.kosten)
+            costs_incl_btw = costs_ex_btw * 1.09
+            costs_table_tuple.append([fixed_cost.kostennaam, '', '', '', costs_ex_btw, costs_incl_btw])
+
+        total_costs_ex_btw = sum(x[4] for x in costs_table_tuple)
+        total_costs_incl_btw = sum(x[5] for x in costs_table_tuple)
+        costs_table_tuple.append(['Totaal', '', '', '', total_costs_ex_btw, total_costs_incl_btw])
+
+        return costs_table_tuple, total_costs_ex_btw, total_costs_incl_btw
+
+    def calculate_revenue_table(self, total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw):
+        difference_ex_btw = total_ex_btw - total_costs_ex_btw
+        difference_incl_btw = total_incl_btw - total_costs_incl_btw
+        btw_difference = difference_incl_btw - difference_ex_btw
+
+        revenue_table = []
+        revenue_table.append(['Winst', difference_ex_btw, difference_incl_btw])
+        revenue_table.append(['Verschil BTW', btw_difference, ''])
+        return revenue_table
+

@@ -49,7 +49,7 @@ class Orders(models.Model):
     besteldatum = models.DateTimeField(null=True, blank=True)
     afleverdatum = models.DateField(null=True, blank=True)
     aflevertijd = models.TimeField(null=True, blank=True)
-    verzendkosten = models.IntegerField(default=0, null=True, blank=True)
+    verzendkosten = models.FloatField(default=0, null=True, blank=True)
     korting = models.IntegerField(default=0, null=True, blank=True)
     orderprijs = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
     organisatieID = models.IntegerField(default=0, null=True, blank=True)
