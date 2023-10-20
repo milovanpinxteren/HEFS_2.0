@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+
+    <script>
+        function ExportToExcel(type, fn, dl) {
+            var elt = document.getElementById('facturenTable');
+            var wb = XLSX.utils.table_to_book(elt, {sheet: "sheet1"});
+            return dl ?
+                XLSX.write(wb, {bookType: type, bookSST: true, type: 'base64'}) :
+                XLSX.writeFile(wb, fn || ('overzicht-facturen.' + (type || 'xlsx')));
+        }
+    </script>
+    <title>Facturen</title>
+</head>
+<body>
+{% include "navbar.html" %}
+<h1>facturen</h1>
+    <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+
+<table id="facturenTable">
+    <thead class="table-head">
+    <th class="table-heading">ConversieID</th>
+    <th class="table-heading">orderprijs incl verzendkosten</th>
+    <th class="table-heading">orderprijs excl verzendkosten</th>
+    <th class="table-heading">orderprijs incl verzendkosten excl btw</th>
+    <th class="table-heading">orderprijs incl verzendkosten excl btw excl commissie Mark</th>
+    </thead>
+    <tbody>
+    {% for conversie_id, values in facturen_table.items %}
+        <tr class="table-rows">
+            <td class="table-data">{{ conversie_id }}</td>
+            {% for value in values %}
+            <td class="table-data">{{ value.0|floatformat:2 }}</td>
+                {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
