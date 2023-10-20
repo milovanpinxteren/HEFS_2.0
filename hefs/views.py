@@ -10,6 +10,7 @@ from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
 from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
+from .classes.make_factuur_overview import MakeFactuurOverview
 from .classes.veh_handler import VehHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
 from .models import ApiUrls, AlgemeneInformatie
@@ -169,3 +170,10 @@ def financial_overview_page(request):
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
         return render(request, 'financialoverviewpage.html', context)
+
+
+def facturen_page(request):
+    make_facturen_overview = MakeFactuurOverview()
+    facturen_table = make_facturen_overview.prepare_overview()
+    context = {'facturen_table': facturen_table}
+    return render(request, 'facturenpage.html', context)
