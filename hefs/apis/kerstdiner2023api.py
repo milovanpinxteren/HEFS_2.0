@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import requests
 from django.conf import settings
 from hefs.models import Orders, NewOrders, VerzendOpties, Orderline, AlgemeneInformatie
+from django.utils import timezone
 
 
 class Kerstdiner2023API:
@@ -14,9 +15,16 @@ class Kerstdiner2023API:
         headers = {"Accept": "application/json", "Content-Type": "application/json",
                    "X-Shopify-Access-Token": shopify_access_token}
         response = requests.get(url="https://d36867-2.myshopify.com/admin/api/2023-04/orders.json", headers=headers)
+
+
         if response.status_code == 200:
-            orders = response.json()["orders"]
-            self.handle_shopify_orders(orders)
+            if response.links['next']['url']: #more than 50 orders #TODO what if more than 100 orders
+                orders = response.json()["orders"]
+                self.handle_shopify_orders(orders)
+                next_response = requests.get(url=response.links['next']['url'], headers=headers)
+                next_orders = next_response.json()["orders"]
+                self.handle_shopify_orders(next_orders)
+
         else:
             print("Failed to retrieve orders. Status code:", response.status_code)
             return []
@@ -91,11 +99,17 @@ class Kerstdiner2023API:
 
     def add_to_new_orders(self, order):
         verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['code'])[0]
+
         besteldatum = datetime.strptime(order['created_at'][:10], '%Y-%m-%d')
+        tz = timezone.get_current_timezone()
+        timzone_besteldatum = timezone.make_aware(besteldatum, tz, True)
+
+
         for newOrderLine in order['line_items']:
             if newOrderLine['fulfillable_quantity'] > 0:
+                print(order['name'])
                 NewOrders.objects.create(conversieID=order['name'],
-                                         besteldatum=besteldatum,
+                                         besteldatum=timzone_besteldatum,
                                          verzendoptie=verzendoptie,
                                          afleverdatum=verzendoptie.verzenddatum,
                                          aflevertijd='00:00:00',
