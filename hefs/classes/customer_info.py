@@ -56,8 +56,8 @@ class CustomerInfo():
 
         totale_inkomsten = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('orderprijs')).get('orderprijs__sum'))
-        totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
-            Sum('verzendkosten')).get('verzendkosten__sum')
+        totale_verzendkosten = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
+            Sum('verzendkosten')).get('verzendkosten__sum'))
         inkomsten_zonder_verzendkosten = totale_inkomsten - totale_verzendkosten
 
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
