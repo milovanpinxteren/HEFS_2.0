@@ -158,13 +158,17 @@ def financial_overview_page(request):
         userid = request.user.id
         financecalculator = FinanceCalculator()
 
-
         profit_table, total_ex_btw, total_incl_btw = financecalculator.calculate_profit_table(userid)
         costs_table, total_costs_ex_btw, total_costs_incl_btw = financecalculator.calculate_costs_table(userid)
         revenue_table = financecalculator.calculate_revenue_table(total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw)
 
+        table_for_prognose = profit_table.copy()
+        prognose_profit_table = financecalculator.calculate_prognose_profit_table(table_for_prognose, total_ex_btw, total_incl_btw)
+
+
         context = {
-            'profit_table': profit_table, 'costs_table': costs_table, 'revenue_table': revenue_table
+            'profit_table': profit_table, 'costs_table': costs_table, 'revenue_table': revenue_table,
+            'prognose_profit_table': prognose_profit_table
         }
         return render(request, 'financialoverviewpage.html', context)
     except Exception as e:

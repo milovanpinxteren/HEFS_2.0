@@ -37,7 +37,7 @@ class CustomerInfo():
         df_merged = pd.concat(frames).reset_index(drop=True)
 
         fig = px.line(df_merged, x="Besteldatum", y="Totaal aantal personen", color='Jaar',
-                      title="Aantal personen per datum")
+                      title="Aantal personen per datum", hover_data=['Totaal aantal bestellingen'])
         fig.update_xaxes(tickformat='%d-%m')
         fig.update_xaxes(nticks=25)
         fig.update_xaxes(gridcolor='lightgrey')

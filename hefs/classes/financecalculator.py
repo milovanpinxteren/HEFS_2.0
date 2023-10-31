@@ -1,6 +1,6 @@
-from django.db.models import Sum
+from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 
-from hefs.models import PercentueleKosten, VasteKosten, VariableKosten, ApiUrls, Orders, AlgemeneInformatie
+from hefs.models import PercentueleKosten, VasteKosten, VariableKosten, ApiUrls, Orders, AlgemeneInformatie, Orderline, PickItems
 
 
 class FinanceCalculator():
@@ -63,6 +63,13 @@ class FinanceCalculator():
         fixed_costs = VasteKosten.objects.all()
 
 
+        total_inkoop = float(PickItems.objects.annotate(
+            total_kosten=ExpressionWrapper(F('product__inkoop') * F('hoeveelheid'),
+                                           output_field=DecimalField(max_digits=8, decimal_places=2))
+        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+
+        costs_table_tuple.append(['Inkoop', '', '', '', total_inkoop, total_inkoop * 1.09])
+
         for percentual_cost in percentual_costs:
             percentage = float(percentual_cost.percentage)
             amount_ex_btw = float((percentage / 100) * inkomsten_zonder_verzendkosten_ex_btw)
@@ -100,4 +107,42 @@ class FinanceCalculator():
         revenue_table.append(['Winst', difference_ex_btw, difference_incl_btw])
         revenue_table.append(['Verschil BTW', btw_difference, ''])
         return revenue_table
+
+    def calculate_prognose_profit_table(self, profit_table, total_ex_btw, total_incl_btw):
+        prognose_profit_table = []
+
+        prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
+        prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
+
+        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
+
+        prognose_factor_diner = prognosegetal_diner / aantal_hoofdgerechten
+        prognose_factor_brunch = prognosegetal_brunch / aantal_brunch
+        prognose_factor_totaal = (prognosegetal_diner + prognosegetal_brunch) / (aantal_hoofdgerechten + aantal_brunch)
+
+        for row in profit_table:
+            print(row)
+            if 'diner' in row[0]:
+                print('update diner')
+                sum_diner_ex_btw = row[1] * prognose_factor_diner
+                sum_diner_incl_btw = row[2] * prognose_factor_diner
+                prognose_profit_table.append(['Omzet diners', sum_diner_ex_btw, sum_diner_incl_btw])
+            elif 'brunch' in row[0]:
+                sum_brunch_ex_btw = row[1] * prognose_factor_brunch
+                sum_brunch_incl_btw = row[2] * prognose_factor_brunch
+                prognose_profit_table.append(['Omzet brunch', sum_brunch_ex_btw, sum_brunch_incl_btw])
+            elif 'verzendkosten' in row[0]:
+                sum_shipping_ex_btw = row[1] * prognose_factor_totaal
+                sum_shipping_incl_btw = row[2] * prognose_factor_totaal
+                prognose_profit_table.append(['Omzet verzendkosten', sum_shipping_ex_btw, sum_shipping_incl_btw])
+            elif 'Totaal' in row[0]:
+                sum_total_ex_btw = row[1] * prognose_factor_totaal
+                sum_total_incl_btw = row[2] * prognose_factor_totaal
+                prognose_profit_table.append(['Omzet verzendkosten', sum_total_ex_btw, sum_total_incl_btw])
+
+
+        return prognose_profit_table
+
+
 
