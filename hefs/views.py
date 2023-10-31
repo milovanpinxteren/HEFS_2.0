@@ -163,12 +163,17 @@ def financial_overview_page(request):
         revenue_table = financecalculator.calculate_revenue_table(total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw)
 
         table_for_prognose = profit_table.copy()
-        prognose_profit_table = financecalculator.calculate_prognose_profit_table(table_for_prognose, total_ex_btw, total_incl_btw)
+        prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw = financecalculator.calculate_prognose_profit_table(table_for_prognose)
+        prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw = financecalculator.calculate_prognose_costs_table(costs_table)
+        prognose_revenue_table = financecalculator.calculate_prognose_revenue_table(prognose_sum_total_ex_btw, prognose_sum_total_incl_btw, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw)
 
-
+        prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
+        prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
         context = {
             'profit_table': profit_table, 'costs_table': costs_table, 'revenue_table': revenue_table,
-            'prognose_profit_table': prognose_profit_table
+            'prognose_profit_table': prognose_profit_table, 'prognose_cost_table': prognose_cost_table,
+            'prognose_revenue_table': prognose_revenue_table, 'prognosegetal_diner': prognosegetal_diner,
+            'prognosegetal_brunch': prognosegetal_brunch
         }
         return render(request, 'financialoverviewpage.html', context)
     except Exception as e:
