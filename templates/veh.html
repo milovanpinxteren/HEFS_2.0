@@ -65,6 +65,13 @@
             Aantal brunch: {{ aantal_brunch }} <br>
             Aantal gourmet: {{ aantal_gourmet }} <br>
         </p>
+        <p>
+            {% for key, value in orders_per_date_dict.items %}
+                {{ key }}:
+                {{ value }} orders
+                <br>
+            {% endfor %}
+        </p>
         <div>
             <form class="general-numbers-form" action="./update-general-numbers" method="post"
                   enctype="multipart/form-data"

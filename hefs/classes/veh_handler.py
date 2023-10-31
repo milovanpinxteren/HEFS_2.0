@@ -77,9 +77,15 @@ class VehHandler():
                 updated_row = (*updated_row, prognose, total_prognose)
             veh[i] = updated_row
 
+        orders_per_date_dict = {}
+        for date in dates:
+            print(date)
+            no_orders = Orders.objects.filter(afleverdatum=date[0]).count()
+            orders_per_date_dict[str(date[0])] = no_orders
+
         context = {'table': veh, 'column_headers': date_array, 'prognosegetal_diner': prognosegetal_diner,
                    'prognosegetal_brunch': prognosegetal_brunch, 'prognosegetal_gourmet': prognosegetal_gourmet,
                    'aantal_hoofdgerechten': aantal_hoofdgerechten, 'aantal_orders': aantal_orders,
-                   'aantal_brunch': aantal_brunch, 'aantal_gourmet': aantal_gourmet}
+                   'aantal_brunch': aantal_brunch, 'aantal_gourmet': aantal_gourmet, 'orders_per_date_dict': orders_per_date_dict}
 
         return context
