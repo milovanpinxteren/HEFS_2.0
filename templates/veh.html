@@ -122,7 +122,7 @@
                 <td class="table-data" onload="calculatePrognoses()">
                     {% if column != None %}
                         {% if column|length < 4 %}
-                            <span class="number-span">{{ column|floatformat }}</span>
+                            <span class="number-span">{{ column|floatformat:0 }}</span>
                         {% elif column|length > 4 %}
                             {{ column }}
                         {% endif %}

@@ -12,86 +12,110 @@
 {% include "navbar.html" %}
 <h1 class="page-title">Financieel Overzicht</h1>
 {% if not error %}
-    <div class="tables-container">
-    <table class="table">
-        <thead class="table-head"><span class="table-title">Inkomsten</span>
-        <th class="table-heading">Omschrijving</th>
-        <th class="table-heading">Omzet ex BTW</th>
-        <th class="table-heading">Omzet incl BTW</th>
-        </thead>
-        <tbody>
-        {% for row in profit_table %}
-            {% if forloop.last %}
-                <tr class="table-rows" style="font-weight: bold; border: 2px solid">
-                    {% else %}
-                <tr class="table-rows">
-            {% endif %}
-        <td class="table-data">{{ row.0 }}</td>
-        <td class="table-data">{{ row.1|floatformat:2 }}</td>
-        <td class="table-data">{{ row.2|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <br><br>
+    <div class="tables-container" style="float: left">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Inkomsten</span>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Omzet ex BTW</th>
+            <th class="table-heading">Omzet incl BTW</th>
+            </thead>
+            <tbody>
+            {% for row in profit_table %}
+                {% if forloop.last %}
+                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                        {% else %}
+                    <tr class="table-rows">
+                {% endif %}
+            <td class="table-data">{{ row.0 }}</td>
+            <td class="table-data">{{ row.1|floatformat:2 }}</td>
+            <td class="table-data">{{ row.2|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <br><br>
 
 
-    <table class="table">
-        <thead class="table-head"><span class="table-title">Kosten</span>
-        <th class="table-heading">Kostennaam</th>
-        <th class="table-heading">Percentage</th>
-        <th class="table-heading">Kosten per eenheid</th>
-        <th class="table-heading">Vermenigvuldinging</th>
-        <th class="table-heading">Kosten ex BTW</th>
-        <th class="table-heading">Kosten incl BTW</th>
-        {#            <th class="table-heading">Totale kosten</th>#}
-        </thead>
-        <tbody>
-        {% for row in costs_table %}
-            {% if forloop.last %}
-                <tr class="table-rows" style="font-weight: bold; border: 2px solid">
-                    {% else %}
-                <tr class="table-rows">
-            {% endif %}
-        <td class="table-data">{{ row.0 }}</td>
-        <td class="table-data">{{ row.1 }}</td>
-        <td class="table-data">{{ row.2 }}</td>
-        <td class="table-data">{{ row.3 }}</td>
-        <td class="table-data">{{ row.4|floatformat:2 }}</td>
-        <td class="table-data">{{ row.5|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Kosten</span>
+            <th class="table-heading">Kostennaam</th>
+            <th class="table-heading">Percentage</th>
+            <th class="table-heading">Kosten per eenheid</th>
+            <th class="table-heading">Vermenigvuldinging</th>
+            <th class="table-heading">Kosten ex BTW</th>
+            <th class="table-heading">Kosten incl BTW</th>
+            {#            <th class="table-heading">Totale kosten</th>#}
+            </thead>
+            <tbody>
+            {% for row in costs_table %}
+                {% if forloop.last %}
+                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                        {% else %}
+                    <tr class="table-rows">
+                {% endif %}
+            <td class="table-data">{{ row.0 }}</td>
+            <td class="table-data">{{ row.1 }}</td>
+            <td class="table-data">{{ row.2 }}</td>
+            <td class="table-data">{{ row.3 }}</td>
+            <td class="table-data">{{ row.4|floatformat:2 }}</td>
+            <td class="table-data">{{ row.5|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-    <br>
-    <table class="table">
-        <th class="table-heading"></th>
-        <th class="table-heading">Winst ex BTW</th>
-        <th class="table-heading">Winst incl BTW</th>
-        </thead>
-        <tbody>
-        {% for row in revenue_table %}
-            {% if forloop.first %}
-                <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+        <br>
+        <table class="table">
+            <th class="table-heading"></th>
+            <th class="table-heading">Winst ex BTW</th>
+            <th class="table-heading">Winst incl BTW</th>
+            </thead>
+            <tbody>
+            {% for row in revenue_table %}
+                {% if forloop.first %}
+                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                        <td class="table-data">{{ row.0 }}</td>
+                        <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
+                        <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
+                        {% else %}
+                    <tr class="table-rows">
                     <td class="table-data">{{ row.0 }}</td>
-                    <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
-                    <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
-                    {% else %}
-                <tr class="table-rows">
-                <td class="table-data">{{ row.0 }}</td>
-                <td class="table-data">{{ row.1|floatformat:2 }}</td>
-                <td class="table-data">{{ row.2|floatformat:2 }}</td>
-            {% endif %}
-        </tr>
+                    <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                    <td class="table-data">{{ row.2|floatformat:2 }}</td>
+                {% endif %}
+            </tr>
 
-        {% endfor %}
-        </tbody>
-    </table>
+            {% endfor %}
+            </tbody>
+        </table>
 
+
+    </div>
+    <div style="float: right;">
+        <table class="table">
+            <thead class="table-head"><span class="table-title">Prognose Inkomsten</span>
+            <th class="table-heading">Omschrijving</th>
+            <th class="table-heading">Omzet ex BTW</th>
+            <th class="table-heading">Omzet incl BTW</th>
+            </thead>
+            <tbody>
+            {% for row in prognose_profit_table %}
+                {% if forloop.last %}
+                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                        {% else %}
+                    <tr class="table-rows">
+                {% endif %}
+            <td class="table-data">{{ row.0 }}</td>
+            <td class="table-data">{{ row.1|floatformat:2 }}</td>
+            <td class="table-data">{{ row.2|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
 {% else %}
     <h2>{{ ErrorMessage }}</h2>
 {% endif %}
-</div>
 </body>
 </html>
