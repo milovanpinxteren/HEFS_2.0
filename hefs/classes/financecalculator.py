@@ -90,7 +90,7 @@ class FinanceCalculator():
         for fixed_cost in fixed_costs:
             costs_ex_btw = float(fixed_cost.kosten)
             costs_incl_btw = costs_ex_btw * 1.09
-            costs_table_tuple.append([fixed_cost.kostennaam, '', '', '', costs_ex_btw, costs_incl_btw])
+            costs_table_tuple.append([fixed_cost.kostennaam, '', '', 'Vaste kosten', costs_ex_btw, costs_incl_btw])
 
         total_costs_ex_btw = sum(x[4] for x in costs_table_tuple)
         total_costs_incl_btw = sum(x[5] for x in costs_table_tuple)
@@ -108,7 +108,7 @@ class FinanceCalculator():
         revenue_table.append(['Verschil BTW', btw_difference, ''])
         return revenue_table
 
-    def calculate_prognose_profit_table(self, profit_table, total_ex_btw, total_incl_btw):
+    def calculate_prognose_profit_table(self, profit_table):
         prognose_profit_table = []
 
         prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
@@ -137,12 +137,57 @@ class FinanceCalculator():
                 sum_shipping_incl_btw = row[2] * prognose_factor_totaal
                 prognose_profit_table.append(['Omzet verzendkosten', sum_shipping_ex_btw, sum_shipping_incl_btw])
             elif 'Totaal' in row[0]:
-                sum_total_ex_btw = row[1] * prognose_factor_totaal
-                sum_total_incl_btw = row[2] * prognose_factor_totaal
-                prognose_profit_table.append(['Omzet verzendkosten', sum_total_ex_btw, sum_total_incl_btw])
+                prognose_sum_total_ex_btw = row[1] * prognose_factor_totaal
+                prognose_sum_total_incl_btw = row[2] * prognose_factor_totaal
+                prognose_profit_table.append(['Omzet Totaal', prognose_sum_total_ex_btw, prognose_sum_total_incl_btw])
 
 
-        return prognose_profit_table
+        return prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
+
+    def calculate_prognose_costs_table(self, costs_table):
+        prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
+        prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
+
+        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
+
+        prognose_factor_diner = prognosegetal_diner / aantal_hoofdgerechten
+        prognose_factor_totaal = (prognosegetal_diner + prognosegetal_brunch) / (aantal_hoofdgerechten + aantal_brunch)
+
+        prognose_cost_table = []
+        for cost in costs_table:
+            if cost[2] == '' and cost[3] == '' and cost[0] != 'Totaal':
+                cost_ex_btw = cost[4] * prognose_factor_totaal
+                cost_incl_btw = cost_ex_btw * 1.09
+                prognose_cost_table.append([cost[0], '', '', '', cost_ex_btw, cost_incl_btw])
+            elif cost[2] != '' and cost[3] == 'Per order':
+                cost_ex_btw = cost[4] * prognose_factor_totaal
+                cost_incl_btw = cost_ex_btw * 1.09
+                prognose_cost_table.append([cost[0], '', '', '', cost_ex_btw, cost_incl_btw])
+            elif cost[2] != '' and cost[3] == 'Per hoofdgerecht':
+                cost_ex_btw = cost[4] * prognose_factor_diner
+                cost_incl_btw = cost_ex_btw * 1.09
+                prognose_cost_table.append([cost[0], '', '', '', cost_ex_btw, cost_incl_btw])
+            elif cost[3] == 'Vaste kosten':
+                prognose_cost_table.append([cost[0], cost[1], cost[2], cost[3], cost[4], cost[5]])
+
+
+        prognose_total_costs_ex_btw = sum(x[4] for x in prognose_cost_table)
+        prognose_total_costs_incl_btw = sum(x[5] for x in prognose_cost_table)
+        prognose_cost_table.append(['Totaal', '', '', '', prognose_total_costs_ex_btw, prognose_total_costs_incl_btw])
+
+        return prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw
+
+    def calculate_prognose_revenue_table(self, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw,
+                                         prognose_total_costs_ex_btw, prognose_total_costs_incl_btw):
+        difference_ex_btw = prognose_sum_total_ex_btw - prognose_total_costs_ex_btw
+        difference_incl_btw = prognose_sum_total_incl_btw - prognose_total_costs_incl_btw
+        btw_difference = difference_incl_btw - difference_ex_btw
+
+        prognose_revenue_table = []
+        prognose_revenue_table.append(['Winst', difference_ex_btw, difference_incl_btw])
+        prognose_revenue_table.append(['Verschil BTW', btw_difference, ''])
+        return prognose_revenue_table
 
 
 
