@@ -113,7 +113,7 @@ class CalculateOrders():
         AlgemeneInformatie.objects.filter(naam='aantalOrders').delete()
         AlgemeneInformatie.objects.create(naam='aantalOrders', waarde=aantal_orders)
         # aantal hoofdgerechten
-        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[4, 7])
+        hoofdgerechten = Productinfo.objects.filter(gang_id__in=[4])
         # hoofdgerechten_array = list(hoofdgerechten.values_list('productcode', flat=True))
         hoofdgerechten_array = []
         for hoofdgerecht in hoofdgerechten:
