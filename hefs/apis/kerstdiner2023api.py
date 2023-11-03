@@ -98,7 +98,10 @@ class Kerstdiner2023API:
                     self.add_to_new_orders(order)
 
     def add_to_new_orders(self, order):
-        verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['code'])[0]
+        try:
+            verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['code'])[0]
+        except IndexError:
+            verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['title'])[0]
 
         besteldatum = datetime.strptime(order['created_at'][:10], '%Y-%m-%d')
         tz = timezone.get_current_timezone()
