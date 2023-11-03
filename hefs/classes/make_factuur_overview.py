@@ -5,7 +5,7 @@ class MakeFactuurOverview():
     def prepare_overview(self):
         result_dict = {}
 
-        orders = Orders.objects.all()
+        orders = Orders.objects.all().order_by('conversieID')
 
         for order in orders:
             conversie_id = order.conversieID

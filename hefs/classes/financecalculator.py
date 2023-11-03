@@ -96,6 +96,9 @@ class FinanceCalculator():
         total_costs_incl_btw = sum(x[5] for x in costs_table_tuple)
         costs_table_tuple.append(['Totaal', '', '', '', total_costs_ex_btw, total_costs_incl_btw])
 
+        for cost in costs_table_tuple:
+            cost[1] = float((cost[4] / inkomsten_zonder_verzendkosten_ex_btw) * 100)
+
         return costs_table_tuple, total_costs_ex_btw, total_costs_incl_btw
 
     def calculate_revenue_table(self, total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw):
@@ -122,9 +125,7 @@ class FinanceCalculator():
         prognose_factor_totaal = (prognosegetal_diner + prognosegetal_brunch) / (aantal_hoofdgerechten + aantal_brunch)
 
         for row in profit_table:
-            print(row)
             if 'diner' in row[0]:
-                print('update diner')
                 sum_diner_ex_btw = row[1] * prognose_factor_diner
                 sum_diner_incl_btw = row[2] * prognose_factor_diner
                 prognose_profit_table.append(['Omzet diners', sum_diner_ex_btw, sum_diner_incl_btw])
@@ -137,12 +138,12 @@ class FinanceCalculator():
                 sum_shipping_incl_btw = row[2] * prognose_factor_totaal
                 prognose_profit_table.append(['Omzet verzendkosten', sum_shipping_ex_btw, sum_shipping_incl_btw])
             elif 'Totaal' in row[0]:
-                prognose_sum_total_ex_btw = row[1] * prognose_factor_totaal
+                self.prognose_sum_total_ex_btw = row[1] * prognose_factor_totaal
                 prognose_sum_total_incl_btw = row[2] * prognose_factor_totaal
-                prognose_profit_table.append(['Omzet Totaal', prognose_sum_total_ex_btw, prognose_sum_total_incl_btw])
+                prognose_profit_table.append(['Omzet Totaal', self.prognose_sum_total_ex_btw, prognose_sum_total_incl_btw])
 
 
-        return prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
+        return prognose_profit_table, self.prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
 
     def calculate_prognose_costs_table(self, costs_table):
         prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
@@ -175,6 +176,9 @@ class FinanceCalculator():
         prognose_total_costs_ex_btw = sum(x[4] for x in prognose_cost_table)
         prognose_total_costs_incl_btw = sum(x[5] for x in prognose_cost_table)
         prognose_cost_table.append(['Totaal', '', '', '', prognose_total_costs_ex_btw, prognose_total_costs_incl_btw])
+
+        for cost in prognose_cost_table:
+            cost[1] = float((cost[4] / self.prognose_sum_total_ex_btw) * 100)
 
         return prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw
 

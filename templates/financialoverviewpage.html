@@ -40,8 +40,8 @@
             <thead class="table-head"><span class="table-title">Kosten</span>
             <th class="table-heading">Kostennaam</th>
             <th class="table-heading">Percentage</th>
-            <th class="table-heading">Kosten per eenheid</th>
-            <th class="table-heading">Vermenigvuldinging</th>
+{#            <th class="table-heading">Kosten per eenheid</th>#}
+{#            <th class="table-heading">Vermenigvuldinging</th>#}
             <th class="table-heading">Kosten ex BTW</th>
             <th class="table-heading">Kosten incl BTW</th>
             {#            <th class="table-heading">Totale kosten</th>#}
@@ -54,9 +54,9 @@
                     <tr class="table-rows">
                 {% endif %}
             <td class="table-data">{{ row.0 }}</td>
-            <td class="table-data">{{ row.1 }}</td>
-            <td class="table-data">{{ row.2 }}</td>
-            <td class="table-data">{{ row.3 }}</td>
+            <td class="table-data">{{ row.1|floatformat:2 }}</td>
+{#            <td class="table-data">{{ row.2 }}</td>#}
+{#            <td class="table-data">{{ row.3 }}</td>#}
             <td class="table-data">{{ row.4|floatformat:2 }}</td>
             <td class="table-data">{{ row.5|floatformat:2 }}</td>
             </tr>
@@ -126,8 +126,8 @@
             <thead class="table-head"><span class="table-title">Prognose Kosten</span>
             <th class="table-heading">Kostennaam</th>
             <th class="table-heading">Percentage</th>
-            <th class="table-heading">Kosten per eenheid</th>
-            <th class="table-heading">Vermenigvuldinging</th>
+{#            <th class="table-heading">Kosten per eenheid</th>#}
+{#            <th class="table-heading">Vermenigvuldinging</th>#}
             <th class="table-heading">Kosten ex BTW</th>
             <th class="table-heading">Kosten incl BTW</th>
             {#            <th class="table-heading">Totale kosten</th>#}
@@ -140,9 +140,9 @@
                     <tr class="table-rows">
                 {% endif %}
             <td class="table-data">{{ row.0 }}</td>
-            <td class="table-data">{{ row.1 }}</td>
-            <td class="table-data">{{ row.2 }}</td>
-            <td class="table-data">{{ row.3 }}</td>
+            <td class="table-data">{{ row.1|floatformat:2 }}</td>
+{#            <td class="table-data">{{ row.2 }}</td>#}
+{#            <td class="table-data">{{ row.3 }}</td>#}
             <td class="table-data">{{ row.4|floatformat:2 }}</td>
             <td class="table-data">{{ row.5|floatformat:2 }}</td>
             </tr>
