@@ -13,8 +13,6 @@ class FinanceCalculator():
         sum_brunch_incl_btw = float(sum_brunch_incl_btw['total_orderprijs'])
         sum_brunch_ex_btw = float(sum_brunch_incl_btw) / 1.09
 
-        #omzet gourmet
-
         # omzet diners
         diner_orders = Orders.objects.exclude(organisatieID__in=organisations_to_show, orderline__productSKU__in=[700, 701, 750, 751])
         sum_diner_incl_btw = diner_orders.aggregate(total_orderprijs=Sum('orderprijs'))
@@ -49,9 +47,6 @@ class FinanceCalculator():
         except TypeError:
             inkomsten_zonder_verzendkosten = 0
             inkomsten_zonder_verzendkosten_ex_btw = 0
-
-
-
 
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
         aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
@@ -138,12 +133,12 @@ class FinanceCalculator():
                 sum_shipping_incl_btw = row[2] * prognose_factor_totaal
                 prognose_profit_table.append(['Omzet verzendkosten', sum_shipping_ex_btw, sum_shipping_incl_btw])
             elif 'Totaal' in row[0]:
-                self.prognose_sum_total_ex_btw = row[1] * prognose_factor_totaal
+                prognose_sum_total_ex_btw = row[1] * prognose_factor_totaal
                 prognose_sum_total_incl_btw = row[2] * prognose_factor_totaal
-                prognose_profit_table.append(['Omzet Totaal', self.prognose_sum_total_ex_btw, prognose_sum_total_incl_btw])
+                prognose_profit_table.append(['Omzet Totaal', prognose_sum_total_ex_btw, prognose_sum_total_incl_btw])
 
-
-        return prognose_profit_table, self.prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
+        self.prognose_ex_verzendk_ex_btw = prognose_sum_total_ex_btw - sum_shipping_ex_btw
+        return prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
 
     def calculate_prognose_costs_table(self, costs_table):
         prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
@@ -177,8 +172,17 @@ class FinanceCalculator():
         prognose_total_costs_incl_btw = sum(x[5] for x in prognose_cost_table)
         prognose_cost_table.append(['Totaal', '', '', '', prognose_total_costs_ex_btw, prognose_total_costs_incl_btw])
 
+
         for cost in prognose_cost_table:
-            cost[1] = float((cost[4] / self.prognose_sum_total_ex_btw) * 100)
+            exists_in_database = PercentueleKosten.objects.filter(kostennaam=cost[0])
+            if not exists_in_database:
+                cost[1] = (cost[4] / self.prognose_ex_verzendk_ex_btw) * 100
+            elif exists_in_database:
+                print('asdf')
+                percentage = float(exists_in_database[0].percentage) / 100
+                cost[1] = percentage * 100
+                cost[4] = self.prognose_ex_verzendk_ex_btw * percentage
+                cost[5] = self.prognose_ex_verzendk_ex_btw * percentage * 1.21
 
         return prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw
 
