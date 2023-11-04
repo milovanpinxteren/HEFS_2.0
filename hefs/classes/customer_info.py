@@ -11,8 +11,9 @@ from hefs.models import Orders, AlgemeneInformatie, ApiUrls, Customers, JSONData
 
 class CustomerInfo():
     def orders_per_date_plot(self, userid):
-        persons_per_order = AlgemeneInformatie.objects.get(
-            naam='aantalHoofdgerechten').waarde / AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
+        persons_per_order = (AlgemeneInformatie.objects.get(
+            naam='aantalHoofdgerechten').waarde + AlgemeneInformatie.objects.get(
+            naam='aantalBrunch').waarde) / AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
 
         data_2020 = JSONData.objects.get(key='data_2020').value
         data_2021 = JSONData.objects.get(key='data_2021').value
