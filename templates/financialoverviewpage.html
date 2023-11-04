@@ -7,176 +7,206 @@
     <title>Financieel Overzicht</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        function ExportToExcel(type, fn, dl) {
+            var elt = document.getElementById('allTables');
+
+            var allTables = elt.querySelectorAll('.table');
+            console.log(allTables)
+            var wb = XLSX.utils.book_new(); // Create a new Excel workbook
+
+
+            for (var i = 0; i < allTables.length; i++) {
+                var table = allTables[i];
+                console.log(table);
+                var ws = XLSX.utils.table_to_sheet(table); // Convert the table to a worksheet
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet " + (i + 1));
+
+
+            }
+
+            return dl ?
+                XLSX.write(wb, {bookType: type, bookSST: true, type: 'base64'}) :
+                XLSX.writeFile(wb, fn || ('overzicht-Finance.' + (type || 'xlsx')));
+        }
+    </script>
 </head>
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Financieel Overzicht</h1>
 {% if not error %}
-    <div class="tables-container" style="float: left">
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Inkomsten</span>
-            <th class="table-heading">Omschrijving</th>
-            <th class="table-heading">Omzet ex BTW</th>
-            <th class="table-heading">Omzet incl BTW</th>
-            </thead>
-            <tbody>
-            {% for row in profit_table %}
-                {% if forloop.last %}
-                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
-                        {% else %}
-                    <tr class="table-rows">
-                {% endif %}
-            <td class="table-data">{{ row.0 }}</td>
-            <td class="table-data">{{ row.1|floatformat:2 }}</td>
-            <td class="table-data">{{ row.2|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <br>
+    <div id="allTables">
+        <div class="tables-container" style="float: left">
+            <table class="table">
+                <thead class="table-head"><span class="table-title">Inkomsten</span>
+                <th class="table-heading">Omschrijving</th>
+                <th class="table-heading">Omzet ex BTW</th>
+                <th class="table-heading">Omzet incl BTW</th>
+                </thead>
+                <tbody>
+                {% for row in profit_table %}
+                    {% if forloop.last %}
+                        <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                            {% else %}
+                        <tr class="table-rows">
+                    {% endif %}
+                <td class="table-data">{{ row.0 }}</td>
+                <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                <td class="table-data">{{ row.2|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br>
 
 
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Kosten</span>
-            <th class="table-heading">Kostennaam</th>
-            <th class="table-heading">Percentage</th>
-{#            <th class="table-heading">Kosten per eenheid</th>#}
-{#            <th class="table-heading">Vermenigvuldinging</th>#}
-            <th class="table-heading">Kosten ex BTW</th>
-            <th class="table-heading">Kosten incl BTW</th>
-            {#            <th class="table-heading">Totale kosten</th>#}
-            </thead>
-            <tbody>
-            {% for row in costs_table %}
-                {% if forloop.last %}
-                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
-                        {% else %}
-                    <tr class="table-rows">
-                {% endif %}
-            <td class="table-data">{{ row.0 }}</td>
-            <td class="table-data">{{ row.1|floatformat:2 }}</td>
-{#            <td class="table-data">{{ row.2 }}</td>#}
-{#            <td class="table-data">{{ row.3 }}</td>#}
-            <td class="table-data">{{ row.4|floatformat:2 }}</td>
-            <td class="table-data">{{ row.5|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            <table class="table">
+                <thead class="table-head"><span class="table-title">Kosten</span>
+                <th class="table-heading">Kostennaam</th>
+                <th class="table-heading">Percentage</th>
+                {#            <th class="table-heading">Kosten per eenheid</th>#}
+                {#            <th class="table-heading">Vermenigvuldinging</th>#}
+                <th class="table-heading">Kosten ex BTW</th>
+                <th class="table-heading">Kosten incl BTW</th>
+                {#            <th class="table-heading">Totale kosten</th>#}
+                </thead>
+                <tbody>
+                {% for row in costs_table %}
+                    {% if forloop.last %}
+                        <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                            {% else %}
+                        <tr class="table-rows">
+                    {% endif %}
+                <td class="table-data">{{ row.0 }}</td>
+                <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                {#            <td class="table-data">{{ row.2 }}</td>#}
+                {#            <td class="table-data">{{ row.3 }}</td>#}
+                <td class="table-data">{{ row.4|floatformat:2 }}</td>
+                <td class="table-data">{{ row.5|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
 
-        <br>
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Winst</span>
-            <th class="table-heading"></th>
-            <th class="table-heading">Winst ex BTW</th>
-            <th class="table-heading">Winst incl BTW</th>
-            </thead>
-            <tbody>
-            {% for row in revenue_table %}
-                {% if forloop.first %}
-                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+            <br>
+            <table class="table">
+                <thead class="table-head"><span class="table-title">Winst</span>
+                <th class="table-heading"></th>
+                <th class="table-heading">Winst ex BTW</th>
+                <th class="table-heading">Winst incl BTW</th>
+                </thead>
+                <tbody>
+                {% for row in revenue_table %}
+                    {% if forloop.first %}
+                        <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                            <td class="table-data">{{ row.0 }}</td>
+                            <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
+                            <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
+                            {% else %}
+                        <tr class="table-rows">
                         <td class="table-data">{{ row.0 }}</td>
-                        <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
-                        <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
-                        {% else %}
-                    <tr class="table-rows">
-                    <td class="table-data">{{ row.0 }}</td>
-                    <td class="table-data">{{ row.1|floatformat:2 }}</td>
-                    <td class="table-data">{{ row.2|floatformat:2 }}</td>
-                {% endif %}
-            </tr>
+                        <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                        <td class="table-data">{{ row.2|floatformat:2 }}</td>
+                    {% endif %}
+                </tr>
 
-            {% endfor %}
-            </tbody>
-        </table>
+                {% endfor %}
+                </tbody>
+            </table>
 
-    </div>
-    <div class="prognosegetallen">
-        <p>
-        prognosegetal diner: {{ prognosegetal_diner }} <br>
-        prognosegetal brunch: {{ prognosegetal_brunch }}
-    </p>
-    </div>
-    <div style="float: right;">
+        </div>
+        <div class="prognosegetallen">
+            <p>
+                prognosegetal diner: {{ prognosegetal_diner }} <br>
+                prognosegetal brunch: {{ prognosegetal_brunch }}
+            </p>
+        </div>
+        <div class="prognose-tables" style="float: right;">
 
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Prognose Inkomsten</span>
-            <th class="table-heading">Omschrijving</th>
-            <th class="table-heading">Omzet ex BTW</th>
-            <th class="table-heading">Omzet incl BTW</th>
-            </thead>
-            <tbody>
-            {% for row in prognose_profit_table %}
-                {% if forloop.last %}
-                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
-                        {% else %}
-                    <tr class="table-rows">
-                {% endif %}
-            <td class="table-data">{{ row.0 }}</td>
-            <td class="table-data">{{ row.1|floatformat:2 }}</td>
-            <td class="table-data">{{ row.2|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            <table class="table">
+                <thead class="table-head"><span class="table-title">Prognose Inkomsten</span>
+                <th class="table-heading">Omschrijving</th>
+                <th class="table-heading">Omzet ex BTW</th>
+                <th class="table-heading">Omzet incl BTW</th>
+                </thead>
+                <tbody>
+                {% for row in prognose_profit_table %}
+                    {% if forloop.last %}
+                        <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                            {% else %}
+                        <tr class="table-rows">
+                    {% endif %}
+                <td class="table-data">{{ row.0 }}</td>
+                <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                <td class="table-data">{{ row.2|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
 
-        <br>
+            <br>
 
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Prognose Kosten</span>
-            <th class="table-heading">Kostennaam</th>
-            <th class="table-heading">Percentage</th>
-{#            <th class="table-heading">Kosten per eenheid</th>#}
-{#            <th class="table-heading">Vermenigvuldinging</th>#}
-            <th class="table-heading">Kosten ex BTW</th>
-            <th class="table-heading">Kosten incl BTW</th>
-            {#            <th class="table-heading">Totale kosten</th>#}
-            </thead>
-            <tbody>
-            {% for row in prognose_cost_table %}
-                {% if forloop.last %}
-                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
-                        {% else %}
-                    <tr class="table-rows">
-                {% endif %}
-            <td class="table-data">{{ row.0 }}</td>
-            <td class="table-data">{{ row.1|floatformat:2 }}</td>
-{#            <td class="table-data">{{ row.2 }}</td>#}
-{#            <td class="table-data">{{ row.3 }}</td>#}
-            <td class="table-data">{{ row.4|floatformat:2 }}</td>
-            <td class="table-data">{{ row.5|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            <table class="table">
+                <thead class="table-head"><span class="table-title">Prognose Kosten</span>
+                <th class="table-heading">Kostennaam</th>
+                <th class="table-heading">Percentage</th>
+                {#            <th class="table-heading">Kosten per eenheid</th>#}
+                {#            <th class="table-heading">Vermenigvuldinging</th>#}
+                <th class="table-heading">Kosten ex BTW</th>
+                <th class="table-heading">Kosten incl BTW</th>
+                {#            <th class="table-heading">Totale kosten</th>#}
+                </thead>
+                <tbody>
+                {% for row in prognose_cost_table %}
+                    {% if forloop.last %}
+                        <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                            {% else %}
+                        <tr class="table-rows">
+                    {% endif %}
+                <td class="table-data">{{ row.0 }}</td>
+                <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                {#            <td class="table-data">{{ row.2 }}</td>#}
+                {#            <td class="table-data">{{ row.3 }}</td>#}
+                <td class="table-data">{{ row.4|floatformat:2 }}</td>
+                <td class="table-data">{{ row.5|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
 
-        <br>
-        <table class="table">
-            <thead class="table-head"><span class="table-title">Prognose Winst</span>
-            <th class="table-heading"></th>
-            <th class="table-heading">Winst ex BTW</th>
-            <th class="table-heading">Winst incl BTW</th>
-            </thead>
-            <tbody>
-            {% for row in prognose_revenue_table %}
-                {% if forloop.first %}
-                    <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+            <br>
+            <table class="table">
+                <thead class="table-head"><span class="table-title">Prognose Winst</span>
+                <th class="table-heading"></th>
+                <th class="table-heading">Winst ex BTW</th>
+                <th class="table-heading">Winst incl BTW</th>
+                </thead>
+                <tbody>
+                {% for row in prognose_revenue_table %}
+                    {% if forloop.first %}
+                        <tr class="table-rows" style="font-weight: bold; border: 2px solid">
+                            <td class="table-data">{{ row.0 }}</td>
+                            <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
+                            <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
+                            {% else %}
+                        <tr class="table-rows">
                         <td class="table-data">{{ row.0 }}</td>
-                        <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
-                        <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
-                        {% else %}
-                    <tr class="table-rows">
-                    <td class="table-data">{{ row.0 }}</td>
-                    <td class="table-data">{{ row.1|floatformat:2 }}</td>
-                    <td class="table-data">{{ row.2|floatformat:2 }}</td>
-                {% endif %}
-            </tr>
+                        <td class="table-data">{{ row.1|floatformat:2 }}</td>
+                        <td class="table-data">{{ row.2|floatformat:2 }}</td>
+                    {% endif %}
+                </tr>
 
-            {% endfor %}
-            </tbody>
-        </table>
+                {% endfor %}
+                </tbody>
+            </table>
 
+
+        </div>
     </div>
+    <br>
+    <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
 {% else %}
     <h2>{{ ErrorMessage }}</h2>
 {% endif %}
