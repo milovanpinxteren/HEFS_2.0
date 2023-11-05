@@ -40,6 +40,7 @@ class Kerstdiner2023API:
                 if not existing_order and not existing_new_order:
                     print('order does not exist, added')
                     self.add_to_new_orders(order)
+                    self.handle_coupons(order)
                 else:
                     updated_at = datetime.strptime(order['updated_at'][:10], '%Y-%m-%d')
                     if updated_at > (last_api_call_date - timedelta(days=1)):
@@ -47,6 +48,7 @@ class Kerstdiner2023API:
                         Orders.objects.filter(conversieID=conversieID).delete() #TODO: check if this deletes orderlines
                         NewOrders.objects.filter(conversieID=conversieID).delete()
                         self.add_to_new_orders(order)
+                        self.handle_coupons(order)
                     else:
                         print('order change already handled', conversieID)
             elif order['created_at'] == order['updated_at']:
@@ -55,6 +57,7 @@ class Kerstdiner2023API:
                 if not existing_order and not existing_new_order:
                     print('order does not exist, added')
                     self.add_to_new_orders(order)
+                    self.handle_coupons(order)
                 else:
                     print("order exists and not alternated", conversieID)
         last_api_call.waarde = time.time()
@@ -138,3 +141,71 @@ class Kerstdiner2023API:
                                          postadres_plaats=order['billing_address']['city'],
                                          postadres_land=order['billing_address']['country'],
                                          opmerkingen=order['customer']['note'])
+
+    def handle_coupons(self, order):
+        try:
+            verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['code'])[0]
+        except IndexError:
+            verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shipping_lines'][0]['title'])[0]
+
+        besteldatum = datetime.strptime(order['created_at'][:10], '%Y-%m-%d')
+        tz = timezone.get_current_timezone()
+        timzone_besteldatum = timezone.make_aware(besteldatum, tz, True)
+        for i in range(0, len(order['discount_codes'])):
+            if 'ALTEREGO' in order['discount_codes'][i]['code']:
+                NewOrders.objects.create(conversieID=order['name'],
+                                         besteldatum=timzone_besteldatum,
+                                         verzendoptie=verzendoptie,
+                                         afleverdatum=verzendoptie.verzenddatum,
+                                         aflevertijd='00:00:00',
+                                         verzendkosten=float(verzendoptie.verzendkosten),
+                                         korting=float(order['total_discounts']),
+                                         orderprijs=order['current_subtotal_price'],
+                                         totaal=float(order['current_total_price']),
+                                         aantal=1,
+                                         product=order['name'],
+                                         productSKU=883,
+                                         voornaam=order['shipping_address']['first_name'],
+                                         achternaam=order['shipping_address']['last_name'],
+                                         emailadres=order['contact_email'],
+                                         telefoonnummer=order['shipping_address']['phone'],
+                                         straatnaam=order['shipping_address']['address1'],
+                                         huisnummer=order['shipping_address']['address2'],
+                                         postcode=order['shipping_address']['zip'],
+                                         plaats=order['shipping_address']['city'],
+                                         land=order['shipping_address']['country'],
+                                         postadres_straatnaam=order['billing_address']['address1'],
+                                         postadres_huisnummer=order['billing_address']['address2'],
+                                         postadres_postcode=order['billing_address']['zip'],
+                                         postadres_plaats=order['billing_address']['city'],
+                                         postadres_land=order['billing_address']['country'],
+                                         opmerkingen=order['customer']['note'])
+            if 'GERIJPTEBIEREN' in order['discount_codes'][i]['code']:
+                NewOrders.objects.create(conversieID=order['name'],
+                                         besteldatum=timzone_besteldatum,
+                                         verzendoptie=verzendoptie,
+                                         afleverdatum=verzendoptie.verzenddatum,
+                                         aflevertijd='00:00:00',
+                                         verzendkosten=float(verzendoptie.verzendkosten),
+                                         korting=float(order['total_discounts']),
+                                         orderprijs=order['current_subtotal_price'],
+                                         totaal=float(order['current_total_price']),
+                                         aantal=1,
+                                         product=order['name'],
+                                         productSKU=884,
+                                         voornaam=order['shipping_address']['first_name'],
+                                         achternaam=order['shipping_address']['last_name'],
+                                         emailadres=order['contact_email'],
+                                         telefoonnummer=order['shipping_address']['phone'],
+                                         straatnaam=order['shipping_address']['address1'],
+                                         huisnummer=order['shipping_address']['address2'],
+                                         postcode=order['shipping_address']['zip'],
+                                         plaats=order['shipping_address']['city'],
+                                         land=order['shipping_address']['country'],
+                                         postadres_straatnaam=order['billing_address']['address1'],
+                                         postadres_huisnummer=order['billing_address']['address2'],
+                                         postadres_postcode=order['billing_address']['zip'],
+                                         postadres_plaats=order['billing_address']['city'],
+                                         postadres_land=order['billing_address']['country'],
+                                         opmerkingen=order['customer']['note'])
+
