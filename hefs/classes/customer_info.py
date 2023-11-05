@@ -61,7 +61,6 @@ class CustomerInfo():
             Sum('verzendkosten')).get('verzendkosten__sum'))
         inkomsten_zonder_verzendkosten = totale_inkomsten - totale_verzendkosten
 
-
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
         aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
         aantal_personen = aantal_hoofdgerechten + AlgemeneInformatie.objects.get(naam='aantalBrunch').waarde
@@ -110,13 +109,12 @@ class CustomerInfo():
         distribution_2022 = JSONData.objects.get(key='distribution_2022').value
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
         aantal_brunches = AlgemeneInformatie.objects.get(naam='aantalBrunch').waarde
-        aantal_gourmets = AlgemeneInformatie.objects.get(naam='aantalGourmet').waarde
-        percentage_brunch = float((aantal_brunches / aantal_hoofdgerechten) * 100)
-        percentage_gourmet = float((aantal_gourmets / aantal_hoofdgerechten) * 100)
+        aantal_personen = aantal_hoofdgerechten + aantal_brunches
+        percentage_brunch = float((aantal_brunches / aantal_personen) * 100)
 
-        distribution_2023 = {"aantal personen": aantal_hoofdgerechten, "aantal personen brunch": aantal_brunches,
-                             "aantal personen gourmet": aantal_gourmets, "percentage brunch": percentage_brunch,
-                             "percentage gourmet": percentage_gourmet}
+        distribution_2023 = {"aantal personen": aantal_personen, "percentage brunch": percentage_brunch,
+                             "aantal personen brunch": aantal_brunches
+                             }
         return distribution_2022, distribution_2023
 
     def prepare_view(self, userid):
