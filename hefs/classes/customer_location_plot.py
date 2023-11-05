@@ -2,11 +2,9 @@
 import folium
 import pandas as pd
 import pgeocode
-from django.db.models import Sum, Count, Avg
 from folium.plugins import HeatMap
-from plotly import express as px, offline as opy
 
-from hefs.models import Orders, AlgemeneInformatie, ApiUrls, Customers
+from hefs.models import Orders, ApiUrls
 
 class CustomerLocationPlot():
     def customer_location_plot(self, userid):
@@ -19,7 +17,7 @@ class CustomerLocationPlot():
         nomi = pgeocode.Nominatim('nl')
         df_coordinates = nomi.query_postal_code(location_df['stripped_postal'].array)
         df_coordinates['weight'] = 1
-        map_obj = folium.Map(location=[52.2130, 5.2794], zoom_start=7, tiles='Stamen Terrain')
+        map_obj = folium.Map(location=[52.2130, 5.2794], zoom_start=7, tiles='cartodb positron')
 
         lats_longs = df_coordinates[['latitude', 'longitude', 'weight']].to_numpy()
 
