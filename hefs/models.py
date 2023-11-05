@@ -115,6 +115,7 @@ class Productinfo(models.Model):
     picknaam = models.CharField(max_length=250)
     pickvolgorde = models.IntegerField(default=0)
     inkoop = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    btw_percentage = models.IntegerField(default=0)
     verkoop_incl_btw = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     verkoop_excl_btw = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     verpakkingsoort = models.CharField(max_length=15, default='')

@@ -57,13 +57,29 @@ class FinanceCalculator():
         variable_costs = VariableKosten.objects.all()
         fixed_costs = VasteKosten.objects.all()
 
-
-        total_inkoop = float(PickItems.objects.annotate(
+        total_inkoop_diner_ex_btw = float(PickItems.objects.exclude(product__gang=7).annotate(
             total_kosten=ExpressionWrapper(F('product__inkoop') * F('hoeveelheid'),
                                            output_field=DecimalField(max_digits=8, decimal_places=2))
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
-        costs_table_tuple.append(['Inkoop', '', '', '', total_inkoop, total_inkoop * 1.09])
+        total_inkoop_diner_incl_btw = float(PickItems.objects.exclude(product__gang=7).annotate(
+            total_kosten=ExpressionWrapper(F('product__inkoop') * (F('product__btw_percentage') / 100 + 1) * F('hoeveelheid'),
+                                           output_field=DecimalField(max_digits=8, decimal_places=2))
+        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+
+        costs_table_tuple.append(['Inkoop diner', '', '', '', total_inkoop_diner_ex_btw, total_inkoop_diner_incl_btw])
+
+        total_inkoop_brunch_ex_btw = float(PickItems.objects.filter(product__gang=7).annotate(
+            total_kosten=ExpressionWrapper(F('product__inkoop') * F('hoeveelheid'),
+                                           output_field=DecimalField(max_digits=8, decimal_places=2))
+        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+
+        total_inkoop_brunch_incl_btw = float(PickItems.objects.filter(product__gang=7).annotate(
+            total_kosten=ExpressionWrapper(F('product__inkoop') * (F('product__btw_percentage') / 100 + 1) * F('hoeveelheid'),
+                                           output_field=DecimalField(max_digits=8, decimal_places=2))
+        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+
+        costs_table_tuple.append(['Inkoop brunch', '', '', '', total_inkoop_brunch_ex_btw, total_inkoop_brunch_incl_btw])
 
         for percentual_cost in percentual_costs:
             percentage = float(percentual_cost.percentage)
@@ -178,7 +194,6 @@ class FinanceCalculator():
             if not exists_in_database:
                 cost[1] = (cost[4] / self.prognose_ex_verzendk_ex_btw) * 100
             elif exists_in_database:
-                print('asdf')
                 percentage = float(exists_in_database[0].percentage) / 100
                 cost[1] = percentage * 100
                 cost[4] = self.prognose_ex_verzendk_ex_btw * percentage

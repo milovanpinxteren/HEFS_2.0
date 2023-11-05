@@ -14,8 +14,8 @@ class MakeFactuurOverview():
 
             # Calculate the desired values
             calculated_values = [
+                [order_price + shipping_cost],
                 [order_price],
-                [order_price - shipping_cost],
                 [(order_price - shipping_cost) / 1.09],
                 [((order_price - shipping_cost) / 1.09) * 0.85]
             ]
