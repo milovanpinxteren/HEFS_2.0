@@ -63,7 +63,7 @@ class FinanceCalculator():
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
         total_inkoop_diner_incl_btw = float(PickItems.objects.exclude(product__gang=7).annotate(
-            total_kosten=ExpressionWrapper(F('product__inkoop') * (F('product__btw_percentage') / 100 + 1) * F('hoeveelheid'),
+            total_kosten=ExpressionWrapper(F('product__inkoop') * F('product__btw_percentage') * F('hoeveelheid'),
                                            output_field=DecimalField(max_digits=8, decimal_places=2))
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
@@ -75,7 +75,7 @@ class FinanceCalculator():
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
         total_inkoop_brunch_incl_btw = float(PickItems.objects.filter(product__gang=7).annotate(
-            total_kosten=ExpressionWrapper(F('product__inkoop') * (F('product__btw_percentage') / 100 + 1) * F('hoeveelheid'),
+            total_kosten=ExpressionWrapper(F('product__inkoop') * F('product__btw_percentage') * F('hoeveelheid'),
                                            output_field=DecimalField(max_digits=8, decimal_places=2))
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
