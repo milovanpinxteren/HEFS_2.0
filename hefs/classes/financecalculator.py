@@ -130,8 +130,7 @@ class FinanceCalculator():
         income_minus_commission_ex_btw = income_ex_btw * 0.85  # income minus HaH commission, now hardcoded, maybe softcoding in future
         income_incl_btw = self.sum_brunch_incl_btw + self.sum_diner_incl_btw
         income_minus_commission_incl_btw = income_incl_btw * 0.85  # income minus HaH commission, now hardcoded, maybe softcoding in future
-        # self.total_costs_ex_btw
-        # self.total_costs_incl_btw
+
         btw_diff = (income_minus_commission_incl_btw - income_minus_commission_ex_btw) - (
                     self.total_costs_incl_btw - self.total_costs_ex_btw)
         # btw_diff_incl_btw = income_minus_commission_incl_btw - self.total_costs_incl_btw
@@ -173,6 +172,7 @@ class FinanceCalculator():
                 prognose_profit_table.append(['Omzet Totaal', prognose_sum_total_ex_btw, prognose_sum_total_incl_btw])
 
         self.prognose_ex_verzendk_ex_btw = prognose_sum_total_ex_btw - sum_shipping_ex_btw
+        self.prognose_ex_verzendk_incl_btw = prognose_sum_total_incl_btw - sum_shipping_incl_btw
         return prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
 
     def calculate_prognose_costs_table(self, costs_table):
@@ -202,9 +202,9 @@ class FinanceCalculator():
             elif cost[3] == 'Vaste kosten':
                 prognose_cost_table.append([cost[0], cost[1], cost[2], cost[3], cost[4], cost[5]])
 
-        prognose_total_costs_ex_btw = sum(x[4] for x in prognose_cost_table)
-        prognose_total_costs_incl_btw = sum(x[5] for x in prognose_cost_table)
-        prognose_cost_table.append(['Totaal', '', '', '', prognose_total_costs_ex_btw, prognose_total_costs_incl_btw])
+        self.prognose_total_costs_ex_btw = sum(x[4] for x in prognose_cost_table)
+        self.prognose_total_costs_incl_btw = sum(x[5] for x in prognose_cost_table)
+        prognose_cost_table.append(['Totaal', '', '', '', self.prognose_total_costs_ex_btw, self.prognose_total_costs_incl_btw])
 
         for cost in prognose_cost_table:
             exists_in_database = PercentueleKosten.objects.filter(kostennaam=cost[0])
@@ -216,15 +216,23 @@ class FinanceCalculator():
                 cost[4] = self.prognose_ex_verzendk_ex_btw * percentage
                 cost[5] = self.prognose_ex_verzendk_ex_btw * percentage * 1.21
 
-        return prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw
+        return prognose_cost_table, self.prognose_total_costs_ex_btw, self.prognose_total_costs_incl_btw
 
     def calculate_prognose_revenue_table(self, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw,
                                          prognose_total_costs_ex_btw, prognose_total_costs_incl_btw):
         difference_ex_btw = prognose_sum_total_ex_btw - prognose_total_costs_ex_btw
         difference_incl_btw = prognose_sum_total_incl_btw - prognose_total_costs_incl_btw
-        btw_difference = difference_incl_btw - difference_ex_btw
+
+
+        income_ex_btw = self.prognose_ex_verzendk_ex_btw
+        income_minus_commission_ex_btw = income_ex_btw * 0.85  # income minus HaH commission, now hardcoded, maybe softcoding in future
+        income_incl_btw = self.prognose_ex_verzendk_incl_btw
+        income_minus_commission_incl_btw = income_incl_btw * 0.85  # income minus HaH commission, now hardcoded, maybe softcoding in future
+
+        btw_diff = (income_minus_commission_incl_btw - income_minus_commission_ex_btw) - (
+                self.prognose_total_costs_incl_btw - self.prognose_total_costs_ex_btw)
 
         prognose_revenue_table = []
         prognose_revenue_table.append(['Winst', difference_ex_btw, difference_incl_btw])
-        prognose_revenue_table.append(['Verschil BTW', btw_difference, ''])
+        prognose_revenue_table.append(['Verschil BTW', btw_diff, ''])
         return prognose_revenue_table
