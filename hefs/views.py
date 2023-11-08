@@ -159,7 +159,7 @@ def financial_overview_page(request):
         financecalculator = FinanceCalculator()
 
         profit_table, total_ex_btw, total_incl_btw = financecalculator.calculate_profit_table(userid)
-        costs_table, total_costs_ex_btw, total_costs_incl_btw = financecalculator.calculate_costs_table(userid)
+        costs_table, total_costs_ex_btw, total_costs_incl_btw, costs_of_inkoop_dict = financecalculator.calculate_costs_table(userid)
         revenue_table = financecalculator.calculate_revenue_table(total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw)
 
         table_for_prognose = profit_table.copy()
@@ -173,7 +173,7 @@ def financial_overview_page(request):
             'profit_table': profit_table, 'costs_table': costs_table, 'revenue_table': revenue_table,
             'prognose_profit_table': prognose_profit_table, 'prognose_cost_table': prognose_cost_table,
             'prognose_revenue_table': prognose_revenue_table, 'prognosegetal_diner': prognosegetal_diner,
-            'prognosegetal_brunch': prognosegetal_brunch
+            'prognosegetal_brunch': prognosegetal_brunch, 'costs_of_inkoop_dict': costs_of_inkoop_dict
         }
         return render(request, 'financialoverviewpage.html', context)
     except Exception as e:

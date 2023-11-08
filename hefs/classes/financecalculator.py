@@ -10,25 +10,25 @@ class FinanceCalculator():
         #omzet brunch
         brunch_orders = Orders.objects.filter(organisatieID__in=organisations_to_show, orderline__productSKU__in=[700, 701])
         sum_brunch_incl_btw = brunch_orders.aggregate(total_orderprijs=Sum('orderprijs'))
-        sum_brunch_incl_btw = float(sum_brunch_incl_btw['total_orderprijs'])
-        sum_brunch_ex_btw = float(sum_brunch_incl_btw) / 1.09
+        self.sum_brunch_incl_btw = float(sum_brunch_incl_btw['total_orderprijs'])
+        self.sum_brunch_ex_btw = float(self.sum_brunch_incl_btw) / 1.09
 
         # omzet diners
         diner_orders = Orders.objects.exclude(organisatieID__in=organisations_to_show, orderline__productSKU__in=[700, 701, 750, 751])
         sum_diner_incl_btw = diner_orders.aggregate(total_orderprijs=Sum('orderprijs'))
-        sum_diner_incl_btw = float(sum_diner_incl_btw['total_orderprijs'])
-        sum_diner_ex_btw = float(sum_diner_incl_btw) / 1.09
+        self.sum_diner_incl_btw = float(sum_diner_incl_btw['total_orderprijs'])
+        self.sum_diner_ex_btw = float(self.sum_diner_incl_btw) / 1.09
 
         sum_verzendkosten_incl_btw = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('verzendkosten')).get('verzendkosten__sum'))
         sum_verzendkosten_ex_btw = float(sum_verzendkosten_incl_btw) / 1.09
-        total_incl_btw = sum_brunch_incl_btw + sum_diner_incl_btw + sum_verzendkosten_incl_btw
-        total_ex_btw = sum_brunch_ex_btw + sum_diner_ex_btw + sum_verzendkosten_ex_btw
+        total_incl_btw = self.sum_brunch_incl_btw + self.sum_diner_incl_btw + sum_verzendkosten_incl_btw
+        total_ex_btw = self.sum_brunch_ex_btw + self.sum_diner_ex_btw + sum_verzendkosten_ex_btw
 
         profit_table = [] #omschrijving, ex btw, incl btw
 
-        profit_table.append(['Omzet diners', sum_diner_ex_btw, sum_diner_incl_btw])
-        profit_table.append(['Omzet brunch', sum_brunch_ex_btw, sum_brunch_incl_btw])
+        profit_table.append(['Omzet diners', self.sum_diner_ex_btw, self.sum_diner_incl_btw])
+        profit_table.append(['Omzet brunch', self.sum_brunch_ex_btw, self.sum_brunch_incl_btw])
         profit_table.append(['Omzet verzendkosten', sum_verzendkosten_ex_btw, sum_verzendkosten_incl_btw])
         profit_table.append(['Omzet Totaal', total_ex_btw, total_incl_btw])
         return profit_table, total_ex_btw, total_incl_btw
@@ -103,23 +103,38 @@ class FinanceCalculator():
             costs_incl_btw = costs_ex_btw * 1.09
             costs_table_tuple.append([fixed_cost.kostennaam, '', '', 'Vaste kosten', costs_ex_btw, costs_incl_btw])
 
-        total_costs_ex_btw = sum(x[4] for x in costs_table_tuple)
-        total_costs_incl_btw = sum(x[5] for x in costs_table_tuple)
-        costs_table_tuple.append(['Totaal', '', '', '', total_costs_ex_btw, total_costs_incl_btw])
+        self.total_costs_ex_btw = sum(x[4] for x in costs_table_tuple)
+        self.total_costs_incl_btw = sum(x[5] for x in costs_table_tuple)
+        costs_table_tuple.append(['Totaal', '', '', '', self.total_costs_ex_btw, self.total_costs_incl_btw])
 
         for cost in costs_table_tuple:
             cost[1] = float((cost[4] / inkomsten_zonder_verzendkosten_ex_btw) * 100)
 
-        return costs_table_tuple, total_costs_ex_btw, total_costs_incl_btw
+
+        percentage_costs_dinner_ex_btw = float((total_inkoop_diner_ex_btw / self.sum_diner_ex_btw) * 100)
+        percentage_costs_brunch_ex_btw = float((total_inkoop_brunch_ex_btw / self.sum_brunch_ex_btw) * 100)
+
+        costs_of_inkoop_dict = {'Percentage kosten diner t.o.v. inkomsten diner':percentage_costs_dinner_ex_btw,
+                                'Percentage kosten brunch t.o.v. inkomsten brunch': percentage_costs_brunch_ex_btw,
+                                }
+        return costs_table_tuple, self.total_costs_ex_btw, self.total_costs_incl_btw, costs_of_inkoop_dict
 
     def calculate_revenue_table(self, total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw):
         difference_ex_btw = total_ex_btw - total_costs_ex_btw
         difference_incl_btw = total_incl_btw - total_costs_incl_btw
-        btw_difference = difference_incl_btw - difference_ex_btw
+
+        income_ex_btw = self.sum_brunch_ex_btw + self.sum_diner_ex_btw
+        income_minus_commission_ex_btw = income_ex_btw * 0.85 #income minus HaH commission, now hardcoded, maybe softcoding in future
+        income_incl_btw = self.sum_brunch_incl_btw + self.sum_diner_incl_btw
+        income_minus_commission_incl_btw = income_incl_btw * 0.85 #income minus HaH commission, now hardcoded, maybe softcoding in future
+        # self.total_costs_ex_btw
+        # self.total_costs_incl_btw
+        btw_diff_ex_btw = income_minus_commission_ex_btw - self.total_costs_ex_btw
+        btw_diff_incl_btw = income_minus_commission_incl_btw - self.total_costs_incl_btw
 
         revenue_table = []
         revenue_table.append(['Winst', difference_ex_btw, difference_incl_btw])
-        revenue_table.append(['Verschil BTW', btw_difference, ''])
+        revenue_table.append(['Verschil BTW', btw_diff_ex_btw, btw_diff_incl_btw])
         return revenue_table
 
     def calculate_prognose_profit_table(self, profit_table):
@@ -168,7 +183,7 @@ class FinanceCalculator():
 
         prognose_cost_table = []
         for cost in costs_table:
-            if cost[2] == '' and cost[3] == '' and cost[0] != 'Totaal':
+            if cost[2] == '' and cost[3] == '' and cost[0] != 'Totaal' and cost[0]:
                 cost_ex_btw = cost[4] * prognose_factor_totaal
                 cost_incl_btw = cost_ex_btw * 1.09
                 prognose_cost_table.append([cost[0], '', '', '', cost_ex_btw, cost_incl_btw])
@@ -177,7 +192,7 @@ class FinanceCalculator():
                 cost_incl_btw = cost_ex_btw * 1.09
                 prognose_cost_table.append([cost[0], '', '', '', cost_ex_btw, cost_incl_btw])
             elif cost[2] != '' and cost[3] == 'Per hoofdgerecht':
-                cost_ex_btw = cost[4] * prognose_factor_diner
+                cost_ex_btw = cost[4] * prognose_factor_totaal
                 cost_incl_btw = cost_ex_btw * 1.09
                 prognose_cost_table.append([cost[0], '', '', '', cost_ex_btw, cost_incl_btw])
             elif cost[3] == 'Vaste kosten':

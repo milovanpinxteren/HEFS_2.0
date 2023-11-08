@@ -61,7 +61,6 @@
             </table>
             <br>
 
-
             <table class="table">
                 <thead class="table-head"><span class="table-title">Kosten</span>
                 <th class="table-heading">Kostennaam</th>
@@ -118,10 +117,19 @@
 
         </div>
         <div class="prognosegetallen">
+            <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+
             <p>
                 prognosegetal diner: {{ prognosegetal_diner }} <br>
                 prognosegetal brunch: {{ prognosegetal_brunch }}
             </p>
+
+            <div style="float: left">
+                {% for key, value in costs_of_inkoop_dict.items %}
+                    <p><b>{{ key }}</b>: {{ value|floatformat:2 }}%</p>
+                {% endfor %}
+            </div>
+
         </div>
         <div class="prognose-tables" style="float: right;">
 
@@ -206,7 +214,6 @@
         </div>
     </div>
     <br>
-    <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
 {% else %}
     <h2>{{ ErrorMessage }}</h2>
 {% endif %}
