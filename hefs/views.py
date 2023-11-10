@@ -13,7 +13,8 @@ from .classes.financecalculator import FinanceCalculator
 from .classes.make_factuur_overview import MakeFactuurOverview
 from .classes.veh_handler import VehHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
-from .models import ApiUrls, AlgemeneInformatie
+from .models import ApiUrls, AlgemeneInformatie, Orders
+from django.contrib import messages
 
 
 def index(request):
@@ -77,12 +78,15 @@ def getorderspage(request):
 
 
 def makeorderspage(request):
-    return render(request, 'makeorderspage.html')
+    numer_of_orders = Orders.objects.all().count()
+    context = {'number_of_orders': numer_of_orders}
+    return render(request, 'makeorderspage.html', context)
 
 
 def show_busy(request):
+    numer_of_orders = Orders.objects.all().count()
     status = request.session['status']
-    context = {'status': status}
+    context = {'status': status, 'number_of_orders': numer_of_orders}
     return render(request, 'waitingpage.html', context)
 
 
@@ -90,19 +94,28 @@ def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
             request.session['status'] = '10'
+            messages.info(request, 'Ophalen van de orders in Shopify')
             get_new_orders(request.user.id)
             request.session['status'] = '50'
+            messages.info(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders()
             request.session['status'] = '75'
+            messages.info(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders()
+            messages.success(request, 'Klaar met berekenen')
             request.session['status'] = '100'
+
         else:
+            messages.info(request, 'Ophalen van de orders in Shopify')
             get_new_orders.delay(request.user.id)
             request.session['status'] = '25'
+            messages.info(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders.delay()
             request.session['status'] = '75'
+            messages.info(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders.delay()
             request.session['status'] = '100'
+            messages.success(request, 'Klaar met berekenen')
         return show_busy(request)
     else:
         if request.session['status'] == '100':
@@ -126,6 +139,7 @@ def get_new_orders(user_id):
 @job
 def calculate_orders():
     CalculateOrders()
+
 
 
 @job
