@@ -17,7 +17,7 @@
 {#<br><br><br><br>#}
 {#<div class="loader"></div>#}
 <progress id="Progressbar" max="100" value="0"></progress>
-
+{#<button onclick="checkJobStatus()">test</button>#}
 
 <script>
     // Get the progress bar element
@@ -56,10 +56,10 @@
             headers: {"X-CSRFToken": "{{ csrf_token }}"},
             success: function (data) {
                 console.log('data', data)
-                if (data.status === '100') {
+                if (data.status === 100) {
                     target = document.getElementById('statusH1')
                     target.innerHTML = 'Klaar met berekenen'
-                } else if (data.status !== '100') {
+                } else if (data.status !== 100) {
                     // Job is still running, continue checking
                     setTimeout(checkJobStatus, 1000);  // Adjust the interval as needed
                 }
