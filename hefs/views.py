@@ -99,7 +99,7 @@ def get_orders(request):
         if request.environ.get('OS', '') == "Windows_NT":
             get_new_orders(request.user.id)
             add_orders()
-            calculate_orders(request)
+            calculate_orders()
             request.session['status'] = '100'
         else:
             get_new_orders.delay(request.user.id)
