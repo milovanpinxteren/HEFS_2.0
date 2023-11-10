@@ -90,27 +90,21 @@ def show_busy(request):
     return render(request, 'waitingpage.html', context)
 
 def get_status(request):
-    return JsonResponse({'status': request.session['status']})
+    status = AlgemeneInformatie.objects.get(naam='status').waarde
+    return JsonResponse({'status': status})
 
 
 def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
-            # messages.info(request, 'Ophalen van de orders in Shopify')
             get_new_orders(request.user.id)
-            # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders()
-            # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders(request)
-            # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
         else:
             get_new_orders.delay(request.user.id)
-            # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders.delay()
-            # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders.delay()
-            # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
         return show_busy(request)
     else:
@@ -134,7 +128,8 @@ def get_new_orders(user_id):
 @job
 def calculate_orders(request):
     CalculateOrders()
-
+    AlgemeneInformatie.objects.filter(naam='status').delete()
+    AlgemeneInformatie.objects.create(naam='status', waarde=100)
 
 
 @job
