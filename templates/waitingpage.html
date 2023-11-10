@@ -10,9 +10,42 @@
 <body>
 {% include 'navbar.html' %}
 {#<h1 class="page-title">Even geduld a.u.b.</h1>#}
-<h1 class="page-title" >Percentage voltooid: {{ status }}%</h1>
-<br><br><br><br>
-<div class="loader"></div>
+<h1 class="page-title" >Nog even geduld a.u.b.</h1>
 
+{#<br><br><br><br>#}
+{#<div class="loader"></div>#}
+<progress id="Progressbar" max="100" value="0"></progress>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<script>
+    // Get the progress bar element
+    const progressBar = document.getElementById("Progressbar");
+    // Set an initial value
+    let progressValue = 0;
+    // Function to update the progress bar value
+    function updateProgressBar() {
+        // Update the progress value (you can replace this logic with your own)
+        progressValue += 1; // For example, increase the progress by 10 each second
+        // Ensure the progress value doesn't exceed the maximum value (100)
+        if (progressValue > 100) {
+            progressValue = 100;
+        }
+        // Update the value attribute of the progress bar
+        progressBar.value = progressValue;
+    }
+    // Update the progress bar every second
+    const intervalId = setInterval(updateProgressBar, ({{ number_of_orders }} * 4))
+
+    // Stop updating after a certain time (for demonstration purposes)
+    setTimeout(() => {
+        clearInterval(intervalId);
+    }, 500000); // Stop after 5 seconds (you can adjust this time)
+</script>
 </body>
 </html>

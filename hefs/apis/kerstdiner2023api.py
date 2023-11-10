@@ -18,13 +18,13 @@ class Kerstdiner2023API:
 
 
         if response.status_code == 200:
-            if response.links['next']['url']: #more than 50 orders #TODO what if more than 100 orders
+            orders = response.json()["orders"]
+            self.handle_shopify_orders(orders)
+            while 'next' in response.links:
+                print(response.links['next']['url'])
+                response = requests.get(url=response.links['next']['url'], headers=headers)
                 orders = response.json()["orders"]
                 self.handle_shopify_orders(orders)
-                next_response = requests.get(url=response.links['next']['url'], headers=headers)
-                next_orders = next_response.json()["orders"]
-                self.handle_shopify_orders(next_orders)
-
         else:
             print("Failed to retrieve orders. Status code:", response.status_code)
             return []
