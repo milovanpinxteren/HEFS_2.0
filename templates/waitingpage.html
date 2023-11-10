@@ -6,29 +6,25 @@
     <title>Even geduld a.u.b.</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 </head>
 <body>
 {% include 'navbar.html' %}
 {#<h1 class="page-title">Even geduld a.u.b.</h1>#}
-<h1 class="page-title" >Nog even geduld a.u.b.</h1>
+<h1 class="page-title" id="statusH1">Nog even geduld a.u.b.</h1>
 
 {#<br><br><br><br>#}
 {#<div class="loader"></div>#}
 <progress id="Progressbar" max="100" value="0"></progress>
-{{ message }}
-{#{% if messages %}#}
-{#<ul class="messages">#}
-{#    {% for message in messages %}#}
-{#    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
-{#    {% endfor %}#}
-{#</ul>#}
-{#{% endif %}#}
+
 
 <script>
     // Get the progress bar element
     const progressBar = document.getElementById("Progressbar");
     // Set an initial value
     let progressValue = 0;
+
     // Function to update the progress bar value
     function updateProgressBar() {
         // Update the progress value (you can replace this logic with your own)
@@ -40,13 +36,42 @@
         // Update the value attribute of the progress bar
         progressBar.value = progressValue;
     }
+
     // Update the progress bar every second
-    const intervalId = setInterval(updateProgressBar, ({{ number_of_orders }} * 4))
+    const intervalId = setInterval(updateProgressBar, ({{ number_of_orders }} * 4)
+    )
 
     // Stop updating after a certain time (for demonstration purposes)
     setTimeout(() => {
         clearInterval(intervalId);
     }, 500000); // Stop after 5 seconds (you can adjust this time)
+</script>
+<script>
+    // Example using jQuery for simplicity
+    function checkJobStatus() {
+        const url = `get_status`
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            success: function (data) {
+                console.log('data', data)
+                if (data.status === '100') {
+                    target = document.getElementById('statusH1')
+                    target.innerHTML = 'Klaar met berekenen'
+                } else if (data.status !== '100') {
+                    // Job is still running, continue checking
+                    setTimeout(checkJobStatus, 1000);  // Adjust the interval as needed
+                }
+            },
+            error: function () {
+                // Handle errors if needed
+            }
+        });
+    }
+
+    // Call the function when the page loads or as needed
+    checkJobStatus();
 </script>
 </body>
 </html>
