@@ -126,7 +126,7 @@ def get_new_orders(user_id):
 
 
 @job
-def calculate_orders(request):
+def calculate_orders():
     CalculateOrders()
 
 
