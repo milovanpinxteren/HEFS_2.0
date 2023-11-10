@@ -15,13 +15,14 @@
 {#<br><br><br><br>#}
 {#<div class="loader"></div>#}
 <progress id="Progressbar" max="100" value="0"></progress>
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
+{{ message }}
+{#{% if messages %}#}
+{#<ul class="messages">#}
+{#    {% for message in messages %}#}
+{#    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
+{#    {% endfor %}#}
+{#</ul>#}
+{#{% endif %}#}
 
 <script>
     // Get the progress bar element
