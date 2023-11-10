@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, JsonResponse
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from django_rq import job
@@ -99,20 +99,21 @@ def get_orders(request):
         if request.environ.get('OS', '') == "Windows_NT":
             # messages.info(request, 'Ophalen van de orders in Shopify')
             get_new_orders(request.user.id)
-            update_status(request, 'Orders opgehaald, controleren en toevoegen')
+            # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders()
-            update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
+            # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders()
-            update_status(request, 'Klaar met berekenen')
+            # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
         else:
             get_new_orders.delay(request.user.id)
-            update_status(request, 'Orders opgehaald, controleren en toevoegen')
+            # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders.delay()
-            update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
+            # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders.delay()
-            update_status(request, 'Klaar met berekenen')
+            # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
+            return JsonResponse({'message': 'Klaar met berekenen'})
         return show_busy(request)
     else:
         if request.session['status'] == '100':
@@ -135,6 +136,7 @@ def get_new_orders(user_id):
 @job
 def calculate_orders():
     CalculateOrders()
+    return HttpResponse('Klaar met berekenen')
 
 
 
