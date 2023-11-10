@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.http import HttpResponse, FileResponse
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
@@ -89,33 +90,29 @@ def show_busy(request):
     context = {'status': status, 'number_of_orders': numer_of_orders}
     return render(request, 'waitingpage.html', context)
 
+def update_status(request, message):
+    messages.info(request, message)
+
 
 def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
-            request.session['status'] = '10'
-            messages.info(request, 'Ophalen van de orders in Shopify')
+            # messages.info(request, 'Ophalen van de orders in Shopify')
             get_new_orders(request.user.id)
-            request.session['status'] = '50'
-            messages.info(request, 'Orders opgehaald, controleren en toevoegen')
+            update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders()
-            request.session['status'] = '75'
-            messages.info(request, 'Toegevoegd, picklijsten en VEH berekenen')
+            update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders()
-            messages.success(request, 'Klaar met berekenen')
+            update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
-
         else:
-            messages.info(request, 'Ophalen van de orders in Shopify')
             get_new_orders.delay(request.user.id)
-            request.session['status'] = '25'
-            messages.info(request, 'Orders opgehaald, controleren en toevoegen')
+            update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders.delay()
-            request.session['status'] = '75'
-            messages.info(request, 'Toegevoegd, picklijsten en VEH berekenen')
+            update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
             calculate_orders.delay()
+            update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
-            messages.success(request, 'Klaar met berekenen')
         return show_busy(request)
     else:
         if request.session['status'] == '100':
@@ -132,7 +129,6 @@ def handle_alterated_new_orders(request):
 @job
 def get_new_orders(user_id):
     print("Get new orders")
-    print(user_id)
     GetOrders(user_id)
 
 
