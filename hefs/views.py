@@ -102,6 +102,8 @@ def get_orders(request):
             calculate_orders()
             request.session['status'] = '100'
         else:
+            AlgemeneInformatie.objects.filter(naam='status').delete()
+            AlgemeneInformatie.objects.create(naam='status', waarde=1)
             get_new_orders.delay(request.user.id)
             add_orders.delay()
             calculate_orders.delay()
