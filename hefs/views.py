@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponse, FileResponse, JsonResponse
-from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from django_rq import job
 
@@ -90,8 +89,8 @@ def show_busy(request):
     context = {'status': status, 'number_of_orders': numer_of_orders}
     return render(request, 'waitingpage.html', context)
 
-def update_status(request, message):
-    messages.info(request, message)
+def get_status(request):
+    return JsonResponse({'status': request.session['status']})
 
 
 def get_orders(request):
@@ -110,7 +109,7 @@ def get_orders(request):
             # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders.delay()
             # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
-            calculate_orders.delay(request)
+            calculate_orders.delay()
             # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
         return show_busy(request)
@@ -135,8 +134,7 @@ def get_new_orders(user_id):
 @job
 def calculate_orders(request):
     CalculateOrders()
-    context = {'message': 'Klaar met berekenen'}
-    return render(request, 'waitingpage.html', context)
+
 
 
 @job

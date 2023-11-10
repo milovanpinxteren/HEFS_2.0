@@ -15,6 +15,7 @@ urlpatterns = [
     path('get_pickbonnen', views.get_pickbonnen, name='get_pickbonnen'),
     path('financial_overview_page', views.financial_overview_page, name='financial_overview_page'),
     path('facturen_page', views.facturen_page, name='facturen_page'),
+    path('get_status', views.get_status, name='get_status'),
 
     path('handle_alterated_new_orders', views.handle_alterated_new_orders, name='handle_alterated_new_orders'),
 
