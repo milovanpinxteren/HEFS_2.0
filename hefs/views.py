@@ -113,7 +113,6 @@ def get_orders(request):
             calculate_orders.delay()
             # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
-            return JsonResponse({'message': 'Klaar met berekenen'})
         return show_busy(request)
     else:
         if request.session['status'] == '100':
@@ -136,7 +135,7 @@ def get_new_orders(user_id):
 @job
 def calculate_orders():
     CalculateOrders()
-    return HttpResponse('Klaar met berekenen')
+    return JsonResponse({'message': 'Klaar met berekenen'})
 
 
 
