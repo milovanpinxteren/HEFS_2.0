@@ -102,7 +102,7 @@ def get_orders(request):
             # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders()
             # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
-            calculate_orders()
+            calculate_orders(request)
             # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
         else:
@@ -110,7 +110,7 @@ def get_orders(request):
             # update_status(request, 'Orders opgehaald, controleren en toevoegen')
             add_orders.delay()
             # update_status(request, 'Toegevoegd, picklijsten en VEH berekenen')
-            calculate_orders.delay()
+            calculate_orders.delay(request)
             # update_status(request, 'Klaar met berekenen')
             request.session['status'] = '100'
         return show_busy(request)
@@ -133,10 +133,10 @@ def get_new_orders(user_id):
 
 
 @job
-def calculate_orders():
+def calculate_orders(request):
     CalculateOrders()
-    return JsonResponse({'message': 'Klaar met berekenen'})
-
+    context = {'message': 'Klaar met berekenen'}
+    return render(request, 'waitingpage.html', context)
 
 
 @job
@@ -162,6 +162,7 @@ def get_pickbonnen(request):
             PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
     response = FileResponse(open('pickbonnen.pdf', 'rb'), content_type='application/pdf', as_attachment=True)
     return response
+
 
 
 def financial_overview_page(request):
