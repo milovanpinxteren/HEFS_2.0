@@ -55,7 +55,6 @@ class CalculateOrders():
                         PickItems.objects.create(omschrijving=product_to_pick.picknaam, hoeveelheid=1,
                                                  pick_order=PickOrders.objects.get(order_id=order_id),
                                                  product=product_to_pick)
-                        print("Pickitem gecreerd")
                     except ObjectDoesNotExist:
                         # TODO: User feedback
                         print('Geen product gevonden Productinfo voor: ', productinfo.productnaam, productID)
