@@ -150,3 +150,6 @@ class CalculateOrders():
                                               waarde=aantal_gourmets.get('aantal__sum'))
         except IntegrityError:
             AlgemeneInformatie.objects.create(naam='aantalGourmet', waarde=0)
+
+        AlgemeneInformatie.objects.filter(naam='status').delete()
+        AlgemeneInformatie.objects.create(naam='status', waarde=100)

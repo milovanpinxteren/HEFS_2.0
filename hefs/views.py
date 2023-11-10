@@ -128,8 +128,7 @@ def get_new_orders(user_id):
 @job
 def calculate_orders(request):
     CalculateOrders()
-    AlgemeneInformatie.objects.filter(naam='status').delete()
-    AlgemeneInformatie.objects.create(naam='status', waarde=100)
+
 
 
 @job
