@@ -37,20 +37,13 @@ class FinanceCalculator():
         return profit_table, total_ex_btw, total_incl_btw
 
     def calculate_costs_table(self, userid):
-        organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
-        totale_inkomsten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
-            Sum('orderprijs')).get('orderprijs__sum')
-        totale_verzendkosten = Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
-            Sum('verzendkosten')).get('verzendkosten__sum')
-        try:
-            inkomsten_zonder_verzendkosten = float(totale_inkomsten) - float(totale_verzendkosten)
-            inkomsten_zonder_verzendkosten_ex_btw = inkomsten_zonder_verzendkosten / 1.09
-        except TypeError:
-            inkomsten_zonder_verzendkosten = 0
-            inkomsten_zonder_verzendkosten_ex_btw = 0
+        inkomsten_zonder_verzendkosten = self.sum_brunch_incl_btw + self.sum_diner_incl_btw
+        inkomsten_zonder_verzendkosten_ex_btw = self.sum_brunch_ex_btw + self.sum_diner_ex_btw
 
-        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
+
+        self.aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        self.aantal_brunch = AlgemeneInformatie.objects.get(naam='aantalBrunch').waarde
+        self.aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
 
         costs_table_tuple = []  # name, percentage, kosten per eenheid, vermenigvuldiging, kosten ex, kosten incl
         percentual_costs = PercentueleKosten.objects.all()
@@ -67,7 +60,7 @@ class FinanceCalculator():
                                            output_field=DecimalField(max_digits=8, decimal_places=2))
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
-        costs_table_tuple.append(['Inkoop diner', '', '', '', total_inkoop_diner_ex_btw, total_inkoop_diner_incl_btw])
+        # costs_table_tuple.append(['Inkoop diner', '', '', '', total_inkoop_diner_ex_btw, total_inkoop_diner_incl_btw])
 
         total_inkoop_brunch_ex_btw = float(PickItems.objects.filter(product__gang=7).annotate(
             total_kosten=ExpressionWrapper(F('product__inkoop') * F('hoeveelheid'),
@@ -80,7 +73,7 @@ class FinanceCalculator():
         ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
 
         costs_table_tuple.append(
-            ['Inkoop brunch', '', '', '', total_inkoop_brunch_ex_btw, total_inkoop_brunch_incl_btw])
+            ['Inkoop food', '', '', '', total_inkoop_diner_ex_btw + total_inkoop_brunch_ex_btw, total_inkoop_diner_incl_btw + total_inkoop_brunch_incl_btw])
 
         for percentual_cost in percentual_costs:
             percentage = float(percentual_cost.percentage)
@@ -90,13 +83,13 @@ class FinanceCalculator():
 
         for variable_cost in variable_costs:
             if variable_cost.vermenigvuldiging == 1:  # per order
-                amount_ex_btw = float(variable_cost.kosten_per_eenheid) * aantal_orders
+                amount_ex_btw = float(variable_cost.kosten_per_eenheid) * self.aantal_orders
                 amount_incl_btw = amount_ex_btw * 1.09
                 costs_table_tuple.append(
                     [variable_cost.kostennaam, '', float(variable_cost.kosten_per_eenheid), 'Per order', amount_ex_btw,
                      amount_incl_btw])
-            if variable_cost.vermenigvuldiging == 2:  # per hoofdgerecht
-                amount_ex_btw = float(variable_cost.kosten_per_eenheid) * aantal_hoofdgerechten
+            if variable_cost.vermenigvuldiging == 2:  # per persoon (hoofdgerecht + brunch)
+                amount_ex_btw = float(variable_cost.kosten_per_eenheid) * (self.aantal_hoofdgerechten + self.aantal_brunch)
                 amount_incl_btw = amount_ex_btw * 1.09
                 costs_table_tuple.append(
                     [variable_cost.kostennaam, '', float(variable_cost.kosten_per_eenheid), 'Per hoofdgerecht',
@@ -143,15 +136,15 @@ class FinanceCalculator():
     def calculate_prognose_profit_table(self, profit_table):
         prognose_profit_table = []
 
-        prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
-        prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
+        self.prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
+        self.prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
 
-        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
+        # aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        # aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
 
-        prognose_factor_diner = prognosegetal_diner / aantal_hoofdgerechten
-        prognose_factor_brunch = prognosegetal_brunch / aantal_brunch
-        prognose_factor_totaal = (prognosegetal_diner + prognosegetal_brunch) / (aantal_hoofdgerechten + aantal_brunch)
+        prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
+        prognose_factor_brunch = self.prognosegetal_brunch / self.aantal_brunch
+        prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
 
         for row in profit_table:
             if 'diner' in row[0]:
@@ -176,14 +169,14 @@ class FinanceCalculator():
         return prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
 
     def calculate_prognose_costs_table(self, costs_table):
-        prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
-        prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
+        # prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
+        # prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
+        #
+        # aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        # aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
 
-        aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
-
-        prognose_factor_diner = prognosegetal_diner / aantal_hoofdgerechten
-        prognose_factor_totaal = (prognosegetal_diner + prognosegetal_brunch) / (aantal_hoofdgerechten + aantal_brunch)
+        prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
+        prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
 
         prognose_cost_table = []
         for cost in costs_table:

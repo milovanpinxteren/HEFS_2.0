@@ -37,8 +37,8 @@
                     <td class="table-data">{{ aantal_orders }}</td>
                 </tr>
                 <tr class="table-rows">
-                    <td class="table-data">Aantal hoofdgerechten per order</td>
-                    <td class="table-data">{{ hoofdgerechten_per_order|floatformat:1 }}</td>
+                    <td class="table-data">Aantal personen per order</td>
+                    <td class="table-data">{{ personen_per_order|floatformat:1 }}</td>
                 </tr>
                 <tr class="table-rows">
                     <td class="table-data">Gemiddelde omzet per order (zonder verzendkosten)</td>
@@ -46,7 +46,7 @@
                 </tr>
                 <tr class="table-rows">
                     <td class="table-data">Gemiddelde omzet per persoon (zonder verzendkosten)</td>
-                    <td class="table-data">{{ gem_omzet_per_order|div:hoofdgerechten_per_order|floatformat:2 }}</td>
+                    <td class="table-data">{{ gem_omzet_per_order|div:personen_per_order|floatformat:2 }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -125,7 +125,7 @@
                     <td class="table-data">2023</td>
                     <td class="table-data">{{ aantal_orders }}</td>
                     <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
-                    <td class="table-data">{{ gem_omzet_per_order|div:hoofdgerechten_per_order|floatformat:2 }}</td>
+                    <td class="table-data">{{ gem_omzet_per_order|div:personen_per_order|floatformat:2 }}</td>
                 </tr>
                 </tbody>
             </table>
