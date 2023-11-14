@@ -126,11 +126,10 @@ class FinanceCalculator():
 
         btw_diff = (income_minus_commission_incl_btw - income_minus_commission_ex_btw) - (
                     self.total_costs_incl_btw - self.total_costs_ex_btw)
-        # btw_diff_incl_btw = income_minus_commission_incl_btw - self.total_costs_incl_btw
 
         revenue_table = []
-        revenue_table.append(['Winst', difference_ex_btw, difference_incl_btw])
-        revenue_table.append(['Verschil BTW', btw_diff, ''])
+        revenue_table.append(['Winst', difference_ex_btw])
+        revenue_table.append(['Verschil BTW', btw_diff])
         return revenue_table
 
     def calculate_prognose_profit_table(self, profit_table):
@@ -138,9 +137,6 @@ class FinanceCalculator():
 
         self.prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
         self.prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
-
-        # aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        # aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
 
         prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
         prognose_factor_brunch = self.prognosegetal_brunch / self.aantal_brunch
@@ -169,11 +165,6 @@ class FinanceCalculator():
         return prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw
 
     def calculate_prognose_costs_table(self, costs_table):
-        # prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
-        # prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
-        #
-        # aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
-        # aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
 
         prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
         prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
