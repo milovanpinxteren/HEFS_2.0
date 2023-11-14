@@ -56,18 +56,19 @@ class CustomerInfo():
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
 
         totale_inkomsten = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
-            Sum('orderprijs')).get('orderprijs__sum'))
+            Sum('orderprijs')).get('orderprijs__sum')) #gelijk aan inkomsten incl BTW
         totale_verzendkosten = float(Orders.objects.filter(organisatieID__in=organisations_to_show).aggregate(
             Sum('verzendkosten')).get('verzendkosten__sum'))
         inkomsten_zonder_verzendkosten = totale_inkomsten - totale_verzendkosten
 
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
+        aantal_brunch = AlgemeneInformatie.objects.get(naam='aantalBrunch').waarde
         aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
-        aantal_personen = aantal_hoofdgerechten + AlgemeneInformatie.objects.get(naam='aantalBrunch').waarde
-        hoofdgerechten_per_order = aantal_hoofdgerechten / aantal_orders
+        aantal_personen = aantal_hoofdgerechten + aantal_brunch
+        personen_per_order = aantal_personen / aantal_orders
         gem_omzet_per_order = inkomsten_zonder_verzendkosten / aantal_orders
 
-        return aantal_hoofdgerechten, aantal_orders, hoofdgerechten_per_order, gem_omzet_per_order, aantal_personen
+        return aantal_hoofdgerechten, aantal_orders, personen_per_order, gem_omzet_per_order, aantal_personen
 
     def returning_customers_overview(self, userid):
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
@@ -126,7 +127,7 @@ class CustomerInfo():
         context = {'returning_customers_overview': returning_customers_overview,
                    'orders_per_date_plot': orders_per_date_plot,
                    'aantal_hoofdgerechten': important_numbers[0], 'aantal_orders': important_numbers[1],
-                   'hoofdgerechten_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
+                   'personen_per_order': important_numbers[2], 'gem_omzet_per_order': important_numbers[3],
                    'aantal_personen': important_numbers[4],
                    'customers_2020': returning_customers_overview[0], 'customers_2021': returning_customers_overview[1],
                    'customers_2022': returning_customers_overview[2],
