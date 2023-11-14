@@ -93,8 +93,8 @@
             <table class="table">
                 <thead class="table-head"><span class="table-title">Winst</span>
                 <th class="table-heading"></th>
-                <th class="table-heading">Winst ex BTW</th>
-                <th class="table-heading">Winst incl BTW</th>
+                <th class="table-heading">Winst</th>
+{#                <th class="table-heading">Winst incl BTW</th>#}
                 </thead>
                 <tbody>
                 {% for row in revenue_table %}
@@ -102,12 +102,12 @@
                         <tr class="table-rows" style="font-weight: bold; border: 2px solid">
                             <td class="table-data">{{ row.0 }}</td>
                             <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
-                            <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
+{#                            <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>#}
                             {% else %}
                         <tr class="table-rows">
                         <td class="table-data">{{ row.0 }}</td>
                         <td class="table-data">{{ row.1|floatformat:2 }}</td>
-                        <td class="table-data">{{ row.2|floatformat:2 }}</td>
+{#                        <td class="table-data">{{ row.2|floatformat:2 }}</td>#}
                     {% endif %}
                 </tr>
 
@@ -118,12 +118,10 @@
         </div>
         <div class="prognosegetallen">
             <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
-
             <p>
                 prognosegetal diner: {{ prognosegetal_diner }} <br>
                 prognosegetal brunch: {{ prognosegetal_brunch }}
             </p>
-
             <div style="float: left">
                 {% for key, value in costs_of_inkoop_dict.items %}
                     <p><b>{{ key }}</b>: {{ value|floatformat:2 }}%</p>
@@ -188,8 +186,8 @@
             <table class="table">
                 <thead class="table-head"><span class="table-title">Prognose Winst</span>
                 <th class="table-heading"></th>
-                <th class="table-heading">Winst ex BTW</th>
-                <th class="table-heading">Winst incl BTW</th>
+                <th class="table-heading">Winst</th>
+{#                <th class="table-heading">Winst incl BTW</th>#}
                 </thead>
                 <tbody>
                 {% for row in prognose_revenue_table %}
@@ -197,12 +195,12 @@
                         <tr class="table-rows" style="font-weight: bold; border: 2px solid">
                             <td class="table-data">{{ row.0 }}</td>
                             <td class="table-data" style="color: green">{{ row.1|floatformat:2 }}</td>
-                            <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>
+{#                            <td class="table-data" style="color: green">{{ row.2|floatformat:2 }}</td>#}
                             {% else %}
                         <tr class="table-rows">
                         <td class="table-data">{{ row.0 }}</td>
                         <td class="table-data">{{ row.1|floatformat:2 }}</td>
-                        <td class="table-data">{{ row.2|floatformat:2 }}</td>
+{#                        <td class="table-data">{{ row.2|floatformat:2 }}</td>#}
                     {% endif %}
                 </tr>
 
