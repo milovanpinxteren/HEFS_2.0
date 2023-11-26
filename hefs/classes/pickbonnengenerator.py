@@ -26,9 +26,12 @@ class PickbonnenGenerator:
         pickbonnen = Pickbonnen()
         for order in ordersqueryset:
             naw = []
-            naw.extend(
-                [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, order.huisnummer, order.plaats, order.postcode, order.afleverdatum])
-            # TODO: for label: "[addr] '\n' conversieID '\n' adres '\n' plaats '\n' postcode '\n' voornaam '\n' achternaam
+            if order.huisnummer != None:
+                naw.extend(
+                    [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, order.huisnummer, order.plaats, order.postcode, order.afleverdatum])
+            else:
+                naw.extend(
+                    [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, '', order.plaats, order.postcode, order.afleverdatum])
             pickbonnen.add_page()
             pickbonnen.naw_function(naw)
             pick_order = PickOrders.objects.get(order=order)
@@ -42,9 +45,9 @@ class PickbonnenGenerator:
                     qr_text += str(pick.hoeveelheid) + '\t' + str(pick.product_id) + '\n'
             print(qr_text)
             if order.huisnummer != None:
-                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '\n' + str(order.straatnaam) + str(order.huisnummer) + '\n' + str(order.plaats) + '\n' + str(order.postcode) + '\n' + str(order.voornaam) + '\n' + str(order.achternaam) + '\n' + str(order.afleverdatum)
+                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   |  ' + 'Route: ' + str(order.routenr) + '\n' + str(order.straatnaam) + ' ' + str(order.huisnummer) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
             else:
-                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '\n' + str(order.straatnaam) + '\n' + str(order.plaats) + '\n' + str(order.postcode) + '\n' + str(order.voornaam) + '\n' + str(order.achternaam) + '\n' + str(order.afleverdatum)
+                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   |  ' + 'Route: ' + str(order.routenr) + '\n' + str(order.straatnaam) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
 
             naw_qr_code = qrcode.make(naw_qr_text)
             naw_qr_img = naw_qr_code.get_image()
