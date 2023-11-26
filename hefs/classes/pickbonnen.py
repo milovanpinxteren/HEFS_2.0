@@ -17,7 +17,7 @@ class Pickbonnen(fpdf.FPDF):
         self.cell(100, 10, str(naw[0]), ln=1)
         self.set_font('helvetica', '', 12)
         self.cell(32, 10)
-        naw_string = f'{naw[1]} {naw[2]}\n {naw[3]} {naw[4]}\n{naw[5]}\n{naw[6]}\n{str(naw[7])}'
+        naw_string = f'{naw[1]} {naw[2]}\n{naw[3]} {naw[4]}\n{naw[5]}\n{naw[6]}\n{str(naw[7])}'
         self.multi_cell(100, 5, naw_string)
         self.set_font('helvetica', 'B', 13)
         # self.cell(1, 3, 'Route: ' + str(naw[15]), ln=1)
