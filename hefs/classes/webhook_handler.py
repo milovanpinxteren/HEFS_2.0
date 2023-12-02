@@ -33,8 +33,9 @@ class WebhookHandler():
                 print('make new product')
                 # TODO: make a new product
             elif product_on_partner_response.status_code == 200: #product found, do update
-                self.update_product_quantity(product_on_partner_response, domain_name, headers, json_body)
                 self.update_product_fields(product_on_partner_response, domain_name, headers, json_body)
+                self.update_product_quantity(product_on_partner_response, domain_name, headers, json_body) #!important -> as last, other updates set inventory on 0
+
 
 
     def update_product_quantity(self, product_on_partner_response, domain_name, headers, json_body):
