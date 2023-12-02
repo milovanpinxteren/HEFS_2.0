@@ -17,7 +17,8 @@ class WebhookHandler():
 
         if request_domain == 'gerijptebieren.myshopify.com':
             self.handle_product_change(json_body)
-        # TODO: elif it is an order creation in partner shop (make order in original) or product update in original
+            #ROADMAP: if collection or shipping changed, blog made
+        # TODO: elif it is an order creation in partner shop (make order in original)
 
 
 
@@ -32,11 +33,11 @@ class WebhookHandler():
                 print('make new product')
                 # TODO: make a new product
             elif product_on_partner_response.status_code == 200: #product found, do update
-                self.update_product(product_on_partner_response, domain_name, headers, json_body)
-                    # TODO: update metafields, title, description, status, collections, tags, media, price, price comparison, costs, SKU, barcode, weight
-                    # TODO: translate body_html
+                self.update_product_quantity(product_on_partner_response, domain_name, headers, json_body)
+                self.update_product_fields(product_on_partner_response, domain_name, headers, json_body)
 
-    def update_product(self, product_on_partner_response, domain_name, headers, json_body):
+
+    def update_product_quantity(self, product_on_partner_response, domain_name, headers, json_body):
         product_id_on_partner_site = product_on_partner_response.json()['product']['id']
         get_product_variant_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}/variants.json"
         product_variant_on_partner_response = requests.get(url=get_product_variant_on_partner_site_url, headers=headers)
@@ -57,3 +58,40 @@ class WebhookHandler():
             update_inventory_item_on_partner_response = requests.post(
                 url=inventory_item_on_partner_site_url, headers=headers, json=updated_inventory_data)
             print(update_inventory_item_on_partner_response)
+
+    def update_product_fields(self, product_on_partner_response, domain_name, headers, json_body):
+        product_id_on_partner_site = product_on_partner_response.json()['product']['id']
+        # TODO: update metafields
+        #ROADMAP: costs
+        #TODO: test title, description, status, tags, price, price comparison, SKU, barcode, weight, media
+        # TODO: translate body_html
+        updated_field_data = {
+            "product": {
+                "id": product_id_on_partner_site,
+                "title": json_body['title'],
+                "body_html": json_body['body_html'],
+                "status": json_body['status'],
+                "tags": json_body['tags'],
+                "variants": [{
+                    "barcode": json_body['variants'][0]['barcode'],
+                    "compare_at_price": json_body['variants'][0]['compare_at_price'],
+                    "price": json_body['variants'][0]['price'],
+                    "tags": json_body['variants'][0]['price'],
+                    "sku": json_body['variants'][0]['sku'],
+                    "grams": json_body['variants'][0]['grams'],
+                    "weight": json_body['variants'][0]['weight'],
+                    "weight_unit": json_body['variants'][0]['weight_unit'],
+                }],
+            }
+        }
+        images_array = []
+        for i in range(0, len(json_body['images'])):
+            image_dict = json_body['images'][i]
+            images_array.insert(i, image_dict)
+        updated_field_data["images"] = images_array
+
+
+        product_id_on_partner_site = product_on_partner_response.json()['product']['id']
+        update_product_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}.json"
+        update_product_on_partner_site_response = requests.put(url=update_product_on_partner_site_url, headers=headers,
+                                                               json=updated_field_data)
