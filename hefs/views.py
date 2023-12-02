@@ -23,7 +23,6 @@ def index(request):
 
 @csrf_exempt
 def recieve_webhook(request):
-    print(request)
     headers = request.headers
     body = request.body
     webhook_handler = WebhookHandler()
