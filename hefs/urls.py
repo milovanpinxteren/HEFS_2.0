@@ -16,6 +16,7 @@ urlpatterns = [
     path('financial_overview_page', views.financial_overview_page, name='financial_overview_page'),
     path('facturen_page', views.facturen_page, name='facturen_page'),
     path('get_status', views.get_status, name='get_status'),
+    path('recieve_webhook', views.recieve_webhook, name='recieve_webhook'),
 
     path('handle_alterated_new_orders', views.handle_alterated_new_orders, name='handle_alterated_new_orders'),
 
