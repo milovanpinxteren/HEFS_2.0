@@ -16,19 +16,19 @@ from .classes.webhook_handler import WebhookHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
 from .models import ApiUrls, AlgemeneInformatie, Orders
 from django.contrib import messages
-
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     return HttpResponse("test")
 
+@csrf_exempt
 def recieve_webhook(request):
     print(request)
     headers = request.headers
     body = request.body
     webhook_handler = WebhookHandler()
     webhook_handler.handle_request(headers, body)
-
-    return
+    return HttpResponse(status=200)
 
 def show_veh(request):
     try:
