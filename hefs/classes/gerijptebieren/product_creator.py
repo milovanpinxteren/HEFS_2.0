@@ -24,6 +24,8 @@ class ProductCreator():
                     "vendor": json_body['vendor'],
                     "status": json_body['status'],
                     "tags": json_body['tags'],
+                    "published_at": json_body['published_at'],
+                    "published_scope": json_body['published_scope'],
                     "variants": [{
                         "barcode": json_body['variants'][0]['barcode'],
                         "compare_at_price": json_body['variants'][0]['compare_at_price'],
@@ -31,6 +33,7 @@ class ProductCreator():
                         "tags": json_body['variants'][0]['price'],
                         "sku": json_body['variants'][0]['sku'],
                         "grams": json_body['variants'][0]['grams'],
+                        "inventory_management": json_body['variants'][0]['inventory_management'],
                         "weight": json_body['variants'][0]['weight'],
                         "weight_unit": json_body['variants'][0]['weight_unit'],
                     }],
@@ -40,7 +43,7 @@ class ProductCreator():
                 for i in range(0, len(json_body['images'])):
                     image_dict = json_body['images'][i]
                     images_array.insert(i, image_dict)
-                create_product_data["images"] = images_array
+                create_product_data['product']["images"] = images_array
                 create_product_response = requests.post(url=create_product_url, headers=headers, json=create_product_data)
                 print('Product created', create_product_response)
                 self.update_product_quantity(create_product_response, domain_name, headers, json_body) # !important -> as last, other updates set inventory on 0
