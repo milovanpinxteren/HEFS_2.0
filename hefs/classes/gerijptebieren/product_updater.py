@@ -7,7 +7,6 @@ from hefs.classes.gerijptebieren.translator import Translator
 
 class ProductUpdater:
     def update_product(self, json_body):
-        print('update product')
         partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}  # add domains here
         for domain_name, token in partner_websites.items():
             headers = {"Accept": "application/json", "Content-Type": "application/json",
@@ -25,13 +24,13 @@ class ProductUpdater:
 
     def update_product_fields(self, product_on_partner_response, domain_name, headers, json_body):
         product_id_on_partner_site = product_on_partner_response.json()['product']['id']
-        #TODO: test media
-        # TODO: translate body_html
+        translator = Translator()
+        translated_body = translator.translate_from_google(domain_name, json_body['body_html'])
         updated_field_data = {
             "product": {
                 "id": product_id_on_partner_site,
                 "title": json_body['title'],
-                "body_html": json_body['body_html'],
+                "body_html": translated_body,
                 "status": json_body['status'],
                 "tags": json_body['tags'],
                 "variants": [{
@@ -56,6 +55,7 @@ class ProductUpdater:
         update_product_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}.json"
         update_product_on_partner_site_response = requests.put(url=update_product_on_partner_site_url, headers=headers,
                                                                json=updated_field_data)
+        print('Fields of object updated', update_product_on_partner_site_response)
 
     def update_product_quantity(self, product_on_partner_response, domain_name, headers, json_body):
         product_id_on_partner_site = product_on_partner_response.json()['product']['id']
@@ -76,7 +76,7 @@ class ProductUpdater:
             }
             update_inventory_item_on_partner_response = requests.post(
                 url=inventory_item_on_partner_site_url, headers=headers, json=updated_inventory_data)
-            print(update_inventory_item_on_partner_response)
+            print('Inventory of object updated', update_inventory_item_on_partner_response)
 
     def update_product_metafields(self, product_on_partner_response, domain_name, headers, json_body):
         translator = Translator()
@@ -86,13 +86,16 @@ class ProductUpdater:
                    "X-Shopify-Access-Token": settings.GERIJPTEBIEREN_ACCESS_TOKEN}
         get_product_metafields_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/products/{product_id_original_site}/metafields.json"
         get_product_metafields_original_site_response = requests.get(url=get_product_metafields_original_site_url, headers=original_headers)
-        original_metafields = get_product_metafields_original_site_response.json()['metafields']
-        for metafield in original_metafields:
-            if metafield['key'] in ['rijpingsmethode', 'soort_bier', 'land_van_herkomst']:
-                translated_value = translator.translate_value_from_dict(domain_name, metafield['key'], metafield['value'])
-                metafield['value'] = translated_value
-            payload = {"metafield": metafield}
-            make_metafield_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}/metafields.json"
-            post_metafields_partner_site_response = requests.post(url=make_metafield_url, headers=headers, json=payload)
-            print(post_metafields_partner_site_response)
+        try:
+            original_metafields = get_product_metafields_original_site_response.json()['metafields']
+            for metafield in original_metafields:
+                if metafield['key'] in ['rijpingsmethode', 'soort_bier', 'land_van_herkomst']:
+                    translated_value = translator.translate_value_from_dict(domain_name, metafield['key'], metafield['value'])
+                    metafield['value'] = translated_value
+                payload = {"metafield": metafield}
+                make_metafield_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}/metafields.json"
+                post_metafields_partner_site_response = requests.post(url=make_metafield_url, headers=headers, json=payload)
+                print('Metafields of object updated', post_metafields_partner_site_response)
+        except KeyError:
+            print('no metafields found')
 
