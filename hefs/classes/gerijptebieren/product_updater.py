@@ -43,13 +43,15 @@ class ProductUpdater:
                     "weight": json_body['variants'][0]['weight'],
                     "weight_unit": json_body['variants'][0]['weight_unit'],
                 }],
+                "image": json_body['image'],
             }
         }
         images_array = []
         for i in range(0, len(json_body['images'])):
             image_dict = json_body['images'][i]
             images_array.insert(i, image_dict)
-        updated_field_data["images"] = images_array
+        updated_field_data['product']["images"] = images_array
+
 
         product_id_on_partner_site = product_on_partner_response.json()['product']['id']
         update_product_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}.json"

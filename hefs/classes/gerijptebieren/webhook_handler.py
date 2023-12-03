@@ -43,6 +43,7 @@ class WebhookHandler():
 
 
 
+#TODO: does not work, ID does not exist after deletion -> no way to get the handle
     def delete_product(self, json_body):
         get_product_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/products/{json_body['id']}.json"
         original_headers = {"Accept": "application/json", "Content-Type": "application/json",
