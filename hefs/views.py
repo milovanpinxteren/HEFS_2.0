@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render
 from django_rq import job
@@ -12,10 +11,9 @@ from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
 from .classes.make_factuur_overview import MakeFactuurOverview
 from .classes.veh_handler import VehHandler
-from .classes.webhook_handler import WebhookHandler
+from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
 from .models import ApiUrls, AlgemeneInformatie, Orders
-from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
