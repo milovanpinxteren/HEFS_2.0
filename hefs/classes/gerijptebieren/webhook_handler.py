@@ -2,6 +2,7 @@ import json
 import requests
 from django.conf import settings
 
+from hefs.classes.gerijptebieren.order_creator import OrderCreator
 from hefs.classes.gerijptebieren.product_creator import ProductCreator
 from hefs.classes.gerijptebieren.product_updater import ProductUpdater
 
@@ -23,6 +24,7 @@ class WebhookHandler():
         self.authenticate(headers, json_body)
 
     def authenticate(self, headers, json_body):
+        partner_websites = ['387f61-2.myshopify.com', 'gereiftebiere.de'] #both are the german, just to be sure
         request_domain = headers['x-shopify-shop-domain']
         #TODO: check request
 
@@ -37,9 +39,10 @@ class WebhookHandler():
                 product_updater.update_product(json_body)
 
 
-        if request_domain != 'gerijptebieren.myshopify.com': #make this to only have the domains i want
-            print('check if order and make order in main')
-            # TODO: elif it is an order creation in partner shop (make order in original)
+        if request_domain in partner_websites:
+            if headers["x-shopify-topic"] == "orders/create":
+                order_creator = OrderCreator()
+                order_creator.create_order(json_body, request_domain)
 
 
 
