@@ -17,17 +17,22 @@ class ProductUpdater:
             product_on_partner_response = requests.get(url=get_product_on_partner_site_url, headers=headers)
             print('product_on_partner_response', product_on_partner_response)
             if product_on_partner_response.status_code == 404:  # product handle not found, but has been made
-                print('product handle not found, create product')
-                #if product is concept?
-                product_maker = product_creator.ProductCreator()
-                product_maker.create_product(json_body)
+                print('product handle not found, check if it is a draft')
+                get_draft_products_url = f"https://{domain_name}/admin/api/2023-10/products.json?status=draft"
+                get_draft_products_response = requests.get(url=get_draft_products_url, headers=headers)
+                for product in get_draft_products_response.json()['products']:
+                    if product['handle'] == json_body['handle']:
+                        product_id_on_partner = product['id']
+                        print('draft found, passing id of draft product')
             elif product_on_partner_response.status_code == 200: #product found, do update
-                self.update_product_fields(product_on_partner_response, domain_name, headers, json_body)
-                self.update_product_metafields(product_on_partner_response, domain_name, headers, json_body)
-                self.update_product_quantity(product_on_partner_response, domain_name, headers, json_body) #!important -> as last, other updates set inventory on 0
+                product_id_on_partner = product_on_partner_response.json()['product']['id']
 
-    def update_product_fields(self, product_on_partner_response, domain_name, headers, json_body):
-        product_id_on_partner_site = product_on_partner_response.json()['product']['id']
+            self.update_product_fields(product_id_on_partner, domain_name, headers, json_body)
+            self.update_product_metafields(product_id_on_partner, domain_name, headers, json_body)
+            self.update_product_quantity(product_id_on_partner, domain_name, headers, json_body) #!important -> as last, other updates set inventory on 0
+
+    def update_product_fields(self, product_id_on_partner, domain_name, headers, json_body):
+        product_id_on_partner_site = product_id_on_partner
         translator = Translator()
         translated_body = translator.translate_from_google(domain_name, json_body['body_html'])
         updated_field_data = {
@@ -56,15 +61,13 @@ class ProductUpdater:
             images_array.insert(i, image_dict)
         updated_field_data['product']["images"] = images_array
 
-
-        product_id_on_partner_site = product_on_partner_response.json()['product']['id']
         update_product_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}.json"
         update_product_on_partner_site_response = requests.put(url=update_product_on_partner_site_url, headers=headers,
                                                                json=updated_field_data)
         print('Fields of object updated', update_product_on_partner_site_response)
 
-    def update_product_quantity(self, product_on_partner_response, domain_name, headers, json_body):
-        product_id_on_partner_site = product_on_partner_response.json()['product']['id']
+    def update_product_quantity(self, product_id_on_partner, domain_name, headers, json_body):
+        product_id_on_partner_site = product_id_on_partner
         get_product_variant_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/products/{product_id_on_partner_site}/variants.json"
         product_variant_on_partner_response = requests.get(url=get_product_variant_on_partner_site_url, headers=headers)
 
@@ -84,9 +87,9 @@ class ProductUpdater:
                 url=inventory_item_on_partner_site_url, headers=headers, json=updated_inventory_data)
             print('Inventory of object updated', update_inventory_item_on_partner_response)
 
-    def update_product_metafields(self, product_on_partner_response, domain_name, headers, json_body):
+    def update_product_metafields(self, product_id_on_partner, domain_name, headers, json_body):
         translator = Translator()
-        product_id_on_partner_site = product_on_partner_response.json()['product']['id']
+        product_id_on_partner_site = product_id_on_partner
         product_id_original_site = json_body['id']
         original_headers = {"Accept": "application/json", "Content-Type": "application/json",
                    "X-Shopify-Access-Token": settings.GERIJPTEBIEREN_ACCESS_TOKEN}
