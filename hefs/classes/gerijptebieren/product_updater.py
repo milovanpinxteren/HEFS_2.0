@@ -2,6 +2,7 @@ from django.conf import settings
 import json
 import requests
 
+from hefs.classes.gerijptebieren.product_creator import ProductCreator
 from hefs.classes.gerijptebieren.translator import Translator
 
 
@@ -15,8 +16,10 @@ class ProductUpdater:
             product_on_partner_response = requests.get(url=get_product_on_partner_site_url, headers=headers)
             print('product_on_partner_response', product_on_partner_response)
             if product_on_partner_response.status_code == 404:  # product handle not found, but has been made
-                print('what to do now')
-                # TODO: handle this
+                print('product handle not found, create product')
+                #if product is concept?
+                product_creator = ProductCreator()
+                product_creator.create_product(json_body)
             elif product_on_partner_response.status_code == 200: #product found, do update
                 self.update_product_fields(product_on_partner_response, domain_name, headers, json_body)
                 self.update_product_metafields(product_on_partner_response, domain_name, headers, json_body)

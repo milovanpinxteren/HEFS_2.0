@@ -13,6 +13,7 @@ from hefs.classes.gerijptebieren.product_updater import ProductUpdater
             #Each shop uses API version 2023-10
 
 
+#ROADMAP: full sync
 #ROADMAP: if collection or shipping changed, blog made
 #ROADMAP: update costs of product (not used now)
 
