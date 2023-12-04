@@ -2,7 +2,8 @@ from django.conf import settings
 import json
 import requests
 
-from hefs.classes.gerijptebieren.product_creator import ProductCreator
+
+from hefs.classes.gerijptebieren import product_creator
 from hefs.classes.gerijptebieren.translator import Translator
 
 
@@ -18,8 +19,8 @@ class ProductUpdater:
             if product_on_partner_response.status_code == 404:  # product handle not found, but has been made
                 print('product handle not found, create product')
                 #if product is concept?
-                product_creator = ProductCreator()
-                product_creator.create_product(json_body)
+                product_maker = product_creator.ProductCreator()
+                product_maker.create_product(json_body)
             elif product_on_partner_response.status_code == 200: #product found, do update
                 self.update_product_fields(product_on_partner_response, domain_name, headers, json_body)
                 self.update_product_metafields(product_on_partner_response, domain_name, headers, json_body)
