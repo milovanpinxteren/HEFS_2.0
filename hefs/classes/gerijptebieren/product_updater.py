@@ -1,8 +1,6 @@
 from django.conf import settings
 import json
 import requests
-
-
 from hefs.classes.gerijptebieren import product_creator
 from hefs.classes.gerijptebieren.translator import Translator
 
@@ -16,6 +14,7 @@ class ProductUpdater:
             get_product_on_partner_site_url = f"https://{domain_name}/products/{json_body['handle']}.json"
             product_on_partner_response = requests.get(url=get_product_on_partner_site_url, headers=headers)
             print('product_on_partner_response', product_on_partner_response)
+            product_id_on_partner = False #set to false, overwritten if id is found
             if product_on_partner_response.status_code == 404:  # product handle not found, but has been made
                 print('product handle not found, check if it is a draft')
                 get_draft_products_url = f"https://{domain_name}/admin/api/2023-10/products.json?status=draft"
@@ -27,9 +26,14 @@ class ProductUpdater:
             elif product_on_partner_response.status_code == 200: #product found, do update
                 product_id_on_partner = product_on_partner_response.json()['product']['id']
 
-            self.update_product_fields(product_id_on_partner, domain_name, headers, json_body)
-            self.update_product_metafields(product_id_on_partner, domain_name, headers, json_body)
-            self.update_product_quantity(product_id_on_partner, domain_name, headers, json_body) #!important -> as last, other updates set inventory on 0
+            if product_id_on_partner != False:
+                self.update_product_fields(product_id_on_partner, domain_name, headers, json_body)
+                self.update_product_metafields(product_id_on_partner, domain_name, headers, json_body)
+                self.update_product_quantity(product_id_on_partner, domain_name, headers, json_body) #!important -> as last, other updates set inventory on 0
+            elif product_id_on_partner == False:
+                print('no productid found for handle in active and drafts, make new product', json_body['handle'])
+                creator = product_creator.ProductCreator()
+                creator.create_product(json_body)
 
     def update_product_fields(self, product_id_on_partner, domain_name, headers, json_body):
         product_id_on_partner_site = product_id_on_partner

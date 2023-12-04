@@ -13,7 +13,7 @@ class ProductCreator():
                        "X-Shopify-Access-Token": token}
             metafields = self.check_existment_and_metafields(domain_name, headers, json_body)
             if metafields != False:
-                print('metafields')
+                print('metafields found')
                 create_product_url = f"https://{domain_name}/admin/api/2023-10/products.json"
                 translator = Translator()
                 translated_body = translator.translate_from_google(domain_name, json_body['body_html'])
@@ -45,7 +45,7 @@ class ProductCreator():
                     images_array.insert(i, image_dict)
                 create_product_data['product']["images"] = images_array
                 create_product_response = requests.post(url=create_product_url, headers=headers, json=create_product_data)
-                print('Product created', create_product_response)
+                print('Product created', json_body['title'], create_product_response)
                 self.update_product_quantity(create_product_response, domain_name, headers, json_body) # !important -> as last, other updates set inventory on 0
 
 
