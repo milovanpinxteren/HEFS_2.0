@@ -15,6 +15,9 @@ from hefs.classes.gerijptebieren.product_updater import ProductUpdater
 
 
 #ROADMAP: full sync
+#ROADMAP: order update/fulfillment also triggers update/fulfilment in partner
+#ROADMAP: send mails from partner, not gerijptebieren
+#ROADMAP: If publish date is in the future
 #ROADMAP: if collection or shipping changed, blog made
 #ROADMAP: update costs of product (not used now)
 
@@ -37,6 +40,8 @@ class WebhookHandler():
             elif headers["x-shopify-topic"] == "products/update":
                 product_updater = ProductUpdater()
                 product_updater.update_product(json_body)
+
+
 
 
         if request_domain in partner_websites:
