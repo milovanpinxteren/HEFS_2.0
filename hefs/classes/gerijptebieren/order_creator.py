@@ -1,9 +1,12 @@
 import requests
 from django.conf import settings
 
+from hefs.classes.gerijptebieren.error_handler import ErrorHandler
+
 
 class OrderCreator():
     def create_order(self, json_body, domain_name):
+        #TODO: check payment status etc
         handle_and_quantity_dict = self.get_handles_from_ids(json_body, domain_name)
         original_id_and_quantity_dict = self.get_ids_from_handles(handle_and_quantity_dict)
         self.make_order_on_original(json_body, original_id_and_quantity_dict)
@@ -27,15 +30,25 @@ class OrderCreator():
         headers = {"Accept": "application/json", "Content-Type": "application/json",
                    "X-Shopify-Access-Token": token}
 
-        get_product_response = requests.get(url=get_products_url, headers=headers).json()
-        product_handles = []
-        for product in get_product_response['products']:
-            handle = product['handle']
-            handle_and_quantity_dict[product['handle']] = handle_and_quantity_dict[product['id']]
-            del handle_and_quantity_dict[product['id']]
-            product_handles.append(handle)
+        get_product_response = requests.get(url=get_products_url, headers=headers)
+        if get_product_response.status_code == 200:
+            get_product_response = get_product_response.json()
+            product_handles = []
+            for product in get_product_response['products']:
+                handle = product['handle']
+                handle_and_quantity_dict[product['handle']] = handle_and_quantity_dict[product['id']]
+                del handle_and_quantity_dict[product['id']]
+                product_handles.append(handle)
 
-        return handle_and_quantity_dict
+            return handle_and_quantity_dict
+        else:
+            error_message = 'OrderCreator: Get products from ID on site:' + partner_websites[
+                domain_name] + ' of order' + \
+                            json_body["name"] + ' failed, productIDs: ' + str(
+                product_ids) + ' url:' + get_products_url + ' status code: ' + str(get_product_response.status_code)
+            error_handler = ErrorHandler()
+            error_handler.log_error(error_message)
+            raise Exception
 
     def get_ids_from_handles(self, handle_and_quantity_dict):  # On original website
         # flag order if handle does not exist
@@ -45,10 +58,16 @@ class OrderCreator():
             get_product_on_original_site_url = f"https://gerijptebieren.nl/products/{handle}.json"
             get_product_original_site_response = requests.get(url=get_product_on_original_site_url,
                                                               headers=self.original_headers)
-            # TODO what if id not found?
-            original_variant_id = get_product_original_site_response.json()['product']['variants'][0]['id']
-            handle_and_quantity_dict[original_variant_id] = handle_and_quantity_dict[handle]
-            del handle_and_quantity_dict[handle]
+            if get_product_original_site_response.status_code == 200:
+                original_variant_id = get_product_original_site_response.json()['product']['variants'][0]['id']
+                handle_and_quantity_dict[original_variant_id] = handle_and_quantity_dict[handle]
+                del handle_and_quantity_dict[handle]
+            else:
+                error_message = 'OrderCreator: no productID on found on site: gerijptebieren.nl for handle: ' + str(handle) + ' status code: ' + str(get_product_original_site_response.status_code)
+                error_handler = ErrorHandler()
+                error_handler.log_error(error_message)
+                raise Exception
+
         original_id_and_quantity_dict = handle_and_quantity_dict
 
         return original_id_and_quantity_dict
@@ -56,18 +75,57 @@ class OrderCreator():
     def make_order_on_original(self, json_body, original_id_and_quantity_dict):
         # use self.original_headers and https://gerijptebieren.nl after development
         headers = {"Accept": "application/json", "Content-Type": "application/json",
-                   "X-Shopify-Access-Token": settings.GERIJPTEBIEREN_ACCESS_TOKEN}
+                   "X-Shopify-Access-Token": settings.GEREIFTEBIERE_ACCESS_TOKEN}
         create_order_on_original_site_url = f"https://387f61-2.myshopify.com/admin/api/2023-10/orders.json"
-        #This works
-        #TODO: it's 1 order, vairant should be appended to payload, and one call.
-        #TODO: correct call, orderID, fulfillment
-        #TODO: check if this updates stock
+        line_item_array = []
         for variant_id, quantity in original_id_and_quantity_dict.items():
-            payload = {"order": {"email": "foo@example.com", "fulfillment_status": "fulfilled", "send_receipt": False,
-                                 "send_fulfillment_receipt": False,
-                                 "line_items": [{"variant_id": variant_id, "quantity": quantity}]}}
-            get_product_original_site_response = requests.post(url=create_order_on_original_site_url,
-                                                              headers=headers, json=payload)
-            print(get_product_original_site_response)
+            # line_item_array.append({"variant_id": variant_id, "quantity": quantity}) #after testing
+            line_item_array.append({"variant_id": 47818297901384, "quantity": quantity})
+
+        payload = {
+            "order": {
+                "email": "foo@example.com", "fulfillment_status": None, "send_receipt": False,
+                "send_fulfillment_receipt": False,
+                "line_items": line_item_array,
+                "name": json_body["name"],
+                "customer_locale": json_body["customer_locale"]
+            },
+            "customer": {
+                "first_name": json_body['customer']['first_name'],
+                "last_name": json_body['customer']['last_name'],
+                "email": json_body['customer']['email'],
+            },
+            "billing_address": {
+                "first_name": json_body['billing_address']['first_name'],
+                "last_name": json_body['billing_address']['last_name'],
+                "phone": json_body['billing_address']['phone'],
+                "address": json_body['billing_address']['address1'],
+                "city": json_body['billing_address']['city'],
+                "province": json_body['billing_address']['province'],
+                "country": json_body['billing_address']['country'],
+                "zip": json_body['billing_address']['zip'],
+            },
+            "shipping_address": {
+                "first_name": json_body['shipping_address']['first_name'],
+                "last_name": json_body['shipping_address']['last_name'],
+                "phone": json_body['shipping_address']['phone'],
+                "address": json_body['shipping_address']['address1'],
+                "city": json_body['shipping_address']['city'],
+                "province": json_body['shipping_address']['province'],
+                "country": json_body['shipping_address']['country'],
+                "zip": json_body['shipping_address']['zip'],
+            }
+        }
+        create_order_original_site_response = requests.post(url=create_order_on_original_site_url,
+                                                            headers=headers, json=payload)
+
+        if create_order_original_site_response.status_code == 201:
+            print('order created', json_body["name"])
+        else:
+            error_message = 'Failed to create order in gerijptebieren. OrderName: ' + json_body[
+                "name"] + ' status code: ' + str(create_order_original_site_response.status_code)
+            error_handler = ErrorHandler()
+            error_handler.log_error(error_message)
+            raise Exception
 
 

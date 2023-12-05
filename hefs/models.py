@@ -210,3 +210,7 @@ class Customers(models.Model):
 class JSONData(models.Model):
     key = models.CharField(max_length=25)
     value = models.JSONField()
+
+class ErrorLogDataGerijptebieren(models.Model):
+    error_message = models.CharField(max_length=300, default='', null=True)
+    timestamp = models.DateTimeField(null=True, blank=True)
