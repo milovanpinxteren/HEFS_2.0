@@ -73,14 +73,11 @@ class OrderCreator():
         return original_id_and_quantity_dict
 
     def make_order_on_original(self, json_body, original_id_and_quantity_dict):
-        # use self.original_headers and https://gerijptebieren.nl after development
-        headers = {"Accept": "application/json", "Content-Type": "application/json",
-                   "X-Shopify-Access-Token": settings.GEREIFTEBIERE_ACCESS_TOKEN}
-        create_order_on_original_site_url = f"https://387f61-2.myshopify.com/admin/api/2023-10/orders.json"
+
         line_item_array = []
         for variant_id, quantity in original_id_and_quantity_dict.items():
-            # line_item_array.append({"variant_id": variant_id, "quantity": quantity}) #after testing
-            line_item_array.append({"variant_id": 47818297901384, "quantity": quantity})
+            line_item_array.append({"variant_id": variant_id, "quantity": quantity}) #after testing
+            # line_item_array.append({"variant_id": 47818297901384, "quantity": quantity})
 
         payload = {
             "order": {
@@ -116,8 +113,13 @@ class OrderCreator():
                 "zip": json_body['shipping_address']['zip'],
             }
         }
+        # use self.original_headers and https://gerijptebieren.nl after development
+        # headers = {"Accept": "application/json", "Content-Type": "application/json",
+        #            "X-Shopify-Access-Token": settings.GEREIFTEBIERE_ACCESS_TOKEN}
+        # create_order_on_original_site_url = f"https://387f61-2.myshopify.com/admin/api/2023-10/orders.json"
+        create_order_on_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/orders.json"
         create_order_original_site_response = requests.post(url=create_order_on_original_site_url,
-                                                            headers=headers, json=payload)
+                                                            headers=self.original_headers, json=payload)
 
         if create_order_original_site_response.status_code == 201:
             print('order created', json_body["name"])
