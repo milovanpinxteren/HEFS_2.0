@@ -81,6 +81,7 @@ class OrderCreator():
             line_item_array.append({"variant_id": variant_id, "quantity": quantity}) #after testing
             # line_item_array.append({"variant_id": 47818297901384, "quantity": quantity, "requires_shipping": True})
 
+        #TODO: shipping and discounts
         payload = {
             "order": {
                 "email": json_body['contact_email'],

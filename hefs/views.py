@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render
 from django_rq import job
@@ -9,11 +10,12 @@ from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
 from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
+from .classes.gerijptebieren.product_syncer import ProductSyncer
 from .classes.make_factuur_overview import MakeFactuurOverview
 from .classes.veh_handler import VehHandler
 from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
-from .models import ApiUrls, AlgemeneInformatie, Orders
+from .models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren
 from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
@@ -27,6 +29,19 @@ def recieve_webhook(request):
     webhook_handler.handle_request(headers, body)
     return HttpResponse(status=200)
 
+
+def show_sync_page(request):
+    error_logs = ErrorLogDataGerijptebieren.objects.all()
+    context = {'error_logs': error_logs}
+    return render(request, 'sync_page.html', context)
+
+def start_product_sync(request):
+    print('START SYNC')
+    product_syncer = ProductSyncer()
+    product_syncer.do_sync()
+    error_logs = ErrorLogDataGerijptebieren.objects.all()
+    context = {'error_logs': error_logs}
+    return render(request, 'sync_page.html', context)
 def show_veh(request):
     try:
         organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
@@ -198,3 +213,12 @@ def facturen_page(request):
     facturen_table = make_facturen_overview.prepare_overview()
     context = {'facturen_table': facturen_table}
     return render(request, 'facturenpage.html', context)
+
+
+def routes_page(request):
+    verzendopties_counts = Orders.objects.values('verzendoptie__verzendoptie').annotate(
+        count=Count('verzendoptie__verzendoptie')).order_by('-count')
+    verzendopties_dict = {item['verzendoptie__verzendoptie']: item['count'] for item in verzendopties_counts}
+
+    context = {'verzendopties_dict': verzendopties_dict}
+    return render(request, 'routespage.html', context)
