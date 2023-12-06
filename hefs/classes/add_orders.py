@@ -25,6 +25,7 @@ class AddOrders():
                                       afleverdatum=neworder_first.afleverdatum,
                                       aflevertijd=neworder_first.aflevertijd,
                                       verzendkosten=neworder_first.verzendkosten,
+                                      verzendoptie=neworder_first.verzendoptie,
                                       korting=neworder_first.korting,
                                       orderprijs=neworder_first.orderprijs,
                                       organisatieID=neworder_first.organisatieID,

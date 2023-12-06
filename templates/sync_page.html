@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Gerijptebieren sync pagina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+</head>
+<body>
+{% include "navbar.html" %}
+<h1 class="page-title">Gerijptebieren sync pagina</h1>
+    <a class="button-48" href="{% url 'start_product_sync' %}">Start Synchronisatie</a>
+
+{% for errorlog in error_logs %}
+    <p>
+        {{ errorlog.timestamp }}: {{ errorlog.error_message }}
+    </p>
+{% endfor %}
+</body>
+
+
+</html>
