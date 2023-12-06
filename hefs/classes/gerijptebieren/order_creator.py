@@ -75,10 +75,9 @@ class OrderCreator():
 
         line_item_array = []
         for variant_id, quantity in original_id_and_quantity_dict.items():
-            # line_item_array.append({"variant_id": variant_id, "quantity": quantity}) #after testing
-            line_item_array.append({"variant_id": 47818297901384, "quantity": quantity, "requires_shipping": True})
+            line_item_array.append({"variant_id": variant_id, "quantity": quantity}) #after testing
+            # line_item_array.append({"variant_id": 47818297901384, "quantity": quantity, "requires_shipping": True})
 
-#TODO: add customer locale
         payload = {
             "order": {
                 "email": json_body['contact_email'],
@@ -115,6 +114,7 @@ class OrderCreator():
                 "last_name": json_body['customer']['last_name'],
                 "email": json_body['customer']['email'],
             },
+            "customer_locale": json_body['customer_locale'],
 
         }
 
@@ -122,8 +122,8 @@ class OrderCreator():
         # use self.original_headers and https://gerijptebieren.nl after development
         headers = {"Accept": "application/json", "Content-Type": "application/json",
                    "X-Shopify-Access-Token": settings.GEREIFTEBIERE_ACCESS_TOKEN}
-        create_order_on_original_site_url = f"https://387f61-2.myshopify.com/admin/api/2023-10/orders.json"
-        # create_order_on_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/orders.json"
+        # create_order_on_original_site_url = f"https://387f61-2.myshopify.com/admin/api/2023-10/orders.json"
+        create_order_on_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/orders.json"
         create_order_original_site_response = requests.post(url=create_order_on_original_site_url,
                                                             headers=headers, json=payload)
 
