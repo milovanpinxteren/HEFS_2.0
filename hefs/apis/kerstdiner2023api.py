@@ -151,6 +151,34 @@ class Kerstdiner2023API:
         besteldatum = datetime.strptime(order['created_at'][:10], '%Y-%m-%d')
         tz = timezone.get_current_timezone()
         timzone_besteldatum = timezone.make_aware(besteldatum, tz, True)
+        if 'ALTEREGO' in order['tags']:
+            NewOrders.objects.create(conversieID=order['name'],
+                                     besteldatum=timzone_besteldatum,
+                                     verzendoptie=verzendoptie,
+                                     afleverdatum=verzendoptie.verzenddatum,
+                                     aflevertijd='00:00:00',
+                                     verzendkosten=float(verzendoptie.verzendkosten),
+                                     korting=float(order['total_discounts']),
+                                     orderprijs=order['current_subtotal_price'],
+                                     totaal=float(order['current_total_price']),
+                                     aantal=1,
+                                     product=order['name'],
+                                     productSKU=883,
+                                     voornaam=order['shipping_address']['first_name'],
+                                     achternaam=order['shipping_address']['last_name'],
+                                     emailadres=order['contact_email'],
+                                     telefoonnummer=order['shipping_address']['phone'],
+                                     straatnaam=order['shipping_address']['address1'],
+                                     huisnummer=order['shipping_address']['address2'],
+                                     postcode=order['shipping_address']['zip'],
+                                     plaats=order['shipping_address']['city'],
+                                     land=order['shipping_address']['country'],
+                                     postadres_straatnaam=order['billing_address']['address1'],
+                                     postadres_huisnummer=order['billing_address']['address2'],
+                                     postadres_postcode=order['billing_address']['zip'],
+                                     postadres_plaats=order['billing_address']['city'],
+                                     postadres_land=order['billing_address']['country'],
+                                     opmerkingen=order['customer']['note'])
         for i in range(0, len(order['discount_codes'])):
             if 'ALTEREGO' in order['discount_codes'][i]['code']:
                 NewOrders.objects.create(conversieID=order['name'],
