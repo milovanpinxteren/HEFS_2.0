@@ -13,7 +13,10 @@ class OrderCreator():
 
     def get_handles_from_ids(self, json_body, domain_name):
         partner_websites = {
-            'gereiftebiere.de': {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}}  # add domains here
+            'gereiftebiere.de': {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN},
+            '387f61-2.myshopify.com': {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
+            # add domains here
+        }
 
         product_ids = ''
         handle_and_quantity_dict = {}  # create id as key, quantity as value. Later overwrite the id to be the handle
@@ -87,6 +90,7 @@ class OrderCreator():
                 "line_items": line_item_array,
                 "name": json_body["name"],
                 "customer_locale": json_body["customer_locale"],
+                "inventory_behaviour": "decrement_obeying_policy",
                 "billing_address": {
                     "first_name": json_body['billing_address']['first_name'],
                     "last_name": json_body['billing_address']['last_name'],
@@ -114,18 +118,16 @@ class OrderCreator():
                 "last_name": json_body['customer']['last_name'],
                 "email": json_body['customer']['email'],
             },
-            "customer_locale": json_body['customer_locale'],
-
         }
 
 
         # use self.original_headers and https://gerijptebieren.nl after development
-        headers = {"Accept": "application/json", "Content-Type": "application/json",
-                   "X-Shopify-Access-Token": settings.GEREIFTEBIERE_ACCESS_TOKEN}
+        # headers = {"Accept": "application/json", "Content-Type": "application/json",
+        #            "X-Shopify-Access-Token": settings.GEREIFTEBIERE_ACCESS_TOKEN}
         # create_order_on_original_site_url = f"https://387f61-2.myshopify.com/admin/api/2023-10/orders.json"
         create_order_on_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/orders.json"
         create_order_original_site_response = requests.post(url=create_order_on_original_site_url,
-                                                            headers=headers, json=payload)
+                                                            headers=self.original_headers, json=payload)
 
         if create_order_original_site_response.status_code == 201:
             print('order created', json_body["name"])
