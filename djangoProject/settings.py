@@ -153,7 +153,7 @@ redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 RQ_QUEUES = {
     'default': {
         'URL': redis_url,
-        'DEFAULT_TIMEOUT': os.getenv('REDIS_TIMEOUT', 2100),
+        'DEFAULT_TIMEOUT': os.getenv('REDIS_TIMEOUT', 7200),
     },
     'high': {
         'URL': redis_url,
