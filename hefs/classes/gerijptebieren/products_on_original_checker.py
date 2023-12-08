@@ -109,6 +109,7 @@ class ProductsOnOriginalChecker():
             partner_inventory_item_id = product_variant_on_partner_response.json()['variants'][0]['inventory_item_id']
             inventory_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/inventory_items.json?ids={partner_inventory_item_id}"
             inventory_item_on_partner_response = requests.get(url=inventory_on_partner_site_url, headers=headers)
+            time.sleep(1)
             if inventory_item_on_partner_response.status_code == 200:
                 inventory_item_id_partner = inventory_item_on_partner_response.json()['inventory_items'][0]['id']
                 locations_on_partner_url = f"https://{domain_name}/admin/api/2023-10/locations.json"
@@ -117,6 +118,7 @@ class ProductsOnOriginalChecker():
                     location_id = locations_on_partner_response.json()['locations'][0]['id']
                     inventory_level_on_partner_site_url = f"https://{domain_name}/admin/api/2023-10/inventory_levels.json?location_ids={location_id}&inventory_item_ids={inventory_item_id_partner}"
                     inventory_level_partner = requests.get(url=inventory_level_on_partner_site_url, headers=headers)
+                    time.sleep(1)
                     if inventory_level_partner.status_code == 200:
                         availability_on_partner = inventory_level_partner.json()['inventory_levels'][0]['available']
                         # This is the available amount on the partner site. Might not be correct. If a item is ordered but not yet shipped
