@@ -31,17 +31,27 @@ def recieve_webhook(request):
 
 
 def show_sync_page(request):
-    error_logs = ErrorLogDataGerijptebieren.objects.all()
+    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('timestamp')
     context = {'error_logs': error_logs}
     return render(request, 'sync_page.html', context)
 
 def start_product_sync(request):
     print('START SYNC')
-    product_syncer = ProductSyncer()
-    product_syncer.do_sync()
-    error_logs = ErrorLogDataGerijptebieren.objects.all()
+    type = request.GET['type']
+    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('timestamp')
+    if request.environ.get('OS', '') == "Windows_NT":
+        sync_products(type)
+    else:
+        sync_products.delay(type)
+
     context = {'error_logs': error_logs}
     return render(request, 'sync_page.html', context)
+
+@job
+def sync_products(type):
+    product_syncer = ProductSyncer()
+    product_syncer.do_sync(type)
+
 def show_veh(request):
     try:
         organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs

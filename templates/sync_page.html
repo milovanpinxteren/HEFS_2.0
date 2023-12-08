@@ -10,7 +10,9 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Gerijptebieren sync pagina</h1>
-    <a class="button-48" href="{% url 'start_product_sync' %}">Start Synchronisatie</a>
+    <a class="button-48" href="{% url 'start_product_sync' %}?type=all_original_products">Check of alle producten en aantallen op Gerijptebieren kloppen op partners</a>
+    <a class="button-48" href="{% url 'start_product_sync' %}?type=all_partner_products">Check of alle producten op partners nog bestaan op Gerijptebieren</a>
+
 
 {% for errorlog in error_logs %}
     <p>

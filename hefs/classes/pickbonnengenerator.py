@@ -42,8 +42,7 @@ class PickbonnenGenerator:
                 if pick.product.verpakkingscombinatie_id != 6:
                     pickbonnen.pick_function(pick, pickcount, order.conversieID)
                     pickcount += 1
-                    qr_text += str(pick.hoeveelheid) + '\t' + str(pick.product_id) + '\n'
-            print(qr_text)
+                    qr_text += str(int(pick.hoeveelheid)) + '\t' + str(pick.product_id) + '\n'
             if order.huisnummer != None:
                 naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   |  ' + 'Route: ' + str(order.routenr) + '\n' + str(order.straatnaam) + ' ' + str(order.huisnummer) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
             else:
