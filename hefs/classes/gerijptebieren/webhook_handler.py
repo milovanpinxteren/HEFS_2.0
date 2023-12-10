@@ -13,13 +13,18 @@ from hefs.classes.gerijptebieren.product_updater import ProductUpdater
             #Each product does not have any (additional) variants (or in shopify -> only has 1 variant)
             #Each shop uses API version 2023-10
 
+###########################################Roadmap######################################################################
 
+#RODMAP: batching the queue (in views.py)
+#ROADMAP: Keep ID link -> reduce number of requests -> enables deletion
+#ROADMAP: deletion
 #ROADMAP: full sync
 #ROADMAP: order update/fulfillment also triggers update/fulfilment in partner
-#ROADMAP: send mails from partner, not gerijptebieren
 #ROADMAP: If publish date is in the future
 #ROADMAP: if collection or shipping changed, blog made
-#ROADMAP: update costs of product (not used now)
+
+#Optional ROADMAP: send mails from partner, not gerijptebieren
+#Optional ROADMAP: update costs of product (not used now)
 
 class WebhookHandler():
     def handle_request(self, headers, body):
@@ -53,7 +58,7 @@ class WebhookHandler():
 
 
 
-#TODO: does not work, ID does not exist after deletion -> no way to get the handle
+#does not work, ID does not exist after deletion -> no way to get the handle
     # def delete_product(self, json_body):
     #     get_product_original_site_url = f"https://gerijptebieren.myshopify.com/admin/api/2023-10/products/{json_body['id']}.json"
     #     original_headers = {"Accept": "application/json", "Content-Type": "application/json",

@@ -15,7 +15,6 @@ class AddOrders():
 
     def add_to_orderfile(self):
         print('ADD TO ORDERFILE')
-        #TODO change values to values_list -> flat=True
         self.unique_conversieIDS = NewOrders.objects.values('conversieID').distinct()
         for conversieID in self.unique_conversieIDS:
             neworderlines = NewOrders.objects.filter(conversieID=conversieID['conversieID'])
@@ -23,7 +22,6 @@ class AddOrders():
             existing_order = Orders.objects.filter(conversieID=neworder_first.conversieID)
             if existing_order:
                 print('Order al aanwezig in Orders model')
-                # TODO: give feedback to user
             else:
                 Orders.objects.create(conversieID=neworder_first.conversieID,
                                       besteldatum=neworder_first.besteldatum,
@@ -51,7 +49,6 @@ class AddOrders():
                                                           aantal=neworderline.aantal)
                 if existing_order:
                     print('Orderline al aanwezig in Orderline model')
-                    # TODO: give feedback to user
                 else:
                     Orderline.objects.create(order=order,
                                              product=neworderline.product,

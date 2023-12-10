@@ -92,6 +92,8 @@ class OrderCreator():
                 "name": json_body["name"],
                 "customer_locale": json_body["customer_locale"],
                 "inventory_behaviour": "decrement_obeying_policy",
+                "total_discounts": json_body['total_discounts'],
+                "total_price": json_body['total_price'],
                 "billing_address": {
                     "first_name": json_body['billing_address']['first_name'],
                     "last_name": json_body['billing_address']['last_name'],
@@ -112,7 +114,10 @@ class OrderCreator():
                     "country": json_body['shipping_address']['country'],
                     "zip": json_body['shipping_address']['zip'],
                 },
-                "shipping_lines": [],
+                "shipping_lines": [{
+                    "discounted_price": json_body['shipping_lines'][0]['discounted_price'],
+                    "price": json_body['shipping_lines'][0]['price']
+                }],
             },
             "customer": {
                 "first_name": json_body['customer']['first_name'],
