@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Count
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render
@@ -11,6 +12,8 @@ from .classes.customer_info import CustomerInfo
 from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
 from .classes.gerijptebieren.product_syncer import ProductSyncer
+from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
+from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from .classes.make_factuur_overview import MakeFactuurOverview
 from .classes.veh_handler import VehHandler
 from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
@@ -31,26 +34,38 @@ def recieve_webhook(request):
 
 
 def show_sync_page(request):
-    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('timestamp')
+    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
     return render(request, 'sync_page.html', context)
 
 def start_product_sync(request):
     print('START SYNC')
+    partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
     type = request.GET['type']
-    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('timestamp')
-    if request.environ.get('OS', '') == "Windows_NT":
-        sync_products(type)
-    else:
-        sync_products.delay(type)
+    if type == 'all_original_products':
+        products_on_original_checker = ProductsOnOriginalChecker()
+        all_products_list = products_on_original_checker.get_all_original_products()
+        for domain_name, token in partner_websites.items():
+            for product_set in all_products_list: #one product_set is 250 products
+                if request.environ.get('OS', '') == "Windows_NT":
+                    batch_sync_products(product_set, domain_name, token)
+                else:
+                    batch_sync_products(product_set, domain_name, token).delay()
+    elif type == 'all_partner_products': #only 1 request per products, can be one task (unless more websites)
+        products_on_partners_checker = ProductsOnPartnersChecker()
+        if request.environ.get('OS', '') == "Windows_NT":
+            products_on_partners_checker.check_existment_on_original()
+        else:
+            products_on_partners_checker.check_existment_on_original().delay()
 
+    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
     return render(request, 'sync_page.html', context)
 
 @job
-def sync_products(type):
-    product_syncer = ProductSyncer()
-    product_syncer.do_sync(type)
+def batch_sync_products(product_set, domain_name, token):
+    ProductsOnOriginalChecker().check_products_on_partner_sites(product_set, domain_name, token)  # for all products on original, checks if it exists on partner
+
 
 def show_veh(request):
     try:
