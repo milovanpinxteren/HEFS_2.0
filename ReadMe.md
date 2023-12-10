@@ -33,3 +33,7 @@ App maken <br>
 configureren <br>
 Toegangstoken beheerders API <br>
 ![img.png](img.png)
+
+
+## Gerijptebieren
+Add partner site to partner_sites and partner_websites

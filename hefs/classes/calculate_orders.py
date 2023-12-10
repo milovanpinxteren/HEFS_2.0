@@ -56,10 +56,8 @@ class CalculateOrders():
                                                  pick_order=PickOrders.objects.get(order_id=order_id),
                                                  product=product_to_pick)
                     except ObjectDoesNotExist:
-                        # TODO: User feedback
                         print('Geen product gevonden Productinfo voor: ', productinfo.productnaam, productID)
         except ObjectDoesNotExist:
-            # TODO: User feedback
             print(
                 "Productverpakking niet aanwezig in Verpakkings combinaties. Controleer database, ook 0 moet ingevuld worden",
                 productinfo.productnaam)
