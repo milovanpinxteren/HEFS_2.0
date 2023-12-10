@@ -45,7 +45,7 @@ class Kerstdiner2023API:
                     updated_at = datetime.strptime(order['updated_at'][:10], '%Y-%m-%d')
                     if updated_at > (last_api_call_date - timedelta(days=1)):
                         print('order changed', conversieID)
-                        Orders.objects.filter(conversieID=conversieID).delete() #TODO: check if this deletes orderlines
+                        Orders.objects.filter(conversieID=conversieID).delete()
                         NewOrders.objects.filter(conversieID=conversieID).delete()
                         self.add_to_new_orders(order)
                         self.handle_coupons(order)

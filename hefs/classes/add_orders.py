@@ -15,7 +15,6 @@ class AddOrders():
 
     def add_to_orderfile(self):
         print('ADD TO ORDERFILE')
-        #TODO change values to values_list -> flat=True
         self.unique_conversieIDS = NewOrders.objects.values('conversieID').distinct()
         for conversieID in self.unique_conversieIDS:
             neworderlines = NewOrders.objects.filter(conversieID=conversieID['conversieID'])
