@@ -204,7 +204,7 @@ def get_pickbonnen(request):
             if request.environ.get('OS', '') == "Windows_NT":
                 generate_pickbonnen(begindatum, einddatum, conversieID, routenr)
             else:
-                generate_pickbonnen(begindatum, einddatum, conversieID, routenr).delay()
+                generate_pickbonnen.delay(begindatum, einddatum, conversieID, routenr)
     form = PickbonnenForm()
     context = {'form': form}
     return render(request, 'pickbonnenpage.html', context)
