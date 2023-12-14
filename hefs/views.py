@@ -78,7 +78,7 @@ def show_veh(request):
         context['form'] = form
         return render(request, 'veh.html', context)
     except Exception as e:
-        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        context = {'error': True, 'ErrorMessage': e}
         return render(request, 'veh.html', context)
 
 
@@ -115,7 +115,7 @@ def show_customerlocationplot(request):
         context = {'customer_location_plot': customer_location_plot._repr_html_()}
         return render(request, 'customerlocationplot.html', context)
     except Exception as e:
-        context = {'error': True, 'ErrorMessage': 'Geen orders gevonden'}
+        context = {'error': True, 'ErrorMessage': e}
         return render(request, 'customerlocationplot.html', context)
 
 
@@ -187,10 +187,12 @@ def add_orders():
 def pickbonnen_page(request):
     form = PickbonnenForm()
     context = {'form': form}
+    AlgemeneInformatie.objects.filter(naam='status').delete()
+    AlgemeneInformatie.objects.create(naam='status', waarde=0)
     return render(request, 'pickbonnenpage.html', context)
 
 
-@job
+
 def get_pickbonnen(request):
     if request.method == 'POST':
         form = PickbonnenForm(request.POST, request.FILES)
@@ -199,11 +201,21 @@ def get_pickbonnen(request):
             einddatum = form['einddatum'].value()
             conversieID = form['conversieID'].value()
             routenr = form['routenr'].value()
-            PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
+            if request.environ.get('OS', '') == "Windows_NT":
+                generate_pickbonnen(begindatum, einddatum, conversieID, routenr)
+            else:
+                generate_pickbonnen(begindatum, einddatum, conversieID, routenr).delay()
+    form = PickbonnenForm()
+    context = {'form': form}
+    return render(request, 'pickbonnenpage.html', context)
+
+@job
+def generate_pickbonnen(begindatum, einddatum, conversieID, routenr):
+    PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
+
+def download_pickbonnen(request):
     response = FileResponse(open('pickbonnen.pdf', 'rb'), content_type='application/pdf', as_attachment=True)
     return response
-
-
 
 def financial_overview_page(request):
     try:

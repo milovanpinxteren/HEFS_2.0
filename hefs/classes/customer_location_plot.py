@@ -19,7 +19,7 @@ class CustomerLocationPlot():
         df_coordinates['weight'] = 1
         map_obj = folium.Map(location=[52.2130, 5.2794], zoom_start=7, tiles='cartodb positron')
 
-        lats_longs = df_coordinates[['latitude', 'longitude', 'weight']].to_numpy()
+        lats_longs = df_coordinates[['latitude', 'longitude', 'weight']].dropna().to_numpy()
 
         HeatMap(lats_longs).add_to(map_obj)
         return map_obj

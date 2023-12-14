@@ -10,6 +10,7 @@
 <body>
 {% include "navbar.html" %}
 <h1 class="page-title">Pickbonnen pagina</h1>
+<h2 style="background: #b2bfb5" id="statusH1">Pickbonnen nog niet gegenereerd</h2>
 <h3>Kies hier welke pickbonnen u wilt uitdraaien</h3>
 <p>
     Optie 1: Kies een begin <b>en</b> einddatum. -> Pickbonnen worden gegenereerd voor die datums
@@ -38,12 +39,39 @@
     </div>
 
 </form>
+    <a class="button-48" href="{% url 'download_pickbonnen' %}">Download Pickbonnen</a>
 </body>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 
+<script>
+    // Example using jQuery for simplicity
+    function checkJobStatus() {
+        const url = `get_status`
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            success: function (data) {
+                console.log('data', data)
+                if (data.status === 100) {
+                    target = document.getElementById('statusH1')
+                    target.innerHTML = 'Klaar met genereren van Pickbonnen, klik op "Download Pickbonnen" om te downloaden'
+                } else if (data.status !== 100) {
+                    // Job is still running, continue checking
+                    setTimeout(checkJobStatus, 1000);  // Adjust the interval as needed
+                }
+            },
+            error: function () {
+                // Handle errors if needed
+            }
+        });
+    }
 
+    // Call the function when the page loads or as needed
+    checkJobStatus();
+</script>
 <script>
     $(document).ready(function () {
         $('.datepicker').datepicker();
