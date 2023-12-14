@@ -3,7 +3,7 @@ from datetime import datetime
 import qrcode as qrcode
 
 from hefs.classes.pickbonnen import Pickbonnen
-from hefs.models import Orders, PickOrders, PickItems
+from hefs.models import Orders, PickOrders, PickItems, AlgemeneInformatie
 
 
 class PickbonnenGenerator:
@@ -56,3 +56,5 @@ class PickbonnenGenerator:
             pickbonnen.qr_codecell(pick_qr_img)
             pickbonnen.klant_qr_cell(naw_qr_img)
         pickbonnen.output('pickbonnen.pdf', "rb")
+        AlgemeneInformatie.objects.filter(naam='status').delete()
+        AlgemeneInformatie.objects.create(naam='status', waarde=100)
