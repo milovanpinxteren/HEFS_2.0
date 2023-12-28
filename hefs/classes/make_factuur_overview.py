@@ -16,8 +16,8 @@ class MakeFactuurOverview():
             calculated_values = [
                 [order_price + shipping_cost],
                 [order_price],
-                [(order_price - shipping_cost) / 1.09],
-                [((order_price - shipping_cost) / 1.09) * 0.85]
+                [(order_price) / 1.09],
+                [((order_price) / 1.09) * 0.85]
             ]
 
             result_dict[conversie_id] = calculated_values

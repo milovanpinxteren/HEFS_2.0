@@ -15,6 +15,7 @@ from .classes.gerijptebieren.product_syncer import ProductSyncer
 from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
 from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from .classes.make_factuur_overview import MakeFactuurOverview
+from .classes.route_copier import RouteCopier
 from .classes.veh_handler import VehHandler
 from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
@@ -204,7 +205,11 @@ def get_pickbonnen(request):
             if request.environ.get('OS', '') == "Windows_NT":
                 generate_pickbonnen(begindatum, einddatum, conversieID, routenr)
             else:
-                generate_pickbonnen.delay(begindatum, einddatum, conversieID, routenr)
+                # generate_pickbonnen.delay(begindatum, einddatum, conversieID, routenr)
+                PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
+                response = FileResponse(open('pickbonnen.pdf', 'rb'), content_type='application/pdf',
+                                        as_attachment=True)
+                return response
     form = PickbonnenForm()
     context = {'form': form}
     return render(request, 'pickbonnenpage.html', context)
@@ -253,6 +258,16 @@ def facturen_page(request):
 
 
 def routes_page(request):
+    verzendopties_counts = Orders.objects.values('verzendoptie__verzendoptie').annotate(
+        count=Count('verzendoptie__verzendoptie')).order_by('-count')
+    verzendopties_dict = {item['verzendoptie__verzendoptie']: item['count'] for item in verzendopties_counts}
+
+    context = {'verzendopties_dict': verzendopties_dict}
+    return render(request, 'routespage.html', context)
+
+
+def copy_routes(request):
+    RouteCopier().copy_routes()
     verzendopties_counts = Orders.objects.values('verzendoptie__verzendoptie').annotate(
         count=Count('verzendoptie__verzendoptie')).order_by('-count')
     verzendopties_dict = {item['verzendoptie__verzendoptie']: item['count'] for item in verzendopties_counts}
