@@ -19,6 +19,8 @@ environ.Env.read_env()
 SHOPIFY_ACCESS_TOKEN = env('SHOPIFY_ACCESS_TOKEN')
 GERIJPTEBIEREN_ACCESS_TOKEN = env('GERIJPTEBIEREN_ACCESS_TOKEN')
 GEREIFTEBIERE_ACCESS_TOKEN = env('GEREIFTEBIERE_ACCESS_TOKEN')
+HOB_ACCESS_TOKEN = env('HOB_ACCESS_TOKEN')
+MICROCASH_FTP_PASSWORD = env('MICROCASH_FTP_PASSWORD')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,7 +34,7 @@ SECRET_KEY = 'django-insecure-tzuj9rtn&b0&uyhh@8mqhd#%g338+9cicqittsu2#j8c=eopyb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hefs.89.145.161.168.sslip.io', 'hefs.online',  'www.hefs.online', '127.0.0.1']
+ALLOWED_HOSTS = ['hefs.89.145.161.168.sslip.io', 'hefs.online',  'www.hefs.online', '127.0.0.1', 'hefs.nl', 'www.hefs.nl']
 
 # Application definition
 
@@ -162,4 +164,11 @@ RQ_QUEUES = {
         'URL': redis_url,
 
     }
+}
+
+CELERY_BEAT_SCHEDULE = {
+    'run-my-periodic-function-every-5-minutes': {
+        'task': 'hefs.tasks.sync_changed_inventory',
+        'schedule': 60,  # Execute every 5 minutes (300 seconds)
+    },
 }
