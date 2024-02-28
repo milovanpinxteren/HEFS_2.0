@@ -35,7 +35,17 @@
             <a href="../hefs/facturen_page">Facturatie</a>
         </div>
     </div>
-    <a href="../hefs/show_sync_page">Gerijptebieren</a>
+    <div class="dropdown">
+        <button class="dropbtn">
+            Pilskes
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="../hefs/show_sync_page">Gerijptebieren</a>
+            <a href="../hefs/make_products_page">Productmaker</a>
+        </div>
+    </div>
+
     <a href="/admin">Admin pagina</a>
     <div class="accountdiv">
         Ingelogd als: {{ user.username }}

@@ -11,13 +11,14 @@ from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from .classes.customer_info import CustomerInfo
 from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
-from .classes.gerijptebieren.product_syncer import ProductSyncer
-from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
-from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
+# from .classes.gerijptebieren.product_syncer import ProductSyncer
+# from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
+# from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from .classes.make_factuur_overview import MakeFactuurOverview
+from .classes.microcash_sync.ftp_getter import FTPGetter
 from .classes.route_copier import RouteCopier
 from .classes.veh_handler import VehHandler
-from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
+# from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from .forms import PickbonnenForm, GeneralNumbersForm
 from .models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren
 from django.views.decorators.csrf import csrf_exempt
@@ -39,25 +40,29 @@ def show_sync_page(request):
     context = {'error_logs': error_logs}
     return render(request, 'sync_page.html', context)
 
+
+
 def start_product_sync(request):
+    ftp_getter = FTPGetter()
+    ftp_getter.open_test_file()
     print('START SYNC')
-    partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
-    type = request.GET['type']
-    if type == 'all_original_products':
-        products_on_original_checker = ProductsOnOriginalChecker()
-        all_products_list = products_on_original_checker.get_all_original_products()
-        for domain_name, token in partner_websites.items():
-            for product_set in all_products_list: #one product_set is 250 products
-                if request.environ.get('OS', '') == "Windows_NT":
-                    batch_sync_products(product_set, domain_name, token)
-                else:
-                    batch_sync_products(product_set, domain_name, token).delay()
-    elif type == 'all_partner_products': #only 1 request per products, can be one task (unless more websites)
-        products_on_partners_checker = ProductsOnPartnersChecker()
-        if request.environ.get('OS', '') == "Windows_NT":
-            products_on_partners_checker.check_existment_on_original()
-        else:
-            products_on_partners_checker.check_existment_on_original().delay()
+    # partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
+    # type = request.GET['type']
+    # if type == 'all_original_products':
+    #     products_on_original_checker = ProductsOnOriginalChecker()
+    #     all_products_list = products_on_original_checker.get_all_original_products()
+    #     for domain_name, token in partner_websites.items():
+    #         for product_set in all_products_list: #one product_set is 250 products
+    #             if request.environ.get('OS', '') == "Windows_NT":
+    #                 batch_sync_products(product_set, domain_name, token)
+    #             else:
+    #                 batch_sync_products(product_set, domain_name, token).delay()
+    # elif type == 'all_partner_products': #only 1 request per products, can be one task (unless more websites)
+    #     products_on_partners_checker = ProductsOnPartnersChecker()
+    #     if request.environ.get('OS', '') == "Windows_NT":
+    #         products_on_partners_checker.check_existment_on_original()
+    #     else:
+    #         products_on_partners_checker.check_existment_on_original().delay()
 
     error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
@@ -274,3 +279,8 @@ def copy_routes(request):
 
     context = {'verzendopties_dict': verzendopties_dict}
     return render(request, 'routespage.html', context)
+
+
+def make_products_page(request):
+    barcode_scanner = BarcodeScanner()
+    return None
