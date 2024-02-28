@@ -78,13 +78,13 @@ class FTPGetter:
         except Exception as e:
             print(e)
 
-    def open_test_file(self):
-        file = 'WEB_mcVrdExp.txt'
-        local_file_path = "C:/Downloads/" + file
-        with open(local_file_path, 'r') as local_file:
-            for line in local_file:
-                print(line)
-                self.callback(line, self.get_changed_inventory)
+    # def open_test_file(self):
+    #     file = 'WEB_mcVrdExp.txt'
+    #     local_file_path = "C:/Downloads/" + file
+    #     with open(local_file_path, 'r') as local_file:
+    #         for line in local_file:
+    #             print(line)
+    #             self.callback(line, self.get_changed_inventory)
     def sync_product(self, row):
         data = row.strip().split('\t')
         shopifyID = data[self.shopifyID_index]
