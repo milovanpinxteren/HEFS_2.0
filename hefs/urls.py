@@ -19,6 +19,8 @@ urlpatterns = [
     path('facturen_page', views.facturen_page, name='facturen_page'),
     path('copy_routes', views.copy_routes, name='copy_routes'),
 
+    path('make_products_page', views.make_products_page, name='make_products_page'),
+
     path('get_status', views.get_status, name='get_status'),
     path('recieve_webhook', views.recieve_webhook, name='recieve_webhook'),
     path('show_sync_page', views.show_sync_page, name='show_sync_page'),
