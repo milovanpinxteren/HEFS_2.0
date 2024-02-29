@@ -9,24 +9,21 @@ from rq import Queue
 from rq.registry import ScheduledJobRegistry
 from django.conf import settings
 from redis import Redis
-from djangoProject.tasks import update_product_inventory
+from djangoProject.tasks import update_product_inventory, sync_all_products
 from datetime import datetime, timedelta
 
 
-def schedule_task():
-    # redis_conn = Redis(host=getenv('REDIS_URL', 'localhost:6379'))
-    # Create a queue
-    # queue = Queue(connection=redis_conn)
-    queue = get_queue()
-    while True:
-        job = queue.enqueue(update_product_inventory)
-        now = datetime.now()
-        next_run = datetime(now.year, now.month, now.day, 22, 30)
-        job = queue.enqueue_at(next_run, say_hello)
+def start_schedule_tasks():
+    #init for 5 minute task
+    update_product_inventory()
 
-        # print(job in queue)  # Outputs False as job is not enqueued
-        print('job in queue, scheduler')
-        registry = ScheduledJobRegistry(queue=queue)
-        # print(job in registry)
-        time.sleep(int(settings.SCHEDULE_INTERVAL))
+    #init for daily task at 22:30
+    queue = get_queue()
+    now = datetime.now()
+    next_run = datetime(now.year, now.month, now.day, 22, 30)
+    if now > next_run:
+        next_run += timedelta(days=1)
+    queue.enqueue_at(next_run, sync_all_products)
+
+
 
