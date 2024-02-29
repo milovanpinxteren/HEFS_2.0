@@ -23,5 +23,5 @@ def schedule_task():
         print('job in queue, scheduler')
         registry = ScheduledJobRegistry(queue=queue)
         # print(job in registry)
-        time.sleep(settings.SCHEDULE_INTERVAL)
+        time.sleep(int(settings.SCHEDULE_INTERVAL))
 
