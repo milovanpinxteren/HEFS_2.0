@@ -8,6 +8,7 @@ class HighendfoodsolutionsConfig(AppConfig):
     name = 'hefs'
 
     def ready(self):
+        print('APPS.PY ready function')
         from djangoProject.scheduler import schedule_task
         schedule_task()
 
