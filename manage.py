@@ -3,9 +3,6 @@
 import os
 import sys
 
-from djangoProject.scheduler import schedule_task
-
-
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangoProject.settings')
@@ -22,4 +19,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    schedule_task()
