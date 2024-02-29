@@ -11,7 +11,7 @@ class HighendfoodsolutionsConfig(AppConfig):
 
     def ready(self):
         print('APPS.PY ready function')
-        if 'runserver' not in sys.argv:
+        if 'runserver' in sys.argv:
             print('runserver not')
 
             from djangoProject.scheduler import schedule_task
