@@ -19,9 +19,9 @@ def schedule_task():
     queue = get_queue()
     while True:
         job = queue.enqueue(update_product_inventory)
-        print(job in queue)  # Outputs False as job is not enqueued
+        # print(job in queue)  # Outputs False as job is not enqueued
         print('job in queue, scheduler')
         registry = ScheduledJobRegistry(queue=queue)
-        print(job in registry)
+        # print(job in registry)
         time.sleep(settings.SCHEDULE_INTERVAL)
 
