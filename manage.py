@@ -3,6 +3,8 @@
 import os
 import sys
 
+from djangoProject.scheduler import schedule_task
+
 
 def main():
     """Run administrative tasks."""
@@ -20,3 +22,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    schedule_task()
