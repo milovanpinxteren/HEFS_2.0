@@ -10,6 +10,7 @@ from rq.registry import ScheduledJobRegistry
 from django.conf import settings
 from redis import Redis
 from djangoProject.tasks import update_product_inventory
+from datetime import datetime, timedelta
 
 
 def schedule_task():
@@ -19,6 +20,10 @@ def schedule_task():
     queue = get_queue()
     while True:
         job = queue.enqueue(update_product_inventory)
+        now = datetime.now()
+        next_run = datetime(now.year, now.month, now.day, 22, 30)
+        job = queue.enqueue_at(next_run, say_hello)
+
         # print(job in queue)  # Outputs False as job is not enqueued
         print('job in queue, scheduler')
         registry = ScheduledJobRegistry(queue=queue)
