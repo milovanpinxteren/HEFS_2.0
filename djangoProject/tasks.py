@@ -8,6 +8,7 @@ def update_product_inventory():
     ftp_getter = FTPGetter()
     ftp_getter.get_ftp_changed_file()
     queue = get_queue()
+    print('enqueing')
     queue.enqueue_in(timedelta(seconds=int(settings.SCHEDULE_INTERVAL)), update_product_inventory)
 
 def sync_all_products():
@@ -18,4 +19,5 @@ def sync_all_products():
     next_run = datetime(now.year, now.month, now.day, 22, 30)
     if now > next_run:
         next_run += timedelta(days=1)
+    print('enqueing full sync')
     queue.enqueue_at(next_run, sync_all_products)
