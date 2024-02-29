@@ -54,8 +54,11 @@ class FTPGetter:
     def get_ftp_changed_file(self): #TODO: call this every 5 mins
         try:
             with FTP(self.host) as ftp:
+                print('connecting')
                 ftp.connect(self.host, self.port)
+                print('connected, login', self.username, self.password)
                 ftp.login(self.username, self.password)
+                print('logged in')
                 files = ftp.nlst()
 
                 for file in files:
