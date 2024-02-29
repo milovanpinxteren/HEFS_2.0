@@ -166,9 +166,4 @@ RQ_QUEUES = {
     }
 }
 
-CELERY_BEAT_SCHEDULE = {
-    'run-my-periodic-function-every-5-minutes': {
-        'task': 'hefs.tasks.sync_changed_inventory',
-        'schedule': 60,  # Execute every 5 minutes (300 seconds)
-    },
-}
+
