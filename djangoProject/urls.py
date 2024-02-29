@@ -25,3 +25,6 @@ urlpatterns = [
                   path('hefs/', include('hefs.urls')),
                   path('admin/', admin.site.urls),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+from djangoProject.scheduler import schedule_task
+schedule_task()

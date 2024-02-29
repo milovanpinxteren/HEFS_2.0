@@ -2,11 +2,13 @@
 import time
 from datetime import timedelta
 
+from django.dispatch import receiver
 from rq import Queue
 from rq.registry import ScheduledJobRegistry
 from django.conf import settings
 from redis import Redis
 from djangoProject.tasks import update_product_inventory
+
 
 def schedule_task():
     redis_conn = Redis()
