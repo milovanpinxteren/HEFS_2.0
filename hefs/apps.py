@@ -14,6 +14,6 @@ class HighendfoodsolutionsConfig(AppConfig):
         print(sys.argv)
         if 'djangoProject.wsgi' in sys.argv:
             print('server served')
-            from djangoProject.scheduler import schedule_task
-            schedule_task()
+            from djangoProject.scheduler import start_schedule_tasks
+            start_schedule_tasks()
 
