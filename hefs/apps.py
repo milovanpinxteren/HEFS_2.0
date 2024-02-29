@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
-from djangoProject.scheduler import schedule_task
+
 
 
 class HighendfoodsolutionsConfig(AppConfig):
@@ -8,5 +8,6 @@ class HighendfoodsolutionsConfig(AppConfig):
     name = 'hefs'
 
     def ready(self):
+        from djangoProject.scheduler import schedule_task
         schedule_task()
 
