@@ -54,9 +54,8 @@ class FTPGetter:
     def get_ftp_changed_file(self): #TODO: call this every 5 mins
         try:
             with FTP(self.host) as ftp:
-                print('connecting')
+                print('connecting with ftp')
                 ftp.connect(self.host, self.port)
-                print('connected, login', self.username, self.password)
                 ftp.login(self.username, self.password)
                 print('logged in')
                 files = ftp.nlst()
@@ -74,9 +73,11 @@ class FTPGetter:
                 ftp.connect(self.host, self.port)
                 ftp.login(self.username, self.password)
                 files = ftp.nlst()
+                print('connected for full file')
 
                 for file in files:
                     if file == 'WEB_mcArtExp.txt':
+                        print('found full sync file')
                         ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.sync_product))
         except Exception as e:
             print(e)
@@ -90,6 +91,7 @@ class FTPGetter:
     #             self.callback(line, self.get_changed_inventory)
     def sync_product(self, row):
         data = row.strip().split('\t')
+        self.error_handler.log_error('Updating product ' + data)
         shopifyID = data[self.shopifyID_index]
         price = data[self.sales_price_index]
         inventory_quantity = data[self.inventory_index]
@@ -125,7 +127,7 @@ class FTPGetter:
 
     def get_changed_inventory(self, row):
         # row = "8763716796754\t69"  # was 24
-        print(row)
+        print('inventory changed row: ', row)
         hoBproductID, inventory_quantity = row.split("\t")
         product_handle = self.info_getter.get_product_handle(hoBproductID)
         self.inventory_updater.update_product_quantity(self.websites, self.locations, hoBproductID, product_handle, inventory_quantity)
