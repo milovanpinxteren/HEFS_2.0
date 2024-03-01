@@ -45,6 +45,7 @@ def show_sync_page(request):
 def start_product_sync(request):
     ftp_getter = FTPGetter()
     ftp_getter.get_ftp_full_file()
+    # ftp_getter.get_ftp_changed_file()
     print('START SYNC')
     # partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
     # type = request.GET['type']
