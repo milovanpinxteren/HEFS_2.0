@@ -30,8 +30,8 @@ def index(request):
 def recieve_webhook(request):
     headers = request.headers
     body = request.body
-    webhook_handler = WebhookHandler()
-    webhook_handler.handle_request(headers, body)
+    # webhook_handler = WebhookHandler()
+    # webhook_handler.handle_request(headers, body)
     return HttpResponse(status=200)
 
 
@@ -44,8 +44,8 @@ def show_sync_page(request):
 
 def start_product_sync(request):
     ftp_getter = FTPGetter()
-    ftp_getter.get_ftp_full_file()
-    # ftp_getter.get_ftp_changed_file()
+    # ftp_getter.get_ftp_full_file()
+    ftp_getter.get_ftp_changed_file()
     print('START SYNC')
     # partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
     # type = request.GET['type']
