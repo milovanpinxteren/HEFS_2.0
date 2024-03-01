@@ -1,3 +1,5 @@
+import os
+import tempfile
 from ftplib import FTP
 
 from hefs.classes.error_handler import ErrorHandler
@@ -82,8 +84,14 @@ class FTPGetter:
 
                 for file in files:
                     if file == 'WEB_mcArtExp.txt':
+                        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                            ftp.retrbinary('RETR ' + file, temp_file.write)
+                            temp_file_path = temp_file.name
                         print('found full sync file')
-                        ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.sync_product))
+                        self.process_file(temp_file_path)
+                        os.remove(temp_file_path)
+
+                        # ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.sync_product))
         except Exception as e:
             print(e)
 
@@ -94,6 +102,16 @@ class FTPGetter:
     #         for line in local_file:
     #             print(line)
     #             self.callback(line, self.get_changed_inventory)
+
+
+    def process_file(self, file_path):
+        try:
+            with open(file_path, 'r') as file:
+                for line in file:
+                    self.callback(line, self.sync_product)
+        except Exception as e:
+            print(e)
+
     def sync_product(self, row):
         data = row.strip().split('\t')
         self.error_handler.log_error('Updating product ' + data[0])
@@ -125,7 +143,7 @@ class FTPGetter:
                 self.error_handler.log_error('Product not found, creating ' + product_handle + domain_name)
                 product_created = self.product_maker.create_product(shopifyID, domain_name, headers)
                 if not product_created[0]:
-                    self.error_handler.log_error('Could not create product ' + product_handle + domain_name + product_created[1])
+                    self.error_handler.log_error('Could not create product ' + product_handle + domain_name + str(product_created[1]))
 
         return
 
