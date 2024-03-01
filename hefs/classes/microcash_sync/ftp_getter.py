@@ -63,7 +63,7 @@ class FTPGetter:
                 files = ftp.nlst()
 
                 for file in files:
-                    if file == 'WEB_mcArtExp.txt':
+                    if file == 'WEB_mcVrdExp.txt':
                         # local_file_path = f"C:/Downloads/{file}"
                         # with open(local_file_path, 'wb') as local_file:
                         #     ftp.retrbinary('RETR ' + file, local_file.write)
@@ -142,4 +142,4 @@ class FTPGetter:
 
 
 
-get_ftp = FTPGetter()
+# get_ftp = FTPGetter()
