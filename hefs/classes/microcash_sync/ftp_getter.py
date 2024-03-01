@@ -37,6 +37,7 @@ class FTPGetter:
 
 
     def callback(self, line, sync_function):
+        print('callback', sync_function)
         if not hasattr(self, 'first_line_skipped'):
             self.first_line_skipped = False
         if self.first_line_skipped:
@@ -49,6 +50,7 @@ class FTPGetter:
                 self.sales_price_index = self.column_names.index("Verkoopprijs")
                 self.inventory_index = self.column_names.index("Voorraad")
             except ValueError:
+                print('Error')
                 self.shopifyID_index = self.column_names.index("Barcode")
                 self.inventory_index = self.column_names.index("Voorraad")
     def get_ftp_changed_file(self): #TODO: call this every 5 mins
@@ -61,7 +63,10 @@ class FTPGetter:
                 files = ftp.nlst()
 
                 for file in files:
-                    if file == 'WEB_mcVrdExp.txt':
+                    if file == 'WEB_mcArtExp.txt':
+                        # local_file_path = f"C:/Downloads/{file}"
+                        # with open(local_file_path, 'wb') as local_file:
+                        #     ftp.retrbinary('RETR ' + file, local_file.write)
                         print(f"Printing rows of {file}:")
                         ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.get_changed_inventory))
         except Exception as e:
@@ -91,7 +96,7 @@ class FTPGetter:
     #             self.callback(line, self.get_changed_inventory)
     def sync_product(self, row):
         data = row.strip().split('\t')
-        self.error_handler.log_error('Updating product ' + data)
+        self.error_handler.log_error('Updating product ' + data[0])
         shopifyID = data[self.shopifyID_index]
         price = data[self.sales_price_index]
         inventory_quantity = data[self.inventory_index]
