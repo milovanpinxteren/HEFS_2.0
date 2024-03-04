@@ -10,11 +10,15 @@ class InventoryUpdater:
         for domain_name, token in websites.items():
             headers = {"Accept": "application/json", "Content-Type": "application/json",
                        "X-Shopify-Access-Token": token}
-            if domain_name == '7c70bf.myshopify.com':
-                product_id = hoBproductID
-                inventory_item_id = self.info_getter.get_inventory_item_id(product_id, domain_name, headers)
-            else:
-                product_id, inventory_item_id = self.info_getter.get_ids_from_handle(product_handle, domain_name, headers)
+            try:
+                if domain_name == '7c70bf.myshopify.com':
+                    product_id = hoBproductID
+                    inventory_item_id = self.info_getter.get_inventory_item_id(product_id, domain_name, headers)
+                else:
+                    product_id, inventory_item_id = self.info_getter.get_ids_from_handle(product_handle, domain_name, headers)
+            except Exception as e:
+                print(e)
+            print('productID and domain: ',product_id, domain_name)
             if product_id: #if product exists
                 update_inventory_data = {
                     "location_id": locations[domain_name],
@@ -24,6 +28,6 @@ class InventoryUpdater:
                 update_inventory_response = requests.post(
                     url=update_inventory_url, headers=headers, json=update_inventory_data)
                 if update_inventory_response.status_code == 200:
-                    print('success')
+                    print('updated inventory')
                 elif update_inventory_response.status_code != 200:
                     print('Inventory not updated ',update_inventory_response.status_code, domain_name)
