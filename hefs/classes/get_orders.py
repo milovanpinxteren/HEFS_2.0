@@ -4,6 +4,7 @@ from hefs.apis import kerstdiner2023api
 from hefs.apis import paasdiner2023api
 from hefs.apis.paasdiner2023api import Paasdiner2023API
 from hefs.apis.kerstdiner2023api import Kerstdiner2023API
+from hefs.apis.paasontbijt2024api import Paasontbijt2024API
 
 from hefs.models import ApiUrls
 

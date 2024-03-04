@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{% load static %}
+{% load mathfilters %}
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+    <title>Shopify Orders overzicht</title>
+    <script>
+        function ExportToExcel(type, fn, dl) {
+            var elt = document.getElementById('vehTable');
+            var wb = XLSX.utils.table_to_book(elt, {sheet: "sheet1"});
+            return dl ?
+                XLSX.write(wb, {bookType: type, bookSST: true, type: 'base64'}) :
+                XLSX.writeFile(wb, fn || ('overzicht-transacties.' + (type || 'xlsx')));
+        }
+    </script>
+</head>
+<body>
+{% include "navbar.html" %}
+<h1 class="page-title">Shopify Order Overzicht</h1>
+<a class="button-48" href="{% url 'get_order_transactions' %}">Update transacties</a>
+<button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer naar Excel</button>
+<div>
+    <table id="vehTable">
+        <thead class="table-head">
+        <th class="table-heading">ConversieID</th>
+        <th class="table-heading">Omzet</th>
+        <th class="table-heading">Bezorgkosten</th>
+        <th class="table-heading">Transactiekosten</th>
+        </thead>
+        {% for orderline in orders_matrix %}
+            <tr class="table-rows">
+                {% for linevalue in orderline %}
+                    <td class="table-data">
+                        <span class="number-span">{{ linevalue }}</span>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+</body>
+</html>

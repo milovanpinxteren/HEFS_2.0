@@ -70,7 +70,7 @@ class FTPGetter:
                         # with open(local_file_path, 'wb') as local_file:
                         #     ftp.retrbinary('RETR ' + file, local_file.write)
                         print(f"Printing rows of {file}:")
-                        ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.get_changed_inventory))
+                        ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line.strip(), self.get_changed_inventory))
         except Exception as e:
             print(e)
 
@@ -89,6 +89,7 @@ class FTPGetter:
                             temp_file_path = temp_file.name
                         print('found full sync file')
                         self.process_file(temp_file_path)
+                        print('removing file path')
                         os.remove(temp_file_path)
 
                         # ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.sync_product))
@@ -153,6 +154,7 @@ class FTPGetter:
         print('inventory changed row: ', row)
         hoBproductID, inventory_quantity = row.split("\t")
         product_handle = self.info_getter.get_product_handle(hoBproductID)
+        print(product_handle)
         self.inventory_updater.update_product_quantity(self.websites, self.locations, hoBproductID, product_handle, inventory_quantity)
 
 

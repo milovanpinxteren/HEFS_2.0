@@ -16,14 +16,17 @@ class VehHandler():
             aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
             # aantal_gourmet = Orderline.objects.filter(productSKU__in=[110, 111]).aggregate(Sum('aantal'))['aantal__sum']  # TODO: change to gourmet
             aantal_gourmet = 0
-            prognosefractie_diner = prognosegetal_diner / aantal_hoofdgerechten
+            try:
+                prognosefractie_diner = prognosegetal_diner / aantal_hoofdgerechten
+            except Exception as e:
+                prognosefractie_diner = 0
             try:
                 prognosefractie_brunch = prognosegetal_brunch / aantal_brunch
-            except ZeroDivisionError:
+            except Exception as e:
                 prognosefractie_brunch = 0
             try:
                 prognosefractie_gourmet = prognosegetal_gourmet / aantal_gourmet
-            except ZeroDivisionError:
+            except Exception as e:
                 prognosefractie_gourmet = 0
             aantal_orders = AlgemeneInformatie.objects.get(naam='aantalOrders').waarde
         except Exception as e:
