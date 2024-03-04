@@ -8,6 +8,7 @@ from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
 from hefs.classes.get_orders import GetOrders
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
+from .apis.paasontbijt2024transacties import Paasontbijt2024Transacties
 from .classes.customer_info import CustomerInfo
 from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
@@ -282,6 +283,15 @@ def copy_routes(request):
     return render(request, 'routespage.html', context)
 
 
-def make_products_page(request):
-    barcode_scanner = BarcodeScanner()
-    return None
+
+
+
+def orders_overview(request):
+    return render(request, 'orders_overview.html')
+
+
+def get_order_transactions(request):
+    transaction_getter = Paasontbijt2024Transacties()
+    orders_matrix = transaction_getter.fetch_and_print_orders()
+    context = {'orders_matrix': orders_matrix}
+    return render(request, 'orders_overview.html', context)

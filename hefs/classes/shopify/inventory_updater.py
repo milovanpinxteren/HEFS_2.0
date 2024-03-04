@@ -26,4 +26,4 @@ class InventoryUpdater:
                 if update_inventory_response.status_code == 200:
                     print('success')
                 elif update_inventory_response.status_code != 200:
-                    print(update_inventory_response.status_code)
+                    print('Inventory not updated ',update_inventory_response.status_code, domain_name)

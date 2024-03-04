@@ -13,6 +13,7 @@ class VerzendOpties(models.Model):
 
 class NewOrders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
+    shopifyID = models.BigIntegerField(default=0)
     besteldatum = models.DateTimeField(null=True, blank=True)
     verzendoptie = models.ForeignKey(VerzendOpties, on_delete=models.CASCADE, default='', blank=True)
     afleverdatum = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -46,6 +47,7 @@ class NewOrders(models.Model):
 
 class Orders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
+    shopifyID = models.BigIntegerField(default=0)
     besteldatum = models.DateTimeField(null=True, blank=True)
     afleverdatum = models.DateField(null=True, blank=True)
     aflevertijd = models.TimeField(null=True, blank=True)
