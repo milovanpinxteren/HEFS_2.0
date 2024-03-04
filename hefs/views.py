@@ -17,6 +17,7 @@ from .classes.financecalculator import FinanceCalculator
 # from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from .classes.make_factuur_overview import MakeFactuurOverview
 from .classes.microcash_sync.ftp_getter import FTPGetter
+from .classes.microcash_sync.webhook_handler import WebhookHandler
 from .classes.route_copier import RouteCopier
 from .classes.veh_handler import VehHandler
 # from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
@@ -31,8 +32,8 @@ def index(request):
 def recieve_webhook(request):
     headers = request.headers
     body = request.body
-    # webhook_handler = WebhookHandler()
-    # webhook_handler.handle_request(headers, body)
+    webhook_handler = WebhookHandler()
+    webhook_handler.handle_request(headers, body)
     return HttpResponse(status=200)
 
 
@@ -47,7 +48,6 @@ def start_product_sync(request):
     ftp_getter = FTPGetter()
     # ftp_getter.get_ftp_full_file()
     ftp_getter.get_ftp_changed_file()
-    print('START SYNC')
     # partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
     # type = request.GET['type']
     # if type == 'all_original_products':
@@ -70,9 +70,9 @@ def start_product_sync(request):
     context = {'error_logs': error_logs}
     return render(request, 'sync_page.html', context)
 
-@job
-def batch_sync_products(product_set, domain_name, token):
-    ProductsOnOriginalChecker().check_products_on_partner_sites(product_set, domain_name, token)  # for all products on original, checks if it exists on partner
+# @job
+# def batch_sync_products(product_set, domain_name, token):
+#     ProductsOnOriginalChecker().check_products_on_partner_sites(product_set, domain_name, token)  # for all products on original, checks if it exists on partner
 
 
 def show_veh(request):

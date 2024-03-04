@@ -39,7 +39,6 @@ class FTPGetter:
 
 
     def callback(self, line, sync_function):
-        print('callback', sync_function)
         if not hasattr(self, 'first_line_skipped'):
             self.first_line_skipped = False
         if self.first_line_skipped:
@@ -55,10 +54,10 @@ class FTPGetter:
                 print('Error')
                 self.shopifyID_index = self.column_names.index("Barcode")
                 self.inventory_index = self.column_names.index("Voorraad")
-    def get_ftp_changed_file(self): #TODO: call this every 5 mins
+    def get_ftp_changed_file(self):
         try:
             with FTP(self.host) as ftp:
-                print('connecting with ftp')
+                print('connecting with ftp for inventory changed file')
                 ftp.connect(self.host, self.port)
                 ftp.login(self.username, self.password)
                 print('logged in')
@@ -66,15 +65,19 @@ class FTPGetter:
 
                 for file in files:
                     if file == 'WEB_mcVrdExp.txt':
-                        # local_file_path = f"C:/Downloads/{file}"
-                        # with open(local_file_path, 'wb') as local_file:
-                        #     ftp.retrbinary('RETR ' + file, local_file.write)
-                        print(f"Printing rows of {file}:")
-                        ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line.strip(), self.get_changed_inventory))
+                        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                            ftp.retrbinary('RETR ' + file, temp_file.write)
+                            temp_file_path = temp_file.name
+                ftp.quit()
+                print('found inventory changes file')
+                self.process_file(temp_file_path, self.get_changed_inventory)
+                print('removing file path')
+                os.remove(temp_file_path)
+                        # ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line.strip(), self.get_changed_inventory))
         except Exception as e:
             print(e)
 
-    def get_ftp_full_file(self): #TODO: call this every night
+    def get_ftp_full_file(self):
         try:
             with FTP(self.host) as ftp:
                 ftp.connect(self.host, self.port)
@@ -87,10 +90,11 @@ class FTPGetter:
                         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                             ftp.retrbinary('RETR ' + file, temp_file.write)
                             temp_file_path = temp_file.name
-                        print('found full sync file')
-                        self.process_file(temp_file_path)
-                        print('removing file path')
-                        os.remove(temp_file_path)
+                ftp.quit()
+                print('found full sync file')
+                self.process_file(temp_file_path, self.sync_product)
+                print('removing file path')
+                os.remove(temp_file_path)
 
                         # ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line, self.sync_product))
         except Exception as e:
@@ -105,11 +109,11 @@ class FTPGetter:
     #             self.callback(line, self.get_changed_inventory)
 
 
-    def process_file(self, file_path):
+    def process_file(self, file_path, sync_function):
         try:
             with open(file_path, 'r') as file:
                 for line in file:
-                    self.callback(line, self.sync_product)
+                    self.callback(line.strip(), sync_function)
         except Exception as e:
             print(e)
 
@@ -154,7 +158,7 @@ class FTPGetter:
         print('inventory changed row: ', row)
         hoBproductID, inventory_quantity = row.split("\t")
         product_handle = self.info_getter.get_product_handle(hoBproductID)
-        print(product_handle)
+        print('handle:', product_handle)
         self.inventory_updater.update_product_quantity(self.websites, self.locations, hoBproductID, product_handle, inventory_quantity)
 
 
@@ -162,4 +166,4 @@ class FTPGetter:
 
 
 
-# get_ftp = FTPGetter()
+get_ftp = FTPGetter()
