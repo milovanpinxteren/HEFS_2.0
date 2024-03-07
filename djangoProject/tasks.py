@@ -8,7 +8,7 @@ def update_product_inventory():
     ftp_getter = FTPGetter()
     ftp_getter.get_ftp_changed_file()
     queue = get_queue()
-    print('enqueing')
+    print('enqueing small sync')
     queue.enqueue_in(timedelta(seconds=int(settings.SCHEDULE_INTERVAL)), update_product_inventory)
 
 def sync_all_products():
