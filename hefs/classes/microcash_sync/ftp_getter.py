@@ -68,7 +68,7 @@ class FTPGetter:
                             temp_file_path = temp_file.name
                 ftp.quit()
                 print('found inventory changes file')
-                self.process_file(temp_file_path, self.get_changed_inventory)
+                self.process_file(temp_file_path, self.sync_product)
                 print('removing file path')
                 self.error_handler.log_error('CHANGE SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
                     self.corrected_price_of_items) + str(self.corrected_inventory_of_items) + str(
