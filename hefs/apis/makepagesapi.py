@@ -3,6 +3,7 @@ import time
 
 import requests
 import spintax
+from django.conf import settings
 
 # class MakePagesAPI():
 
@@ -23,10 +24,8 @@ import spintax
         #             new_sentence.append(word)
         #     return ' '.join(new_sentence)
         # # nltk.download()
-        #paasdiner api: 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
-shopify_access_token = "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"
 headers = {"Accept": "application/json", "Content-Type": "application/json",
-           "X-Shopify-Access-Token": "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"}
+           "X-Shopify-Access-Token": settings.PAASONTBIJT_ACCESS_TOKEN}
 places_array = [
     "Zeewolde",
     "Brummen",
