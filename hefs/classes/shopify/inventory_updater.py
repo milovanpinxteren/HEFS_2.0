@@ -15,11 +15,14 @@ class InventoryUpdater:
                     product_id = hoBproductID
                     inventory_item_id = self.info_getter.get_inventory_item_id(product_id, domain_name, headers)
                 else:
-                    product_id, inventory_item_id = self.info_getter.get_ids_from_handle(product_handle, domain_name, headers)
+                    if product_handle:
+                        product_id, inventory_item_id = self.info_getter.get_ids_from_handle(product_handle, domain_name, headers)
+                    else:
+                        print('no handle')
             except Exception as e:
-                print(e)
+                print('update_product_quantity exception:', e)
             print('productID and domain: ',product_id, domain_name)
-            if product_id: #if product exists
+            if product_id and inventory_item_id: #if product exists
                 update_inventory_data = {
                     "location_id": locations[domain_name],
                     "inventory_item_id": inventory_item_id,

@@ -3,6 +3,7 @@ import tempfile
 from ftplib import FTP
 
 from hefs.classes.error_handler import ErrorHandler
+from hefs.classes.microcash_sync.file_comparer import FileComparer
 from hefs.classes.shopify.inventory_updater import InventoryUpdater
 from hefs.classes.shopify.info_getter import InfoGetter
 from hefs.classes.shopify.product_checker import ProductChecker
@@ -10,6 +11,8 @@ from hefs.classes.shopify.product_maker import ProductMaker
 from hefs.classes.shopify.product_updater import ProductUpdater
 
 from django.conf import settings
+
+from hefs.models import AlgemeneInformatie
 
 
 class FTPGetter:
@@ -26,6 +29,7 @@ class FTPGetter:
         self.product_updater = ProductUpdater()
         self.product_maker = ProductMaker()
         self.error_handler = ErrorHandler()
+        self.file_comparer = FileComparer()
         self.host = '86.88.43.117'
         self.port = 21
         self.username = 'Webshop'
@@ -60,24 +64,34 @@ class FTPGetter:
                 ftp.login(self.username, self.password)
                 print('logged in')
                 files = ftp.nlst()
-
                 for file in files:
                     if file == 'WEB_mcVrdExp.txt':
                         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                             ftp.retrbinary('RETR ' + file, temp_file.write)
                             temp_file_path = temp_file.name
                 ftp.quit()
-                print('found inventory changes file')
-                self.process_file(temp_file_path, self.sync_product)
-                print('removing file path')
+                try:
+                    old_file_object = AlgemeneInformatie.objects.get(naam='filepath')
+                    old_file = old_file_object.text
+                except Exception as e:
+                    print('get old file path error', e)
+                    old_file = temp_file_path
+                # self.process_file(temp_file_path, self.sync_product)
+                differences = self.file_comparer.compare_files(old_file, temp_file_path)
+                for row in differences:
+                    print('difference row', row)
+                    self.update_inventory(row)
+
                 self.error_handler.log_error('CHANGE SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
-                    self.corrected_price_of_items) + str(self.corrected_inventory_of_items) + str(
-                    self.created_items))
-                os.remove(temp_file_path)
-                # ftp.retrlines('RETR ' + file, callback=lambda line: self.callback(line.strip(), self.get_changed_inventory))
+                    self.corrected_price_of_items) + ' ' + str(self.corrected_inventory_of_items) + ' ' + str(self.created_items))
+
+                file_object = AlgemeneInformatie.objects.get(naam='filepath')
+                file_object.text = temp_file_path
+                file_object.save()
+                if temp_file_path != old_file:
+                    os.remove(old_file)
         except Exception as e:
-            print(e)
-            self.error_handler.log_error('ERROR IN get_ftp_changed_file ', e)
+            self.error_handler.log_error('ERROR IN get_ftp_changed_file ' + str(e))
 
     def get_ftp_full_file(self):
         try:
@@ -102,7 +116,7 @@ class FTPGetter:
                 os.remove(temp_file_path)
         except Exception as e:
             print(e)
-            self.error_handler.log_error('ERROR IN GET_FTP_FULL_FILE ', e)
+            self.error_handler.log_error('ERROR IN GET_FTP_FULL_FILE ' + str(e))
 
     # def open_test_file(self):
     #     file = 'WEB_mcVrdExp.txt'
@@ -123,7 +137,6 @@ class FTPGetter:
     def sync_product(self, row):
         try:
             data = row.strip().split('\t')
-            # self.error_handler.log_error('Updating product ' + data[0])
             shopifyID = data[self.shopifyID_index]
             price = data[self.sales_price_index]
             inventory_quantity = data[self.inventory_index]
@@ -139,13 +152,11 @@ class FTPGetter:
                     inventory_item_id = self.info_getter.get_inventory_item_id(product_id, domain_name, headers)
                     price_correct = self.product_checker.check_price(existment_response, price)
                     if not price_correct:
-                        # self.error_handler.log_error('Price incorrect, updating ' + product_handle + domain_name)
                         self.product_updater.update_price(domain_name, headers, product_id, variant_id, price)
                         self.corrected_price_of_items += 1
                     inventory_correct = self.product_checker.check_inventory(domain_name, headers, product_id,
                                                                              inventory_quantity)
                     if not inventory_correct:
-                        # self.error_handler.log_error('Inventory incorrect, updating ' + product_handle + domain_name)
                         location_id = self.locations[domain_name]
                         inventory_updated = self.product_updater.update_inventory(domain_name, headers,
                                                                                   inventory_item_id, inventory_quantity,
@@ -154,7 +165,6 @@ class FTPGetter:
                         if not inventory_updated:
                             self.error_handler.log_error('Inventory not updated ' + product_handle + domain_name)
                 else:
-                    # self.error_handler.log_error('Product not found, creating ' + product_handle + domain_name)
                     try:
                         product_created = self.product_maker.create_product(shopifyID, domain_name, headers)
                         self.created_items += 1
@@ -169,14 +179,15 @@ class FTPGetter:
             self.error_handler.log_error('Could not check product ' + row)
         return
 
-    def get_changed_inventory(self, row):
-        # row = "8763716796754\t69"  # was 24
-        print('inventory changed row: ', row)
-        hoBproductID, inventory_quantity = row.split("\t")
+    def update_inventory(self, row):
+        hoBproductID = row[0]
+        inventory_quantity = row[1]
         product_handle = self.info_getter.get_product_handle(hoBproductID)
         print('handle:', product_handle)
         self.inventory_updater.update_product_quantity(self.websites, self.locations, hoBproductID, product_handle,
                                                        inventory_quantity)
+        if product_handle:
+            self.corrected_inventory_of_items += 1
 
 
 get_ftp = FTPGetter()
