@@ -32,7 +32,7 @@ class InfoGetter:
                 print('no product found, will create product when syncing')
                 return False, False
         except Exception as e:
-            print(e)
+            print('get_ids_from_handle exception', e)
 
     def get_inventory_item_id(self, product_id, domain_name, headers):
         try:
@@ -50,4 +50,4 @@ class InfoGetter:
             else:
                 print('gaat niet goed hiero')
         except Exception as e:
-            print(e)
+            print('get_inventory_item_id exception: ', e)

@@ -191,6 +191,7 @@ class PercentueleKosten(models.Model):
 class AlgemeneInformatie(models.Model):
     naam = models.CharField(max_length=300, default='')
     waarde = models.IntegerField(default=0)
+    text = models.CharField(max_length=800, default='')
 
 class ApiUrls(models.Model):
     api = models.URLField(max_length=250)
