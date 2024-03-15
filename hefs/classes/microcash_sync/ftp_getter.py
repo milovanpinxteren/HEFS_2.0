@@ -110,9 +110,10 @@ class FTPGetter:
                 print('found full sync file')
                 self.process_file(temp_file_path, self.sync_product)
                 print('removing file path')
-                self.error_handler.log_error('FULL SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
-                    self.corrected_price_of_items) + str(self.corrected_inventory_of_items) + str(
-                    self.created_items))
+                if self.corrected_price_of_items + self.corrected_inventory_of_items + self.created_items >= 0:
+                    self.error_handler.log_error('FULL SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
+                        self.corrected_price_of_items) + str(self.corrected_inventory_of_items) + str(
+                        self.created_items))
                 os.remove(temp_file_path)
         except Exception as e:
             print(e)

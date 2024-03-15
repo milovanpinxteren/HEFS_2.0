@@ -8,7 +8,19 @@ class ProductChecker:
         if check_existment_response.status_code == 200:
             return check_existment_response.json()
         else:
-            return False
+            trimmed_handle = self.trim_handle(handle)
+            check_existment_url = f"https://{domain_name}/products/{trimmed_handle}.json"
+            check_existment_response = requests.get(url=check_existment_url, headers=headers)
+            if check_existment_response.status_code == 200:
+                return check_existment_response.json()
+            else:
+                return False
+
+    def trim_handle(self, handle):
+        if handle[-1].isdigit():
+            return handle[:-2]
+        else:
+            return handle
 
     def check_price(self, existment_response, price):
         if existment_response['product']['variants'][0]['price'] == price.replace(',', '.'):
