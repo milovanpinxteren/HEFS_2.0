@@ -52,6 +52,7 @@ class FTPGetter:
                 self.shopifyID_index = self.column_names.index("Shopify ID")
                 self.sales_price_index = self.column_names.index("Verkoopprijs")
                 self.inventory_index = self.column_names.index("Voorraad")
+                self.product_title_index = self.column_names.index("Omschrijving")
             except ValueError:
                 self.shopifyID_index = self.column_names.index("Barcode")
                 self.inventory_index = self.column_names.index("Voorraad")
@@ -82,8 +83,9 @@ class FTPGetter:
                     print('difference row', row)
                     self.update_inventory(row)
 
-                self.error_handler.log_error('CHANGE SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
-                    self.corrected_price_of_items) + ' ' + str(self.corrected_inventory_of_items) + ' ' + str(self.created_items))
+                if self.corrected_price_of_items + self.corrected_price_of_items + self.created_items > 0:
+                    self.error_handler.log_error('CHANGE SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
+                        self.corrected_price_of_items) + ' - ' + str(self.corrected_inventory_of_items) + ' - ' + str(self.created_items))
 
                 file_object = AlgemeneInformatie.objects.get(naam='filepath')
                 file_object.text = temp_file_path
@@ -112,7 +114,7 @@ class FTPGetter:
                 print('removing file path')
                 if self.corrected_price_of_items + self.corrected_inventory_of_items + self.created_items >= 0:
                     self.error_handler.log_error('FULL SYNC DONE, PRICE CORRECTED, INVENTORY CORRECTED, ITEMS CREATED ' + str(
-                        self.corrected_price_of_items) + str(self.corrected_inventory_of_items) + str(
+                        self.corrected_price_of_items) + ' - ' + str(self.corrected_inventory_of_items) + ' - ' + str(
                         self.created_items))
                 os.remove(temp_file_path)
         except Exception as e:
@@ -141,7 +143,11 @@ class FTPGetter:
             shopifyID = data[self.shopifyID_index]
             price = data[self.sales_price_index]
             inventory_quantity = data[self.inventory_index]
+            product_title = data[self.product_title_index]
             product_handle = self.info_getter.get_product_handle(shopifyID)
+            if not product_handle:
+                product_handle = product_title.replace(' - ', ' ').replace(' ', '-').lower()
+
             for domain_name, token in self.websites.items():
                 headers = {"Accept": "application/json", "Content-Type": "application/json",
                            "X-Shopify-Access-Token": token}
@@ -159,19 +165,21 @@ class FTPGetter:
                                                                              inventory_quantity)
                     if not inventory_correct:
                         location_id = self.locations[domain_name]
-                        inventory_updated = self.product_updater.update_inventory(domain_name, headers,
+                        inventory_updated, status_code = self.product_updater.update_inventory(domain_name, headers,
                                                                                   inventory_item_id, inventory_quantity,
                                                                                   location_id)
-                        self.corrected_inventory_of_items += 1
+                        if status_code == 200:
+                            self.corrected_inventory_of_items += 1
                         if not inventory_updated:
-                            self.error_handler.log_error('Inventory not updated ' + product_handle + domain_name)
+                            self.error_handler.log_error('Inventory not updated ' + product_handle + domain_name + status_code)
                 else:
                     try:
                         product_created = self.product_maker.create_product(shopifyID, domain_name, headers)
-                        self.created_items += 1
                         if not product_created[0]:
                             self.error_handler.log_error(
                                 'Could not create product ' + product_handle + domain_name + str(product_created[1]))
+                        elif product_created[0]:
+                            self.created_items += 1
                     except Exception as e:
                         print(e)
                         self.error_handler.log_error('Could not create product ' + product_handle + domain_name)
