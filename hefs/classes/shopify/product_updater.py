@@ -1,3 +1,5 @@
+import time
+
 import requests
 
 
@@ -29,8 +31,15 @@ class ProductUpdater:
         update_inventory_response = requests.post(
             url=update_inventory_url, headers=headers, json=update_inventory_data)
         if update_inventory_response.status_code == 200:
-            return True
-        elif update_inventory_response.status_code != 200:
-            print(update_inventory_response.status_code)
-            return False
+            return True, 200
+        elif update_inventory_response.status_code == 429:
+            time.sleep(1)
+            update_inventory_response = requests.post(
+                url=update_inventory_url, headers=headers, json=update_inventory_data)
+            if update_inventory_response.status_code == 200:
+                return True, update_inventory_response.status_code
+            elif update_inventory_response.status_code != 200:
+                return False, update_inventory_response.status_code
+        elif update_inventory_response.status_code != 200 and update_inventory_response.status_code != 429:
+            return False, update_inventory_response.status_code
 

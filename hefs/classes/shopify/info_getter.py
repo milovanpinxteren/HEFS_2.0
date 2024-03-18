@@ -19,6 +19,7 @@ class InfoGetter:
                 return get_product_handle_url_response.json()['product']['handle']
         else:
             print('no handle found: ', hoBproductID)
+            return False
 
     def get_ids_from_handle(self, product_handle, domain_name, headers):
         try:

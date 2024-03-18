@@ -50,10 +50,21 @@ class ProductMaker:
                                                             json=product_info)
                 if create_product_response.status_code == 201:
                     print('created product')
+                    return True, 201
                 else:
                     print('did not create')
+                    if 'metafields' in product_info['product']:
+                        product_info['product'].pop('metafields', None)
+                        create_product_response = requests.post(url=create_product_url, headers=headers,
+                                                                json=product_info)
+                        if create_product_response.status_code == 201:
+                            print('created product')
+                            return True, 201
+                        else:
+                            return False, create_product_response.status_code
         except Exception as e:
             print(e)
+            return False, e
 
 
 

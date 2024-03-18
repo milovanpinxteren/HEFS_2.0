@@ -9,12 +9,14 @@ from hefs.classes.microcash_sync.invoice_sender import InvoiceSender
 class WebhookHandler():
     def __init__(self):
         self.error_handler = ErrorHandler()
+
     def handle_request(self, headers, body):
         json_body = json.loads(body.decode('utf-8'))
         self.authenticate(headers, json_body)
 
     def authenticate(self, headers, json_body):
-        partner_websites = ['387f61-2.myshopify.com', 'gereiftebiere.de']  # both are the german, just to be sure
+        partner_websites = ['387f61-2.myshopify.com', 'gereiftebiere.de', '7c70bf.myshopify.com',
+                            'gerijptebieren.myshopify.com', 'houseofbeers.nl']  # both are the german, just to be sure
         request_domain = headers['x-shopify-shop-domain']
         customer_name = json_body['customer']['first_name'] + ' ' + json_body['customer']['first_name']
 
