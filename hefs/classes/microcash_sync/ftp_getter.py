@@ -182,7 +182,7 @@ class FTPGetter:
                             self.created_items += 1
                     except Exception as e:
                         print(e)
-                        self.error_handler.log_error('Could not create product ' + product_handle + domain_name)
+                        self.error_handler.log_error('Could not create product (error) ' + product_handle + domain_name + e)
         except Exception as e:
             print(e)
             self.error_handler.log_error('Could not check product ' + row)

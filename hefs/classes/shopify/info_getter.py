@@ -43,11 +43,15 @@ class InfoGetter:
                 inventory_item_id = product_inventory_item_response.json()['variants'][0]['inventory_item_id']
                 return inventory_item_id
             elif product_inventory_item_response.status_code == 429:
-                time.sleep(1.2)
+                time.sleep(1)
                 print('sleep in infogetter get inventory item id')
                 product_inventory_item_response = requests.get(url=get_product_inventory_item_id_url, headers=headers)
-                inventory_item_id = product_inventory_item_response.json()['variants'][0]['inventory_item_id']
-                return inventory_item_id
+                if product_inventory_item_response.status_code == 200:
+                    inventory_item_id = product_inventory_item_response.json()['variants'][0]['inventory_item_id']
+                    return inventory_item_id
+                else:
+                    print('Status code in get_inventory_item_id: ',product_inventory_item_response.status_code)
+                    return product_inventory_item_response.status_code
             else:
                 print('gaat niet goed hiero')
         except Exception as e:
