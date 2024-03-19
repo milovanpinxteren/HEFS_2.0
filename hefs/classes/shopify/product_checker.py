@@ -35,9 +35,11 @@ class ProductChecker:
             if get_inventory_response.json()['product']['variants'][0]['inventory_quantity'] == int(inventory_quantity):
                 return True
             else:
+                print('inventory incorrect: ', get_inventory_response.json()['product']['variants'][0]['inventory_quantity'], int(inventory_quantity))
                 return False
         else:
             #TODO: log error
+            print('check inventory did not work: ', get_inventory_response.status_code)
             return False
 
 

@@ -14,4 +14,4 @@ def start_schedule_tasks():
     if now > next_run:
         next_run += timedelta(days=1)
     queue.enqueue_at(next_run, sync_all_products)
-    print('queued full sync')
+    print('queued full sync in scheduler')
