@@ -53,4 +53,4 @@ class WebhookHandler():
                     invoice_sender = InvoiceSender()
                     invoice_sender.send_invoice(xml_string)
                 except Exception as e:
-                    self.error_handler.log_error('Order verzenden mislukt:, ' + e)
+                    self.error_handler.log_error('Order verzenden mislukt:, ' + str(e))
