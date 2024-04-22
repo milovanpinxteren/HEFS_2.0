@@ -5,13 +5,14 @@ from hefs.classes.error_handler import ErrorHandler
 
 
 def start_schedule_tasks():
+    error_handler = ErrorHandler()
+    queue = get_queue()
+    queue.empty()
     # init for 5 minute task
     update_product_inventory()
-    error_handler = ErrorHandler()
-    # init for daily task at 22:30
-    queue = get_queue()
     now = datetime.now()
-    next_run = datetime(now.year, now.month, now.day, 22, 30)
+    # init for daily task at 23:30
+    next_run = datetime(now.year, now.month, now.day, 23, 30)
     if now > next_run:
         next_run += timedelta(days=1)
     queue.enqueue_at(next_run, sync_all_products)

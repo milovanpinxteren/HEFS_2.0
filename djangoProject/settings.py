@@ -36,7 +36,7 @@ SECRET_KEY = 'django-insecure-tzuj9rtn&b0&uyhh@8mqhd#%g338+9cicqittsu2#j8c=eopyb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hefs.89.145.161.168.sslip.io', '127.0.0.1', 'hefs.nl', 'www.hefs.nl', '89.145.161.168']
+ALLOWED_HOSTS = ['hefs.89.145.161.168.sslip.io', '127.0.0.1', 'localhost', 'hefs.nl', 'www.hefs.nl', '89.145.161.168']
 
 # Application definition
 

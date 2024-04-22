@@ -3,7 +3,11 @@ import random
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
-
+#############################################Choices below###############################################################
+class MeasurementUnit(models.TextChoices):
+    KG = 'KG', 'Kilogram'
+    ST = 'ST', 'per stuk'
+    LT = 'LT', 'Liter'
 
 #############################################Orders below###############################################################
 class VerzendOpties(models.Model):
@@ -126,6 +130,7 @@ class Productinfo(models.Model):
     afmeting_breedte_mm = models.IntegerField(default=0)
     afmeting_hoogte_mm = models.IntegerField(default=0)
 
+
     def __str__(self):
         return self.productnaam
 
@@ -136,6 +141,26 @@ class Productinfo(models.Model):
 
         super(Productinfo, self).save()
 
+
+class Halfproducten(models.Model):
+    naam = models.CharField(max_length=250, default='')
+    product = models.ForeignKey(Productinfo, on_delete=models.PROTECT, default='', blank=False)
+    meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
+    nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    bereidingswijze = models.TextField(default='')
+    bereidingskosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+
+    def __str__(self):
+        return self.naam
+class Ingredienten(models.Model):
+    naam = models.CharField(max_length=250, default='')
+    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.PROTECT, default='', blank=False, related_name='halfproduct_naam')
+    meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
+    nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    kosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+
+    def __str__(self):
+        return self.naam
 
 #############################################Extras below###############################################################
 
