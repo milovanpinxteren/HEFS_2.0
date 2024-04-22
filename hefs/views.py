@@ -89,7 +89,8 @@ def show_veh(request):
         context = {'error': True, 'ErrorMessage': e}
         return render(request, 'veh.html', context)
 
-
+def show_halfproducten(request):
+    return render(request, 'halfproducten.html')
 def update_general_numbers(request):
     if request.method == 'POST':
         form = GeneralNumbersForm(request.POST, request.FILES)

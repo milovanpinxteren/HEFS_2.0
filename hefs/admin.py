@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
-    VerzendOpties, JSONData
+    VerzendOpties, JSONData, Halfproducten, Ingredienten
 
 
 @admin.register(JSONData)
@@ -33,6 +33,14 @@ class ProductInfoAdmin(admin.ModelAdmin):
                     'leverancier', 'gang']
     search_fields = ("omschrijving__contains",)
 
+@admin.register(Halfproducten)
+class HalfproductenAdmin(admin.ModelAdmin):
+    list_display = ('naam', 'product', 'meeteenheid', 'bereidingswijze', 'bereidingskosten_per_eenheid')
+
+
+@admin.register(Ingredienten)
+class IngredientenAdmin(admin.ModelAdmin):
+    list_display = ('naam', 'meeteenheid', 'kosten_per_eenheid')
 
 @admin.register(Productextra)
 class ProductExtraAdmin(admin.ModelAdmin):

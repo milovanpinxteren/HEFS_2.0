@@ -185,7 +185,7 @@ class FTPGetter:
                         self.error_handler.log_error('Could not create product (error) ' + product_handle + domain_name + e)
         except Exception as e:
             print(e)
-            self.error_handler.log_error('Could not check product ' + row)
+            self.error_handler.log_error('Could not check product ' + row + e)
         return
 
     def update_inventory(self, row):

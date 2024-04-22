@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('veh', views.show_veh, name='veh'),
+    path('halfproducten', views.show_halfproducten, name='halfproducten'),
     path('update-general-numbers', views.update_general_numbers),
     path('customerinfo', views.show_customerinfo, name='customerinfo'),
     path('customerlocationplot', views.show_customerlocationplot, name='customerlocationplot'),
@@ -25,10 +26,6 @@ urlpatterns = [
     path('recieve_webhook', views.recieve_webhook, name='recieve_webhook'),
     path('show_sync_page', views.show_sync_page, name='show_sync_page'),
     path('start_product_sync', views.start_product_sync, name='start_product_sync'),
-
-
-
-
 
     path('handle_alterated_new_orders', views.handle_alterated_new_orders, name='handle_alterated_new_orders'),
 
