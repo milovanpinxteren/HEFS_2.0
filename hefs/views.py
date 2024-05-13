@@ -12,6 +12,7 @@ from .apis.paasontbijt2024transacties import Paasontbijt2024Transacties
 from .classes.customer_info import CustomerInfo
 from .classes.customer_location_plot import CustomerLocationPlot
 from .classes.financecalculator import FinanceCalculator
+from .classes.halfproduct_shower import HalfProductShower
 # from .classes.gerijptebieren.product_syncer import ProductSyncer
 # from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
 # from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
@@ -79,17 +80,20 @@ def show_veh(request):
     try:
         organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
         veh_handler = VehHandler()
+        half_product_shower = HalfProductShower()
         context = veh_handler.handle_veh(organisations_to_show)
         form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
                                            'prognosegetal_brunch': context['prognosegetal_brunch'],
                                            'prognosegetal_gourmet': context['prognosegetal_gourmet']})
         context['form'] = form
+        context['halfproducts'] = half_product_shower.show_half_products(context['table'])
         return render(request, 'veh.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
         return render(request, 'veh.html', context)
 
 def show_halfproducten(request):
+    organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
     return render(request, 'halfproducten.html')
 def update_general_numbers(request):
     if request.method == 'POST':
