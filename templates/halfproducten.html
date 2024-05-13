@@ -1,14 +1,62 @@
-<!DOCTYPE html>
-{% load static %}
-{% csrf_token %}
-<html lang="en">
-<head>
-    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
-    <meta charset="UTF-8">
-    <title>Halfproducten</title>
-</head>
-<body>
-{% include "navbar.html" %}
-<h1 class="page-title">halfproducten</h1>
-</body>
-</html>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Product ID</th>
+        <th>Product Name</th>
+        <th>Half-Products</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for product_id, product_data in data.items %}
+        <tr>
+            <td>{{ product_id }}</td>
+            <td>{{ product_data.product }}</td>
+            <td>
+                {% if product_data.halfproducts %}
+                    <table border="1">
+                        <thead>
+                        <tr>
+                            <th>Half-Product</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Ingredients</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for half_product, half_product_data in product_data.halfproducts.items %}
+                            <tr>
+                                <td>{{ half_product }}</td>
+                                <td>{{ half_product_data.data.0 }}</td>
+                                <td>{{ half_product_data.data.1 }}</td>
+                                <td>
+                                    <table border="1">
+                                        <thead>
+                                        <tr>
+                                            <th>Ingredient</th>
+                                            <th>Quantity</th>
+                                            <th>Unit</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for ingredient, ingredient_data in half_product_data.ingredients.items %}
+                                            <tr>
+                                                <td>{{ ingredient }}</td>
+                                                <td>{{ ingredient_data.1 }}</td>
+                                                <td>{{ ingredient_data.0 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    No half-products
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

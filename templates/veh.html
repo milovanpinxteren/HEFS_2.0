@@ -20,9 +20,21 @@
                 XLSX.writeFile(wb, fn || ('overzicht-VEH.' + (type || 'xlsx')));
         }
     </script>
+        <script>
+        function ExportIngredientsToExcel(type, fn, dl) {
+            var elt = document.getElementById('ingredientsTable');
+            var wb = XLSX.utils.table_to_book(elt, {sheet: "sheet1"});
+            return dl ?
+                XLSX.write(wb, {bookType: type, bookSST: true, type: 'base64'}) :
+                XLSX.writeFile(wb, fn || ('overzicht-Halfproducten.' + (type || 'xlsx')));
+        }
+    </script>
     <script>
         function filterVEH(type) {
             table = document.getElementById("vehTable");
+            table.style.display = 'inline-block'
+            ingredientsTable = document.getElementById("ingredientsTable");
+            ingredientsTable.style.display = 'none'
             tr = table.getElementsByTagName("tr");
             var els = document.getElementsByClassName('prognose-span');
             while (els.length) {
@@ -49,6 +61,15 @@
                     $(tr[i]).show()
                 }
             }
+        }
+    </script>
+    <script>
+        function showHalfProducts() {
+            ingredientsTable = document.getElementById("ingredientsTable");
+            vehTable = document.getElementById("vehTable");
+            vehTable.style.display = 'none'
+            ingredientsTable.style.display = 'block'
+
         }
     </script>
 </head>
@@ -87,9 +108,11 @@
         <button onclick="filterVEH('diner')">Diner</button>
         <button onclick="filterVEH('brunch')">Brunch</button>
         <button onclick="filterVEH('all')">Alles</button>
+        <button onclick="showHalfProducts()">Halfproducten</button>
     </div>
     <br>
     <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer VEH naar Excel</button>
+    <button class="button-48" onclick="ExportIngredientsToExcel('xlsx')">Exporteer Halfproducten naar Excel</button>
 
     <p>
     <h3>{{ veh_is_empty }}</h3>
@@ -137,6 +160,93 @@
             {% endif %}
         {% endfor %}
     </table>
+
+{#    {{ halfproducts }}#}
+    <table id="ingredientsTable" style="display: none">
+        <thead class="table-head">
+        <tr>
+            <th class="table-heading">Product ID</th>
+            <th class="table-heading">Product Naam</th>
+            <th class="table-heading">Half-Producten</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product_id, product_data in halfproducts.items %}
+            <tr class="table-rows">
+                <td class="table-data">{{ product_id }}</td>
+                <td class="table-data">{{ product_data.product }}</td>
+                <td class="table-data">
+                    {% if product_data.halfproducts %}
+                        <table>
+                            <thead class="table-head">
+                            <tr class="table-rows">
+                                <th class="table-heading">Half-Product</th>
+                                {#                            <th>Bereidingskosten per eenheid</th>#}
+{#                                <th>Meeteenheid</th>#}
+                                {#                            <th>Hoeveelheid per portie</th>#}
+                                {#                            <th>Bereidingswijze</th>#}
+                                <th class="table-heading">Totaal nodig</th>
+                                <th class="table-heading">Prognose nodig</th>
+                                <th class="table-heading">Totale kosten</th>
+                                <th class="table-heading">Prognose kosten</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for half_product, half_product_data in product_data.halfproducts.items %}
+                                <tr class="table-rows">
+                                    <td class="table-data">{{ half_product }}</td>
+                                    {#                                <td>{{ half_product_data.data.0 }}</td>#}
+{#                                    <td>{{ half_product_data.data.1 }}</td>#}
+                                    {#                            <td>{{ half_product_data.data.2 }}</td>#}
+                                    {#                            <td>{{ half_product_data.data.3 }}</td>#}
+                                    <td class="table-data">{{ half_product_data.data.4 }} {{ half_product_data.data.1 }}</td>
+                                    <td class="table-data">{{ half_product_data.data.5 }} {{ half_product_data.data.1 }}</td>
+                                    <td class="table-data">€ {{ half_product_data.data.6 }}</td>
+                                    <td class="table-data">€ {{ half_product_data.data.7 }}</td>
+                                    <td class="table-data">
+                                        <table>
+                                            <thead class="table-head">
+                                            <tr class="table-rows">
+                                                <th class="table-heading">Ingredient</th>
+{#                                                <th>Meeteenheid</th>#}
+{#                                                <th>Hoeveelheid per portie</th>#}
+{#                                                <th>kosten per eenheid</th>#}
+                                                <th class="table-heading">Totaal nodig</th>
+                                                <th class="table-heading">Prognose nodig</th>
+                                                <th class="table-heading">Totale kosten</th>
+                                                <th class="table-heading">Prognose kosten</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for ingredient, ingredient_data in half_product_data.ingredients.items %}
+                                                <tr class="table-rows">
+                                                    <td class="table-data">{{ ingredient }}</td>
+{#                                                    <td>{{ ingredient_data.0 }}</td>#}
+{#                                                    <td>{{ ingredient_data.1 }}</td>#}
+{#                                                    <td>{{ ingredient_data.2 }}</td>#}
+                                                    <td class="table-data">{{ ingredient_data.3 }} {{ ingredient_data.0 }}</td>
+                                                    <td class="table-data">{{ ingredient_data.4 }} {{ ingredient_data.0 }}</td>
+                                                    <td class="table-data">€ {{ ingredient_data.5 }}</td>
+                                                    <td class="table-data">€ {{ ingredient_data.6 }}</td>
+
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        Geen halfproducten bekend
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
 {% else %}
     <h2>{{ ErrorMessage }}</h2>
 {% endif %}
