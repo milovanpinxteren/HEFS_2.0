@@ -18,7 +18,7 @@
     </script>
 </head>
 <body>
-{% include "navbar.html" %}
+{% include "helpers/navbar.html" %}
 <h1 class="page-title">Shopify Order Overzicht</h1>
 <a class="button-48" href="{% url 'get_order_transactions' %}">Update transacties</a>
 <button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer naar Excel</button>

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
-    VerzendOpties, JSONData, Halfproducten, Ingredienten
+    VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten
 
 
 @admin.register(JSONData)
@@ -26,21 +26,37 @@ class OrderlineAdmin(admin.ModelAdmin):
     def conversieID(self, obj):
         return obj.order.conversieID
 
-
-@admin.register(Productinfo)
-class ProductInfoAdmin(admin.ModelAdmin):
-    list_display = ['omschrijving', 'verpakkingscombinatie', 'productID', 'picknaam', 'productnaam',
-                    'leverancier', 'gang']
-    search_fields = ("omschrijving__contains",)
-
-@admin.register(Halfproducten)
-class HalfproductenAdmin(admin.ModelAdmin):
-    list_display = ('naam', 'product', 'meeteenheid', 'bereidingswijze', 'bereidingskosten_per_eenheid')
-
-
+class HalfproductenIngredientenInline(admin.TabularInline):
+    model = HalfproductenIngredienten
+    extra = 1
 @admin.register(Ingredienten)
 class IngredientenAdmin(admin.ModelAdmin):
     list_display = ('naam', 'meeteenheid', 'kosten_per_eenheid')
+    search_fields = ('naam', 'productinfo__naam')  # Assuming 'naam' is a field in Productinfo
+    inlines = [HalfproductenIngredientenInline]
+
+
+
+
+
+@admin.register(Productinfo)
+class ProductInfoAdmin(admin.ModelAdmin):
+    # inlines = [IngredientenInline, ]
+    list_display = ['omschrijving', 'verpakkingscombinatie', 'productID', 'picknaam', 'productnaam',
+                    'leverancier', 'gang']
+    search_fields = ("omschrijving__contains",)
+    # exclude = ('ingredienten',)
+
+@admin.register(Halfproducten)
+class HalfproductenAdmin(admin.ModelAdmin):
+    inlines = [HalfproductenIngredientenInline]
+    exclude = ('ingredienten',)
+    list_display = ('naam', 'product', 'meeteenheid', 'bereidingswijze', 'bereidingskosten_per_eenheid')
+    # autocomplete_fields = ['ingredienten']
+
+
+
+
 
 @admin.register(Productextra)
 class ProductExtraAdmin(admin.ModelAdmin):

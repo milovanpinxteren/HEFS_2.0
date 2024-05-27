@@ -1,11 +1,13 @@
 from django.urls import path
 
-from . import views
+from hefs.views import views
+from hefs.views.recipe_views import recipe_views
 
+# from . import views
+# from views.views import *
 urlpatterns = [
     path('', views.index, name='index'),
     path('veh', views.show_veh, name='veh'),
-    path('halfproducten', views.show_halfproducten, name='halfproducten'),
     path('update-general-numbers', views.update_general_numbers),
     path('customerinfo', views.show_customerinfo, name='customerinfo'),
     path('customerlocationplot', views.show_customerlocationplot, name='customerlocationplot'),
@@ -28,5 +30,9 @@ urlpatterns = [
     path('start_product_sync', views.start_product_sync, name='start_product_sync'),
 
     path('handle_alterated_new_orders', views.handle_alterated_new_orders, name='handle_alterated_new_orders'),
+
+    path('productinfo', recipe_views.show_productinfo, name='productinfo'),
+    path('halfproducten', recipe_views.show_halfproducten, name='halfproducten'),
+    path('ingredienten', recipe_views.show_ingredienten, name='ingredienten'),
 
 ]

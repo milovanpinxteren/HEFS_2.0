@@ -154,13 +154,24 @@ class Halfproducten(models.Model):
         return self.naam
 class Ingredienten(models.Model):
     naam = models.CharField(max_length=250, default='')
-    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.PROTECT, default='', blank=False, related_name='halfproduct_naam')
     meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
     nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     kosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     def __str__(self):
         return self.naam
+
+
+class HalfproductenIngredienten(models.Model):
+    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = ('halfproduct', 'ingredient',)  # Ensures uniqueness of ingredient for each halfproduct
+
+    def __str__(self):
+        return f"{self.halfproduct} - {self.ingredient} - {self.quantity}"
 
 #############################################Extras below###############################################################
 

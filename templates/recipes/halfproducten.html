@@ -1,0 +1,23 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+
+</head>
+<body>
+{% include "helpers/navbar.html" %}
+
+<h1 class="page-title">halfproducten</h1>
+{% for half_product in half_products %}
+    {{ half_product }}
+    Ingredients:
+    {% for ingredient in half_product.ingredienten.all %}
+        {{ ingredient }}
+    {% endfor %}
+{% endfor %}
+</body>
+</html>

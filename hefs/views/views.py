@@ -8,22 +8,22 @@ from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
 from hefs.classes.get_orders import GetOrders
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
-from .apis.paasontbijt2024transacties import Paasontbijt2024Transacties
-from .classes.customer_info import CustomerInfo
-from .classes.customer_location_plot import CustomerLocationPlot
-from .classes.financecalculator import FinanceCalculator
-from .classes.halfproduct_shower import HalfProductShower
+from hefs.apis.paasontbijt2024transacties import Paasontbijt2024Transacties
+from hefs.classes.customer_info import CustomerInfo
+from hefs.classes.customer_location_plot import CustomerLocationPlot
+from hefs.classes.financecalculator import FinanceCalculator
+from hefs.classes.halfproduct_shower import HalfProductShower
 # from .classes.gerijptebieren.product_syncer import ProductSyncer
 # from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
 # from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
-from .classes.make_factuur_overview import MakeFactuurOverview
-from .classes.microcash_sync.ftp_getter import FTPGetter
-from .classes.microcash_sync.webhook_handler import WebhookHandler
-from .classes.route_copier import RouteCopier
-from .classes.veh_handler import VehHandler
+from hefs.classes.make_factuur_overview import MakeFactuurOverview
+from hefs.classes.microcash_sync.ftp_getter import FTPGetter
+from hefs.classes.microcash_sync.webhook_handler import WebhookHandler
+from hefs.classes.route_copier import RouteCopier
+from hefs.classes.veh_handler import VehHandler
 # from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
-from .forms import PickbonnenForm, GeneralNumbersForm
-from .models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren
+from hefs.forms import PickbonnenForm, GeneralNumbersForm
+from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren
 from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
@@ -41,7 +41,7 @@ def recieve_webhook(request):
 def show_sync_page(request):
     error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
-    return render(request, 'sync_page.html', context)
+    return render(request, 'helpers/sync_page.html', context)
 
 
 
@@ -69,7 +69,7 @@ def start_product_sync(request):
 
     error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
-    return render(request, 'sync_page.html', context)
+    return render(request, 'helpers/sync_page.html', context)
 
 # @job
 # def batch_sync_products(product_set, domain_name, token):
@@ -87,14 +87,12 @@ def show_veh(request):
                                            'prognosegetal_gourmet': context['prognosegetal_gourmet']})
         context['form'] = form
         context['halfproducts'] = half_product_shower.show_half_products(context['table'])
-        return render(request, 'veh.html', context)
+        return render(request, 'info_pages/veh.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
-        return render(request, 'veh.html', context)
+        return render(request, 'info_pages/veh.html', context)
 
-def show_halfproducten(request):
-    organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
-    return render(request, 'halfproducten.html')
+
 def update_general_numbers(request):
     if request.method == 'POST':
         form = GeneralNumbersForm(request.POST, request.FILES)
@@ -115,10 +113,10 @@ def show_customerinfo(request):
     try:
         userid = request.user.id
         context = CustomerInfo().prepare_view(userid)
-        return render(request, 'customerinfo.html', context)
+        return render(request, 'info_pages/customerinfo.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
-        return render(request, 'customerinfo.html', context)
+        return render(request, 'info_pages/customerinfo.html', context)
 
 
 def show_customerlocationplot(request):
@@ -126,27 +124,27 @@ def show_customerlocationplot(request):
         userid = request.user.id
         customer_location_plot = CustomerLocationPlot().customer_location_plot(userid)
         context = {'customer_location_plot': customer_location_plot._repr_html_()}
-        return render(request, 'customerlocationplot.html', context)
+        return render(request, 'info_pages/customerlocationplot.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
-        return render(request, 'customerlocationplot.html', context)
+        return render(request, 'info_pages/customerlocationplot.html', context)
 
 
 def getorderspage(request):
-    return render(request, 'getorderspage.html')
+    return render(request, 'info_pages/getorderspage.html')
 
 
 def makeorderspage(request):
     numer_of_orders = Orders.objects.all().count()
     context = {'number_of_orders': numer_of_orders}
-    return render(request, 'makeorderspage.html', context)
+    return render(request, 'info_pages/makeorderspage.html', context)
 
 
 def show_busy(request):
     numer_of_orders = Orders.objects.all().count()
     status = request.session['status']
     context = {'status': status, 'number_of_orders': numer_of_orders}
-    return render(request, 'waitingpage.html', context)
+    return render(request, 'helpers/waitingpage.html', context)
 
 def get_status(request):
     status = AlgemeneInformatie.objects.get(naam='status').waarde
@@ -202,7 +200,7 @@ def pickbonnen_page(request):
     context = {'form': form}
     AlgemeneInformatie.objects.filter(naam='status').delete()
     AlgemeneInformatie.objects.create(naam='status', waarde=0)
-    return render(request, 'pickbonnenpage.html', context)
+    return render(request, 'info_pages/pickbonnenpage.html', context)
 
 
 
@@ -224,7 +222,7 @@ def get_pickbonnen(request):
                 return response
     form = PickbonnenForm()
     context = {'form': form}
-    return render(request, 'pickbonnenpage.html', context)
+    return render(request, 'info_pages/pickbonnenpage.html', context)
 
 @job
 def generate_pickbonnen(begindatum, einddatum, conversieID, routenr):
@@ -256,17 +254,17 @@ def financial_overview_page(request):
             'prognose_revenue_table': prognose_revenue_table, 'prognosegetal_diner': prognosegetal_diner,
             'prognosegetal_brunch': prognosegetal_brunch, 'costs_of_inkoop_dict': costs_of_inkoop_dict
         }
-        return render(request, 'financialoverviewpage.html', context)
+        return render(request, 'info_pages/financialoverviewpage.html', context)
     except Exception as e:
         context = {'error': True, 'ErrorMessage': e}
-        return render(request, 'financialoverviewpage.html', context)
+        return render(request, 'info_pages/financialoverviewpage.html', context)
 
 
 def facturen_page(request):
     make_facturen_overview = MakeFactuurOverview()
     facturen_table = make_facturen_overview.prepare_overview()
     context = {'facturen_table': facturen_table}
-    return render(request, 'facturenpage.html', context)
+    return render(request, 'info_pages/facturenpage.html', context)
 
 
 def routes_page(request):
@@ -275,7 +273,7 @@ def routes_page(request):
     verzendopties_dict = {item['verzendoptie__verzendoptie']: item['count'] for item in verzendopties_counts}
 
     context = {'verzendopties_dict': verzendopties_dict}
-    return render(request, 'routespage.html', context)
+    return render(request, 'helpers/routespage.html', context)
 
 
 def copy_routes(request):
@@ -285,18 +283,18 @@ def copy_routes(request):
     verzendopties_dict = {item['verzendoptie__verzendoptie']: item['count'] for item in verzendopties_counts}
 
     context = {'verzendopties_dict': verzendopties_dict}
-    return render(request, 'routespage.html', context)
+    return render(request, 'helpers/routespage.html', context)
 
 
 
 
 
 def orders_overview(request):
-    return render(request, 'orders_overview.html')
+    return render(request, 'info_pages/orders_overview.html')
 
 
 def get_order_transactions(request):
     transaction_getter = Paasontbijt2024Transacties()
     orders_matrix = transaction_getter.fetch_and_print_orders()
     context = {'orders_matrix': orders_matrix}
-    return render(request, 'orders_overview.html', context)
+    return render(request, 'info_pages/orders_overview.html', context)

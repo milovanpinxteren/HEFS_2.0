@@ -8,22 +8,21 @@ from django.conf import settings
 # class MakePagesAPI():
 
 
-
-    # def add_seo_pages(self):
-        # def generate_synonyms(sentence):
-        #     words = sentence.split()
-        #     new_sentence = []
-        #     for word in words:
-        #         synonyms = []
-        #         for syn in wordnet.synsets(word, lang='nld'):
-        #             for lemma in syn.lemmas(lang='nld'):
-        #                 synonyms.append(lemma.name())
-        #         if synonyms:
-        #             new_sentence.append(random.choice(synonyms))
-        #         else:
-        #             new_sentence.append(word)
-        #     return ' '.join(new_sentence)
-        # # nltk.download()
+# def add_seo_pages(self):
+# def generate_synonyms(sentence):
+#     words = sentence.split()
+#     new_sentence = []
+#     for word in words:
+#         synonyms = []
+#         for syn in wordnet.synsets(word, lang='nld'):
+#             for lemma in syn.lemmas(lang='nld'):
+#                 synonyms.append(lemma.name())
+#         if synonyms:
+#             new_sentence.append(random.choice(synonyms))
+#         else:
+#             new_sentence.append(word)
+#     return ' '.join(new_sentence)
+# # nltk.download()
 headers = {"Accept": "application/json", "Content-Type": "application/json",
            "X-Shopify-Access-Token": settings.PAASONTBIJT_ACCESS_TOKEN}
 places_array = [
@@ -691,7 +690,7 @@ seo_teksten_array = [
     "{Begin de paasdag met een verrukkelijk|Geniet van een uitgebreid en smaakvol|Laat u verwennen met een heerlijk} paasontbijt, thuisbezorgd in {place}. Onze ontbijtselectie bevat een scala aan {verse|ambachtelijke|biologische} ingrediënten, waardoor uw ochtend een ware {culinaire|feestelijke|gezellige} ervaring wordt. Bestel uw ontbijt en breng samen met vrienden en familie een ontspannen paasochtend door in {place}!",
     "{Vier Pasen op unieke wijze bij ons|Ervaar een onvergetelijke Paasviering met onze speciale|Maak Pasen extra speciaal met een} paasviering, thuisbezorgd in {place}. Onze {smakelijke brunches|culinaire hoogstandjes|uitgebreide buffetten} en {feestelijke diners|speciale menu's|gezellige ontbijten} bieden een scala aan opties voor een onvergetelijke dag. Ontdek de unieke sfeer van Pasen in {place} en bestel uw paasmaaltijd voor thuisbezorging!",
     "{Nodig vrienden en familie uit voor een smaakvol|Maak van Pasen een bijzonder feest met een gezellig|Organiseer een onvergetelijk} paasfeest thuis in {place}. Geniet samen van een {overvloedige brunch|heerlijk ontbijt|feestelijk diner} en laat {place} het decor zijn van uw vreugdevolle paasviering. Bestel uw paasmaaltijd en creëer mooie herinneringen tijdens deze speciale tijd van het jaar!"
-                     ]
+]
 
 id = 143092082
 count = 0
