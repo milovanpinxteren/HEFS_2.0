@@ -13,5 +13,5 @@ class InvoiceSender:
         url = f"http://86.88.43.117/invoice.php?xml={xml_string}"
         response = requests.post(url=url, auth=(username, password))
         print(response.content)
-        self.error_handler.log_error(str(response.content))
+        self.error_handler.log_error(str(response.content[:250]))
 
