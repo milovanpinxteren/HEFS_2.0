@@ -6,18 +6,88 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 </head>
 <body>
 {% include "helpers/navbar.html" %}
 
 <h1 class="page-title">halfproducten</h1>
-{% for half_product in half_products %}
-    {{ half_product }}
-    Ingredients:
-    {% for ingredient in half_product.ingredienten.all %}
-        {{ ingredient }}
-    {% endfor %}
-{% endfor %}
+{#{% for half_product in half_products %}#}
+{#    {{ half_product }}#}
+{#    Ingredients:#}
+{#    {% for ingredient in half_product.ingredienten.all %}#}
+{#        {{ ingredient }}#}
+{#    {% endfor %}#}
+{#{% endfor %}#}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Wijs Ingredient toe</button>
+</form>
+    <h2>Ingredienten voor geselecteerd Halfproduct</h2>
+    <div id="ingredients-list">
+        <p>Selecteer eerst een halfproduct</p>
+    </div>
+
+
+     <script>
+        $(function() {
+            $(".autocomplete-ingredient").autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{% url 'ingredient_autocomplete' %}",
+                        data: {
+                            term: request.term
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+            });
+
+            $(".autocomplete-halfproduct").autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{% url 'halfproduct_autocomplete' %}",
+                        data: {
+                            term: request.term
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function(event, ui) {
+                    $.ajax({
+                        url: "{% url 'get_ingredients_for_halfproduct' %}",
+                        data: {
+                            halfproduct_name: ui.item.value
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            let ingredientsList = $('#ingredients-list');
+                            ingredientsList.empty();
+                            if (data.length === 0) {
+                                ingredientsList.append('<p>No ingredients found for the selected halfproduct.</p>');
+                            } else {
+                                let list = $('<ul></ul>');
+                                data.forEach(function(item) {
+                                    list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');
+                                });
+                                ingredientsList.append(list);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

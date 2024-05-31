@@ -1,6 +1,9 @@
 from django import forms
 from django.forms import DateInput
 from functools import partial
+
+from hefs.models import HalfproductenIngredienten
+
 DateInput = partial(forms.DateInput, {'class': 'datepicker'})
 
 class PickbonnenForm(forms.Form):
@@ -13,3 +16,15 @@ class GeneralNumbersForm(forms.Form):
     prognosegetal_diner = forms.IntegerField(required=False)
     prognosegetal_brunch = forms.IntegerField(required=False)
     prognosegetal_gourmet = forms.IntegerField(required=False)
+
+
+class HalfproductenIngredientenForm(forms.ModelForm):
+    class Meta:
+        model = HalfproductenIngredienten
+        fields = ['halfproduct', 'ingredient', 'quantity']
+
+        widgets = {
+            'halfproduct': forms.TextInput(attrs={'class': 'autocomplete-halfproduct', 'autocomplete': 'off'}),
+            'ingredient': forms.TextInput(attrs={'class': 'autocomplete-ingredient', 'autocomplete': 'off'}),
+        }
+
