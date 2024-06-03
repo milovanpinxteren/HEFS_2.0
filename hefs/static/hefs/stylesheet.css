@@ -433,3 +433,9 @@
 #Progressbar::-moz-progress-bar {
     /* style rules */
 }
+
+#ingredients-list {
+    width: 40%;
+    float: left;
+    border: 1px solid black;
+}

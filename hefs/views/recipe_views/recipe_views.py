@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
@@ -13,12 +14,17 @@ def show_halfproducten(request):
         quantity = form['quantity'].value()
         halfproduct = Halfproducten.objects.get(naam=halfproduct_name)
         ingredient = Ingredienten.objects.get(naam=ingredient_name)
-
-        HalfproductenIngredienten.objects.create(
-            halfproduct=halfproduct,
-            ingredient=ingredient,
-            quantity=quantity
-        )
+        try:
+            halfproducten_ingredienten, created = HalfproductenIngredienten.objects.get_or_create(
+                halfproduct=halfproduct, ingredient=ingredient, defaults={'quantity': quantity}
+            )
+            if not created:  # object was not created, so it was retrieved
+                halfproducten_ingredienten.quantity = quantity  # update the quantity
+                halfproducten_ingredienten.save()
+        except IntegrityError:
+            print('A Constraint Error Occured.')
+            context = {'form': form, 'msg': 'A Constraint Error Occured.'}
+            return render(request, 'recipes/halfproducten.html', context)
         if form.is_valid():
             form.save()
             return redirect('show_halfproducten')  # Redirect to the same page after submission
@@ -56,6 +62,9 @@ def get_ingredients_for_halfproduct(request):
         ingredients_list = [
             {'name': hi.ingredient.naam, 'quantity': hi.quantity, 'meeteenheid': hi.ingredient.meeteenheid} for hi in
             ingredients]
+        ingredients_list.append({'bereidingswijze': halfproduct.bereidingswijze, 'meeteenheid': halfproduct.meeteenheid,
+                                 'nodig_per_portie': str(halfproduct.nodig_per_portie),
+                                 'bereidingskosten_per_eenheid': str(halfproduct.bereidingskosten_per_eenheid)})
         return JsonResponse(ingredients_list, safe=False)
     except Halfproducten.DoesNotExist:
         return JsonResponse([], safe=False)
