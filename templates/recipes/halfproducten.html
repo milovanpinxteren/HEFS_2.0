@@ -9,6 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 </head>
 <body>
 {% include "helpers/navbar.html" %}
@@ -28,10 +29,75 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
     <button type="submit">Wijs Ingredient toe</button>
 </form>
 <h2>Ingredienten voor geselecteerd Halfproduct (per KG/L/Stuk)</h2>
+<h4>Halfproduct: {{ default_halfproduct }}</h4>
 <div id="ingredients-list">
     <p>Selecteer eerst een halfproduct</p>
 </div>
 
+<div id="default-product" style="display: none;">{{ default_halfproduct }}</div>
+
+<script>
+    $(document).ready(function () {
+        // Function to check if the default halfproduct is filled
+        function checkDefaultProduct() {
+            var defaultHalfproduct = $("#default-product").text().trim();
+            if (defaultHalfproduct) {
+                // Trigger the AJAX request to get ingredients for the default halfproduct
+                $.ajax({
+                    url: "{% url 'get_ingredients_for_halfproduct' %}",
+                    data: {
+                        halfproduct_name: defaultHalfproduct
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        let ingredientsList = $('#ingredients-list');
+                        ingredientsList.empty();
+                        if (data.length === 0) {
+                            ingredientsList.append('<p>No ingredients found for the selected halfproduct.</p>');
+                        } else {
+                            let bereidingswijze = null;
+                            let meeteenheid = null;
+                            let nodig_per_portie = null;
+                            let bereidingskosten_per_eenheid = null;
+                            console.log('data')
+                            console.log(data)
+                            console.log(data[data.length - 1])
+                            if ('bereidingswijze' in data[data.length - 1]) {
+                                bereidingswijze = data[data.length - 1]['bereidingswijze'];
+                                ingredientsList.append('<p>Bereidingswijze: ' + bereidingswijze + '</p>');
+                            }
+                            if ('nodig_per_portie' in data[data.length - 1]) {
+                                nodig_per_portie = data[data.length - 1]['nodig_per_portie'];
+                                ingredientsList.append('<p>Nodig per portie: ' + nodig_per_portie + '</p>');
+                            }
+                            if ('meeteenheid' in data[data.length - 1]) {
+                                meeteenheid = data[data.length - 1]['meeteenheid'];
+                                ingredientsList.append('<p>meeteenheid: ' + meeteenheid + '</p>');
+                            }
+                            if ('bereidingskosten_per_eenheid' in data[data.length - 1]) {
+                                bereidingskosten_per_eenheid = data[data.length - 1]['bereidingskosten_per_eenheid'];
+                                ingredientsList.append('<p>Bereidingskosten per eenheid: ' + bereidingskosten_per_eenheid + '€ </p>');
+                            }
+// now pop the additional information from the data
+                            if (bereidingswijze || nodig_per_portie || meeteenheid || bereidingskosten_per_eenheid) {
+                                data.pop();
+                            }
+                            let list = $('<ul></ul>');
+                            data.forEach(function (item) {
+                                list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');
+                            });
+                            ingredientsList.append(list);
+                        }
+                    }
+                });
+                clearInterval(checkInterval); // Stop the timer once the default product is filled
+            }
+        }
+
+        // Check the default product every second
+        var checkInterval = setInterval(checkDefaultProduct, 300);
+    });
+</script>
 
 <script>
     $(function () {

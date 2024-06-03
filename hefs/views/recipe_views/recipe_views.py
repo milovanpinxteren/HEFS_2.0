@@ -1,3 +1,4 @@
+
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -25,13 +26,14 @@ def show_halfproducten(request):
             print('A Constraint Error Occured.')
             context = {'form': form, 'msg': 'A Constraint Error Occured.'}
             return render(request, 'recipes/halfproducten.html', context)
-        if form.is_valid():
-            form.save()
-            return redirect('show_halfproducten')  # Redirect to the same page after submission
+        form = HalfproductenIngredientenForm(initial={'halfproduct': halfproduct_name})
+        context = {'form': form, 'default_halfproduct': halfproduct_name}
+        return render(request, 'recipes/halfproducten.html', context)
     else:
         form = HalfproductenIngredientenForm()
+        context = {'form': form}
 
-    return render(request, 'recipes/halfproducten.html', {'form': form})
+    return render(request, 'recipes/halfproducten.html', context)
 
 
 def ingredient_autocomplete(request):
@@ -42,7 +44,6 @@ def ingredient_autocomplete(request):
             names.append(ingredient.naam)
         return JsonResponse(names, safe=False)
     return JsonResponse([], safe=False)
-
 
 def halfproduct_autocomplete(request):
     if 'term' in request.GET:
@@ -55,7 +56,10 @@ def halfproduct_autocomplete(request):
 
 
 def get_ingredients_for_halfproduct(request):
-    halfproduct_name = request.GET.get('halfproduct_name')
+    if request.GET.get('halfproduct_name'):
+        halfproduct_name = request.GET.get('halfproduct_name')
+    elif request.POST['halfproduct']:
+        halfproduct_name = request.POST['halfproduct']
     try:
         halfproduct = Halfproducten.objects.get(naam=halfproduct_name)
         ingredients = HalfproductenIngredienten.objects.filter(halfproduct=halfproduct)
