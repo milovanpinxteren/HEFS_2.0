@@ -14,80 +14,108 @@
 {% include "helpers/navbar.html" %}
 
 <h1 class="page-title">halfproducten</h1>
-{#{% for half_product in half_products %}#}
-{#    {{ half_product }}#}
-{#    Ingredients:#}
-{#    {% for ingredient in half_product.ingredienten.all %}#}
-{#        {{ ingredient }}#}
-{#    {% endfor %}#}
-{#{% endfor %}#}
+Typ het halfproduct in en klik op het halfproduct. Dan zullen de bijbehorende ingredienten zichtbaar worden.
+<br>
+Om Ingredienten aan een halfproduct toe te voegen, zoek en klik dan ook het ingredient, en vul de hoeveelheid (per KG)
+in.
+<br>
+Druk dan op 'Wijs Ingredient toe'
+<br>
+Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Wijs Ingredient toe</button>
 </form>
-    <h2>Ingredienten voor geselecteerd Halfproduct</h2>
-    <div id="ingredients-list">
-        <p>Selecteer eerst een halfproduct</p>
-    </div>
+<h2>Ingredienten voor geselecteerd Halfproduct (per KG/L/Stuk)</h2>
+<div id="ingredients-list">
+    <p>Selecteer eerst een halfproduct</p>
+</div>
 
 
-     <script>
-        $(function() {
-            $(".autocomplete-ingredient").autocomplete({
-                source: function(request, response) {
-                    $.ajax({
-                        url: "{% url 'ingredient_autocomplete' %}",
-                        data: {
-                            term: request.term
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            response(data);
-                        }
-                    });
-                },
-                minLength: 2,
-            });
-
-            $(".autocomplete-halfproduct").autocomplete({
-                source: function(request, response) {
-                    $.ajax({
-                        url: "{% url 'halfproduct_autocomplete' %}",
-                        data: {
-                            term: request.term
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            response(data);
-                        }
-                    });
-                },
-                minLength: 2,
-                select: function(event, ui) {
-                    $.ajax({
-                        url: "{% url 'get_ingredients_for_halfproduct' %}",
-                        data: {
-                            halfproduct_name: ui.item.value
-                        },
-                        dataType: "json",
-                        success: function(data) {
-                            let ingredientsList = $('#ingredients-list');
-                            ingredientsList.empty();
-                            if (data.length === 0) {
-                                ingredientsList.append('<p>No ingredients found for the selected halfproduct.</p>');
-                            } else {
-                                let list = $('<ul></ul>');
-                                data.forEach(function(item) {
-                                    list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');
-                                });
-                                ingredientsList.append(list);
-                            }
-                        }
-                    });
-                }
-            });
+<script>
+    $(function () {
+        $(".autocomplete-ingredient").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "{% url 'ingredient_autocomplete' %}",
+                    data: {
+                        term: request.term
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
         });
-    </script>
+
+        $(".autocomplete-halfproduct").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "{% url 'halfproduct_autocomplete' %}",
+                    data: {
+                        term: request.term
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                $.ajax({
+                    url: "{% url 'get_ingredients_for_halfproduct' %}",
+                    data: {
+                        halfproduct_name: ui.item.value
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        let ingredientsList = $('#ingredients-list');
+                        ingredientsList.empty();
+                        if (data.length === 0) {
+                            ingredientsList.append('<p>No ingredients found for the selected halfproduct.</p>');
+                        } else {
+                            let bereidingswijze = null;
+                            let meeteenheid = null;
+                            let nodig_per_portie = null;
+                            let bereidingskosten_per_eenheid = null;
+                            console.log('data')
+                            console.log(data)
+                            console.log(data[data.length - 1])
+                            if ('bereidingswijze' in data[data.length - 1]) {
+                                bereidingswijze = data[data.length - 1]['bereidingswijze'];
+                                ingredientsList.append('<p>Bereidingswijze: ' + bereidingswijze + '</p>');
+                            }
+                            if ('nodig_per_portie' in data[data.length - 1]) {
+                                nodig_per_portie = data[data.length - 1]['nodig_per_portie'];
+                                ingredientsList.append('<p>Nodig per portie: ' + nodig_per_portie + '</p>');
+                            }
+                            if ('meeteenheid' in data[data.length - 1]) {
+                                meeteenheid = data[data.length - 1]['meeteenheid'];
+                                ingredientsList.append('<p>meeteenheid: ' + meeteenheid + '</p>');
+                            }
+                            if ('bereidingskosten_per_eenheid' in data[data.length - 1]) {
+                                bereidingskosten_per_eenheid = data[data.length - 1]['bereidingskosten_per_eenheid'];
+                                ingredientsList.append('<p>Bereidingskosten per eenheid: ' + bereidingskosten_per_eenheid + '€ </p>');
+                            }
+// now pop the additional information from the data
+                            if (bereidingswijze || nodig_per_portie || meeteenheid || bereidingskosten_per_eenheid) {
+                                data.pop();
+                            }
+                            let list = $('<ul></ul>');
+                            data.forEach(function (item) {
+                                list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');
+                            });
+                            ingredientsList.append(list);
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
 </body>
 </html>

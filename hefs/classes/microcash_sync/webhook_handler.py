@@ -49,7 +49,7 @@ class WebhookHandler():
                     for product in json_body['line_items']:
                         xml_string += f"""
                             <Product>
-                              <Barcode>{product['id']}</Barcode>
+                              <Barcode>{product['product_id']}</Barcode>
                               <Amount>{product['fulfillable_quantity']}</Amount>
                               <Price>{product['price']}</Price> 
                             </Product>
