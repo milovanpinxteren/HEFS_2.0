@@ -1,7 +1,7 @@
 from hefs.classes.error_handler import ErrorHandler
 from hefs.classes.microcash_sync.ftp_getter import FTPGetter
 from django_rq import get_queue
-from django.conf import settings
+from djangoProject import settings
 from datetime import datetime, timedelta
 
 
