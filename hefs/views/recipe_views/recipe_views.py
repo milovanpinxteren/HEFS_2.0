@@ -3,8 +3,8 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
-from hefs.forms import HalfproductenIngredientenForm
-from hefs.models import ApiUrls, Halfproducten, Ingredienten, HalfproductenIngredienten
+from hefs.forms import HalfproductenIngredientenForm, ProductenHalfproductenForm
+from hefs.models import ApiUrls, Halfproducten, Ingredienten, HalfproductenIngredienten, Productinfo
 
 
 def show_halfproducten(request):
@@ -35,7 +35,19 @@ def show_halfproducten(request):
 
     return render(request, 'recipes/halfproducten.html', context)
 
+def show_productinfo(request):
+    if request.method == 'POST':
+        form = ProductenHalfproductenForm(request.POST)
+        context = {'form': form}
+        return render(request, 'recipes/productinfo.html', context)
+    else:
+        form = ProductenHalfproductenForm()
+        context = {'form': form}
+    return render(request, 'recipes/productinfo.html', context)
 
+
+def show_ingredienten(request):
+    return render(request, 'recipes/ingredienten.html')
 def ingredient_autocomplete(request):
     if 'term' in request.GET:
         qs = Ingredienten.objects.filter(naam__icontains=request.GET.get('term'))
@@ -51,6 +63,16 @@ def halfproduct_autocomplete(request):
         names = list()
         for halfproduct in qs:
             names.append(halfproduct.naam)
+        return JsonResponse(names, safe=False)
+    return JsonResponse([], safe=False)
+
+
+def product_autocomplete(request):
+    if 'term' in request.GET:
+        qs = Productinfo.objects.filter(productnaam__icontains=(request.GET.get('term')))
+        names = list()
+        for product in qs:
+            names.append(product.productnaam)
         return JsonResponse(names, safe=False)
     return JsonResponse([], safe=False)
 
@@ -74,9 +96,4 @@ def get_ingredients_for_halfproduct(request):
         return JsonResponse([], safe=False)
 
 
-def show_productinfo(request):
-    return render(request, 'recipes/productinfo.html')
 
-
-def show_ingredienten(request):
-    return render(request, 'recipes/ingredienten.html')

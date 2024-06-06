@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 def update_product_inventory():
     ftp_getter = FTPGetter()
     ftp_getter.get_ftp_changed_file()
-    queue = get_queue()
+    queue = get_queue(name=settings.small_sync)
+    queue.empty()
     print('enqueing small sync')
     queue.enqueue_in(timedelta(seconds=int(settings.SCHEDULE_INTERVAL)), update_product_inventory)
 
@@ -16,7 +17,8 @@ def sync_all_products():
     ftp_getter = FTPGetter()
     error_handler = ErrorHandler()
     ftp_getter.get_ftp_full_file()
-    queue = get_queue()
+    queue = get_queue(name=settings.full_sync)
+    queue.empty()
     now = datetime.now()
     next_run = datetime(now.year, now.month, now.day, 23, 30)
     if now > next_run:
