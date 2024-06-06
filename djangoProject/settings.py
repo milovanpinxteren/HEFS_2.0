@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 
 import environ
+
 # Initialise environment variables
 env = environ.Env()
 environ.Env.read_env()
@@ -104,6 +105,7 @@ DATABASES = {
 }
 
 import dj_database_url
+
 db_from_env = dj_database_url.config()
 DATABASES['default'].update(db_from_env)
 
@@ -151,21 +153,22 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+full_sync = 'high'
+small_sync = 'low'
 
 RQ_QUEUES = {
     'default': {
         'URL': redis_url,
         'DEFAULT_TIMEOUT': os.getenv('REDIS_TIMEOUT', 7200),
     },
-    'high': {
+    full_sync: {
         'URL': redis_url,
-            },
-    'low': {
+        'DEFAULT_TIMEOUT': os.getenv('REDIS_TIMEOUT', 7200),
+    },
+    small_sync: {
         'URL': redis_url,
+        'DEFAULT_TIMEOUT': os.getenv('REDIS_TIMEOUT', 7200),
 
     }
 }
-
-

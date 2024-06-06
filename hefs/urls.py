@@ -36,6 +36,8 @@ urlpatterns = [
     path('ingredienten', recipe_views.show_ingredienten, name='ingredienten'),
     path('ingredient-autocomplete/', recipe_views.ingredient_autocomplete, name='ingredient_autocomplete'),
     path('halfproduct-autocomplete/', recipe_views.halfproduct_autocomplete, name='halfproduct_autocomplete'),
-    path('get-ingredients-for-halfproduct/', recipe_views.get_ingredients_for_halfproduct, name='get_ingredients_for_halfproduct'),
+    path('product-autocomplete/', recipe_views.product_autocomplete, name='product_autocomplete'),
+    path('get-ingredients-for-halfproduct/', recipe_views.get_ingredients_for_halfproduct,
+         name='get_ingredients_for_halfproduct'),
 
 ]

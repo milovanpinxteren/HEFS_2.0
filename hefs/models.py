@@ -162,6 +162,17 @@ class Ingredienten(models.Model):
         return self.naam
 
 
+class ProductenHalfproducts(models.Model):
+    product = models.ForeignKey(Productinfo, on_delete=models.CASCADE)
+    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = ('product', 'halfproduct',)  # Ensures uniqueness of ingredient for each halfproduct
+
+    def __str__(self):
+        return f"{self.halfproduct} - {self.ingredient} - {self.quantity}"
+
 class HalfproductenIngredienten(models.Model):
     halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE)

@@ -34,8 +34,44 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
     <p>Selecteer eerst een halfproduct</p>
 </div>
 
-<div id="default-product" style="display: none;">{{ default_halfproduct }}</div>
 
+<div id="quantity-form">
+    <form id="calculation-form">
+        <label for="quantity">Aantal porties:</label>
+        <input type="number" id="quantity" name="quantity" min="1" required>
+        <button type="submit">Bereken</button>
+    </form>
+</div>
+
+<div id="default-product" style="display: none;">{{ default_halfproduct }}</div>
+<script>
+    $(document).ready(function () {
+        $("#calculation-form").submit(function (event) {
+            event.preventDefault();
+
+
+            var quantity = parseInt($("#quantity").val());
+            console.log('asdlfkasdf', quantity)
+            if (isNaN(quantity) || quantity <= 0) {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+            var ingredientsList = $('#ingredients-list');
+            var data = [];
+            ingredientsList.find('ul li').each(function () {
+                var item = {};
+                var parts = $(this).text().split(':');
+                item.name = parts[0].trim();
+                var quantityPart = parts[1].trim().split(' ');
+                item.quantity = parseFloat(quantityPart[0]);
+                item.meeteenheid = quantityPart[1];
+                data.push(item);
+            });
+            console.log('ingredients', data)
+
+        });
+    });
+</script>
 <script>
     $(document).ready(function () {
         // Function to check if the default halfproduct is filled
@@ -53,13 +89,13 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
                         let ingredientsList = $('#ingredients-list');
                         ingredientsList.empty();
                         if (data.length === 0) {
-                            ingredientsList.append('<p>No ingredients found for the selected halfproduct.</p>');
+                            ingredientsList.append('<p>Geen Ingredienten gevonden voor halfproduct.</p>');
                         } else {
                             let bereidingswijze = null;
                             let meeteenheid = null;
                             let nodig_per_portie = null;
                             let bereidingskosten_per_eenheid = null;
-                            console.log('data')
+                            console.log('dataasdfawdf')
                             console.log(data)
                             console.log(data[data.length - 1])
                             if ('bereidingswijze' in data[data.length - 1]) {
@@ -68,7 +104,7 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
                             }
                             if ('nodig_per_portie' in data[data.length - 1]) {
                                 nodig_per_portie = data[data.length - 1]['nodig_per_portie'];
-                                ingredientsList.append('<p>Nodig per portie: ' + nodig_per_portie + '</p>');
+                                ingredientsList.append('<p>Nodig per portieasdfasdf: ' + nodig_per_portie + '</p>');
                             }
                             if ('meeteenheid' in data[data.length - 1]) {
                                 meeteenheid = data[data.length - 1]['meeteenheid'];
@@ -142,27 +178,25 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
                         let ingredientsList = $('#ingredients-list');
                         ingredientsList.empty();
                         if (data.length === 0) {
-                            ingredientsList.append('<p>No ingredients found for the selected halfproduct.</p>');
+                            ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
                         } else {
                             let bereidingswijze = null;
                             let meeteenheid = null;
                             let nodig_per_portie = null;
                             let bereidingskosten_per_eenheid = null;
-                            console.log('data')
+                            console.log('data2')
                             console.log(data)
                             console.log(data[data.length - 1])
                             if ('bereidingswijze' in data[data.length - 1]) {
                                 bereidingswijze = data[data.length - 1]['bereidingswijze'];
                                 ingredientsList.append('<p>Bereidingswijze: ' + bereidingswijze + '</p>');
                             }
-                            if ('nodig_per_portie' in data[data.length - 1]) {
+                            if (('nodig_per_portie' in data[data.length - 1]) && ('meeteenheid' in data[data.length - 1])) {
                                 nodig_per_portie = data[data.length - 1]['nodig_per_portie'];
-                                ingredientsList.append('<p>Nodig per portie: ' + nodig_per_portie + '</p>');
-                            }
-                            if ('meeteenheid' in data[data.length - 1]) {
                                 meeteenheid = data[data.length - 1]['meeteenheid'];
-                                ingredientsList.append('<p>meeteenheid: ' + meeteenheid + '</p>');
+                                ingredientsList.append('<p>Nodig per portie: ' + nodig_per_portie + ' ' + meeteenheid);
                             }
+
                             if ('bereidingskosten_per_eenheid' in data[data.length - 1]) {
                                 bereidingskosten_per_eenheid = data[data.length - 1]['bereidingskosten_per_eenheid'];
                                 ingredientsList.append('<p>Bereidingskosten per eenheid: ' + bereidingskosten_per_eenheid + '€ </p>');
@@ -171,6 +205,8 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
                             if (bereidingswijze || nodig_per_portie || meeteenheid || bereidingskosten_per_eenheid) {
                                 data.pop();
                             }
+                            ingredientsList.append('<hr>')
+                            ingredientsList.append('<h4>Ingredienten</h4>')
                             let list = $('<ul></ul>');
                             data.forEach(function (item) {
                                 list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');
