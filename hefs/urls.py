@@ -39,5 +39,7 @@ urlpatterns = [
     path('product-autocomplete/', recipe_views.product_autocomplete, name='product_autocomplete'),
     path('get-ingredients-for-halfproduct/', recipe_views.get_ingredients_for_halfproduct,
          name='get_ingredients_for_halfproduct'),
+    path('get_halfproducts_and_ingredients/', recipe_views.get_halfproducts_and_ingredients,
+         name='get_halfproducts_and_ingredients'),
 
 ]

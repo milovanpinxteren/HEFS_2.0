@@ -164,6 +164,7 @@ class Ingredienten(models.Model):
 
 class ProductenHalfproducts(models.Model):
     product = models.ForeignKey(Productinfo, on_delete=models.CASCADE)
+    productcode = models.CharField(max_length=3, default=0)
     halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
@@ -171,7 +172,7 @@ class ProductenHalfproducts(models.Model):
         unique_together = ('product', 'halfproduct',)  # Ensures uniqueness of ingredient for each halfproduct
 
     def __str__(self):
-        return f"{self.halfproduct} - {self.ingredient} - {self.quantity}"
+        return f"{self.product} - {self.halfproduct} - {self.quantity}"
 
 class HalfproductenIngredienten(models.Model):
     halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
