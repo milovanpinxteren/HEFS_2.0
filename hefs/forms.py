@@ -45,5 +45,5 @@ class ProductenHalfproductenForm(forms.ModelForm):
         }
 
         labels = {
-            'quantity': 'Nodig per portie',
+            'quantity': 'Nodig per Portie',
         }

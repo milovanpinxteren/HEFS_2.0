@@ -18,25 +18,54 @@
     {{ form.as_p }}
     <button type="submit">Wijs Halfproduct toe</button>
 </form>
-
+<div id="ingredients-list">
+    <p>Selecteer eerst een Product</p>
+</div>
+<div id="default-product" style="display: none;">{{ default_product }}</div>
 <script>
-    $(function () {
-        $(".autocomplete-product").autocomplete({
-            source: function (request, response) {
+    $(document).ready(function () {
+        // Function to check if the default halfproduct is filled
+        function checkDefaultProduct() {
+            var defaultproduct = $("#default-product").text().trim();
+            if (defaultproduct) {
+                // Trigger the AJAX request to get ingredients for the default halfproduct
                 $.ajax({
-                    url: "{% url 'product_autocomplete' %}",
+                    url: "{% url 'get_halfproducts_and_ingredients' %}",
                     data: {
-                        term: request.term
+                        product_name: defaultproduct
                     },
                     dataType: "json",
                     success: function (data) {
-                        response(data);
+                        let ingredientsList = $('#ingredients-list');
+                        ingredientsList.empty();
+                        if (data.length === 0) {
+                            ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
+                        } else {
+
+                            ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
+                            for (const key in data) {
+                                let list = $('<ul>' + key + '</ul>');
+                                if (data.hasOwnProperty(key)) {
+                                    data[key].forEach(item => {
+                                        list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>')
+                                    })
+                                }
+                                ingredientsList.append(list);
+                            }
+                        }
                     }
                 });
-            },
-            minLength: 2,
-        });
+                clearInterval(checkInterval); // Stop the timer once the default product is filled
+            }
+        }
 
+        // Check the default product every second
+        var checkInterval = setInterval(checkDefaultProduct, 300);
+    });
+</script>
+
+<script>
+    $(function () {
         $(".autocomplete-halfproduct").autocomplete({
             source: function (request, response) {
                 $.ajax({
@@ -51,11 +80,27 @@
                 });
             },
             minLength: 2,
+        });
+
+        $(".autocomplete-product").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "{% url 'product_autocomplete' %}",
+                    data: {
+                        term: request.term
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
             select: function (event, ui) {
                 $.ajax({
-                    url: "{% url 'get_ingredients_for_halfproduct' %}",
+                    url: "{% url 'get_halfproducts_and_ingredients' %}",
                     data: {
-                        halfproduct_name: ui.item.value
+                        product_name: ui.item.value
                     },
                     dataType: "json",
                     success: function (data) {
@@ -64,38 +109,17 @@
                         if (data.length === 0) {
                             ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
                         } else {
-                            let bereidingswijze = null;
-                            let meeteenheid = null;
-                            let nodig_per_portie = null;
-                            let bereidingskosten_per_eenheid = null;
-                            console.log('data2')
-                            console.log(data)
-                            console.log(data[data.length - 1])
-                            if ('bereidingswijze' in data[data.length - 1]) {
-                                bereidingswijze = data[data.length - 1]['bereidingswijze'];
-                                ingredientsList.append('<p>Bereidingswijze: ' + bereidingswijze + '</p>');
-                            }
-                            if (('nodig_per_portie' in data[data.length - 1]) && ('meeteenheid' in data[data.length - 1])) {
-                                nodig_per_portie = data[data.length - 1]['nodig_per_portie'];
-                                meeteenheid = data[data.length - 1]['meeteenheid'];
-                                ingredientsList.append('<p>Nodig per portie: ' + nodig_per_portie + ' ' + meeteenheid);
-                            }
 
-                            if ('bereidingskosten_per_eenheid' in data[data.length - 1]) {
-                                bereidingskosten_per_eenheid = data[data.length - 1]['bereidingskosten_per_eenheid'];
-                                ingredientsList.append('<p>Bereidingskosten per eenheid: ' + bereidingskosten_per_eenheid + '€ </p>');
+                            ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
+                            for (const key in data) {
+                                let list = $('<ul>' + key + '</ul>');
+                                if (data.hasOwnProperty(key)) {
+                                    data[key].forEach(item => {
+                                        list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>')
+                                    })
+                                }
+                                ingredientsList.append(list);
                             }
-// now pop the additional information from the data
-                            if (bereidingswijze || nodig_per_portie || meeteenheid || bereidingskosten_per_eenheid) {
-                                data.pop();
-                            }
-                            ingredientsList.append('<hr>')
-                            ingredientsList.append('<h4>Ingredienten</h4>')
-                            let list = $('<ul></ul>');
-                            data.forEach(function (item) {
-                                list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');
-                            });
-                            ingredientsList.append(list);
                         }
                     }
                 });

@@ -4,7 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from hefs.forms import HalfproductenIngredientenForm, ProductenHalfproductenForm
-from hefs.models import ApiUrls, Halfproducten, Ingredienten, HalfproductenIngredienten, Productinfo
+from hefs.models import ApiUrls, Halfproducten, Ingredienten, HalfproductenIngredienten, Productinfo, \
+    ProductenHalfproducts
 
 
 def show_halfproducten(request):
@@ -38,8 +39,24 @@ def show_halfproducten(request):
 def show_productinfo(request):
     if request.method == 'POST':
         form = ProductenHalfproductenForm(request.POST)
-        context = {'form': form}
-        return render(request, 'recipes/productinfo.html', context)
+        halfproduct_name = form['halfproduct'].value()
+        product_name = form['product'].value()
+        quantity = form['quantity'].value()
+        halfproduct = Halfproducten.objects.get(naam=halfproduct_name)
+        product = Productinfo.objects.filter(productnaam=product_name)[0]
+        product_code = product.productcode
+        try:
+            halfproducten_ingredienten, created = ProductenHalfproducts.objects.get_or_create(
+                product=product, productcode=product_code, halfproduct=halfproduct, defaults={'quantity': quantity}
+            )
+            if not created:  # object was not created, so it was retrieved
+                halfproducten_ingredienten.quantity = quantity  # update the quantity
+                halfproducten_ingredienten.save()
+            form = ProductenHalfproductenForm(initial={'product': product_name})
+            context = {'form': form, 'default_product': product_name}
+        except IntegrityError:
+            print('A Constraint Error Occured.')
+            context = {'form': form, 'msg': 'A Constraint Error Occured.'}
     else:
         form = ProductenHalfproductenForm()
         context = {'form': form}
@@ -92,6 +109,31 @@ def get_ingredients_for_halfproduct(request):
                                  'nodig_per_portie': str(halfproduct.nodig_per_portie),
                                  'bereidingskosten_per_eenheid': str(halfproduct.bereidingskosten_per_eenheid)})
         return JsonResponse(ingredients_list, safe=False)
+    except Halfproducten.DoesNotExist:
+        return JsonResponse([], safe=False)
+
+
+def get_halfproducts_and_ingredients(request):
+    ingredients_dict = {}
+    if request.GET.get('product_name'):
+        product_name = request.GET.get('product_name')
+    elif request.POST['product']:
+        product_name = request.POST['product']
+    try:
+        product = Productinfo.objects.filter(productnaam=product_name)[0]
+        product_code = product.productcode
+        halfproduct_objects = ProductenHalfproducts.objects.filter(productcode=product_code)
+        for halfproduct in halfproduct_objects:
+            ingredients_list = []
+            ingredients = HalfproductenIngredienten.objects.filter(halfproduct=halfproduct.halfproduct)
+            for hi in ingredients:
+                ingredients_list.append({
+                    'name': hi.ingredient.naam,  # Assuming Ingredienten has a 'name' field
+                    'quantity': hi.quantity,  # Assuming Ingredienten has a 'quantity' field
+                    'meeteenheid': hi.ingredient.meeteenheid  # Assuming Ingredienten has a 'meeteenheid' field
+                })
+            ingredients_dict[halfproduct.halfproduct.naam] = ingredients_list
+        return JsonResponse(ingredients_dict, safe=False)
     except Halfproducten.DoesNotExist:
         return JsonResponse([], safe=False)
 
