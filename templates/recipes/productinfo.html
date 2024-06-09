@@ -8,6 +8,37 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <title>Title</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #ingredients-list {
+            margin-top: 20px;
+        }
+
+        table {
+            {#width: 100%;#}
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h3, h4 {
+            margin-top: 20px;
+        }
+    </style>
+
 </head>
 <body>
 {% include "helpers/navbar.html" %}
@@ -21,47 +52,116 @@
 <div id="ingredients-list">
     <p>Selecteer eerst een Product</p>
 </div>
+<div id="quantity-form">
+    <form id="calculation-form">
+        <label for="quantity">Aantal porties:</label>
+        <input type="number" id="quantity" name="quantity" min="1" required>
+        <button type="submit">Bereken</button>
+    </form>
+    <div id="calculation-result"></div>
+</div>
+
 <div id="default-product" style="display: none;">{{ default_product }}</div>
+
+
 <script>
     $(document).ready(function () {
-        // Function to check if the default halfproduct is filled
-        function checkDefaultProduct() {
-            var defaultproduct = $("#default-product").text().trim();
-            if (defaultproduct) {
-                // Trigger the AJAX request to get ingredients for the default halfproduct
-                $.ajax({
-                    url: "{% url 'get_halfproducts_and_ingredients' %}",
-                    data: {
-                        product_name: defaultproduct
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        let ingredientsList = $('#ingredients-list');
-                        ingredientsList.empty();
-                        if (data.length === 0) {
-                            ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
-                        } else {
-
-                            ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
-                            for (const key in data) {
-                                let list = $('<ul>' + key + '</ul>');
-                                if (data.hasOwnProperty(key)) {
-                                    data[key].forEach(item => {
-                                        list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>')
-                                    })
-                                }
-                                ingredientsList.append(list);
-                            }
-                        }
+        $("#calculation-form").submit(function (event) {
+            event.preventDefault();
+            var quantity = parseInt($("#quantity").val());
+            if (isNaN(quantity) || quantity <= 0) {
+                alert("Voer een geldige hoeveelheid in.");
+                return;
+            }
+            var ingredientsList = $('#ingredients-list');
+            let calculationResult = $('#calculation-result');
+            calculationResult.empty(); // Clear previous results
+            var data = [];
+            $('#ingredients-list table').each(function () {
+                $(this).find('tr').each(function (index) {
+                    if (index > 0) { // Skip header row
+                        var item = {};
+                        var columns = $(this).find('td');
+                        item.name = columns.eq(0).text().trim();
+                        item.quantity = parseFloat(columns.eq(1).text().trim()) * quantity;
+                        item.meeteenheid = columns.eq(2).text().trim();
+                        data.push(item);
                     }
                 });
-                clearInterval(checkInterval); // Stop the timer once the default product is filled
-            }
-        }
-
-        // Check the default product every second
-        var checkInterval = setInterval(checkDefaultProduct, 300);
+            });
+            var table = $('<table></table>').addClass('ingredient-table');
+            var tableHeader = $('<tr></tr>')
+                .append('<th>Ingredient</th>')
+                .append('<th>Hoeveelheid</th>')
+                .append('<th>Meeteenheid</th>');
+            table.append(tableHeader);
+            data.forEach(function (item) {
+                var tableRow = $('<tr></tr>')
+                    .append('<td>' + item.name + '</td>')
+                    .append('<td>' + item.quantity + '</td>')
+                    .append('<td>' + item.meeteenheid + '</td>');
+                table.append(tableRow);
+            });
+            calculationResult.append(table);
+        });
     });
+</script>
+
+<script>
+    $(document).ready(function () {
+            // Function to check if the default halfproduct is filled
+            function checkDefaultProduct() {
+                var defaultproduct = $("#default-product").text().trim();
+                if (defaultproduct) {
+                    // Trigger the AJAX request to get ingredients for the default halfproduct
+                    $.ajax({
+                        url: "{% url 'get_halfproducts_and_ingredients' %}",
+                        data: {
+                            product_name: defaultproduct
+                        },
+                        dataType: "json",
+                        success: function (data) {
+                            let ingredientsList = $('#ingredients-list');
+                            ingredientsList.empty();
+                            if (data.length === 0) {
+                                ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
+                            } else {
+
+                                ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
+                                for (const key in data) {
+                                    {#let list = $('<ul></ul>').append('<h4>' + key + '</h4>');#}
+                                    if (data.hasOwnProperty(key)) {
+                                        let table = $('<table></table>');
+                                        let tableHeader = $('<tr></tr>')
+                                            .append('<th>Ingredient</th>')
+                                            .append('<th>Hoeveelheid</th>')
+                                            .append('<th>Meeteenheid</th>');
+                                        table.append(tableHeader);
+                                        data[key].forEach(item => {
+                                            let tableRow = $('<tr></tr>')
+                                                .append('<td>' + item.name + '</td>')
+                                                .append('<td>' + item.quantity + '</td>')
+                                                .append('<td>' + item.meeteenheid + '</td>');
+                                            table.append(tableRow);
+                                        });
+                                        ingredientsList.append('<h4>' + key + '</h4>');
+                                        ingredientsList.append('<p>' + data[data.length - 1]['bereidingswijze'] + '</p>');
+                                        ingredientsList.append(table);
+                                    }
+
+                                }
+                            }
+                        }
+                    });
+                    clearInterval(checkInterval); // Stop the timer once the default product is filled
+                }
+            }
+
+            // Check the default product every second
+            var checkInterval = setInterval(checkDefaultProduct, 300);
+        }
+    )
+    ;
 </script>
 
 <script>
@@ -112,13 +212,23 @@
 
                             ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
                             for (const key in data) {
-                                let list = $('<ul>' + key + '</ul>');
                                 if (data.hasOwnProperty(key)) {
+                                    let table = $('<table></table>');
+                                    let tableHeader = $('<tr></tr>')
+                                        .append('<th>Ingredient</th>')
+                                        .append('<th>Hoeveelheid</th>')
+                                        .append('<th>Meeteenheid</th>');
+                                    table.append(tableHeader);
                                     data[key].forEach(item => {
-                                        list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>')
-                                    })
+                                        let tableRow = $('<tr></tr>')
+                                            .append('<td>' + item.name + '</td>')
+                                            .append('<td>' + item.quantity + '</td>')
+                                            .append('<td>' + item.meeteenheid + '</td>');
+                                        table.append(tableRow);
+                                    });
+                                    ingredientsList.append('<h4>' + key + '</h4>');
+                                    ingredientsList.append(table);
                                 }
-                                ingredientsList.append(list);
                             }
                         }
                     }

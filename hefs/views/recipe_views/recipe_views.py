@@ -21,8 +21,11 @@ def show_halfproducten(request):
                 halfproduct=halfproduct, ingredient=ingredient, defaults={'quantity': quantity}
             )
             if not created:  # object was not created, so it was retrieved
-                halfproducten_ingredienten.quantity = quantity  # update the quantity
-                halfproducten_ingredienten.save()
+                if float(quantity) > 0:
+                    halfproducten_ingredienten.quantity = quantity  # update the quantity
+                    halfproducten_ingredienten.save()
+                elif float(quantity) <= 0:
+                    halfproducten_ingredienten.delete()
         except IntegrityError:
             print('A Constraint Error Occured.')
             context = {'form': form, 'msg': 'A Constraint Error Occured.'}
@@ -50,8 +53,11 @@ def show_productinfo(request):
                 product=product, productcode=product_code, halfproduct=halfproduct, defaults={'quantity': quantity}
             )
             if not created:  # object was not created, so it was retrieved
-                halfproducten_ingredienten.quantity = quantity  # update the quantity
-                halfproducten_ingredienten.save()
+                if float(quantity) > 0:
+                    halfproducten_ingredienten.quantity = quantity  # update the quantity
+                    halfproducten_ingredienten.save()
+                elif float(quantity) <= 0:
+                    halfproducten_ingredienten.delete()
             form = ProductenHalfproductenForm(initial={'product': product_name})
             context = {'form': form, 'default_product': product_name}
         except IntegrityError:
@@ -89,7 +95,8 @@ def product_autocomplete(request):
         qs = Productinfo.objects.filter(productnaam__icontains=(request.GET.get('term')))
         names = list()
         for product in qs:
-            names.append(product.productnaam)
+            if product.productnaam not in names:
+                names.append(product.productnaam)
         return JsonResponse(names, safe=False)
     return JsonResponse([], safe=False)
 
@@ -132,7 +139,8 @@ def get_halfproducts_and_ingredients(request):
                     'quantity': hi.quantity,  # Assuming Ingredienten has a 'quantity' field
                     'meeteenheid': hi.ingredient.meeteenheid  # Assuming Ingredienten has a 'meeteenheid' field
                 })
-            ingredients_dict[halfproduct.halfproduct.naam] = ingredients_list
+            halfproductinfo = halfproduct.halfproduct.naam + ': ' + str(halfproduct.quantity) + ' ' + halfproduct.halfproduct.meeteenheid
+            ingredients_dict[halfproductinfo] = ingredients_list
         return JsonResponse(ingredients_dict, safe=False)
     except Halfproducten.DoesNotExist:
         return JsonResponse([], safe=False)
