@@ -146,7 +146,7 @@ class Halfproducten(models.Model):
     naam = models.CharField(max_length=250, default='')
     product = models.ForeignKey(Productinfo, on_delete=models.PROTECT, default='', blank=False)
     meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
-    nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=3, default=0)
     bereidingswijze = models.TextField(default='')
     bereidingskosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
@@ -155,7 +155,7 @@ class Halfproducten(models.Model):
 class Ingredienten(models.Model):
     naam = models.CharField(max_length=250, default='')
     meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
-    nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    # nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=3, default=0)
     kosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     def __str__(self):
@@ -166,7 +166,7 @@ class ProductenHalfproducts(models.Model):
     product = models.ForeignKey(Productinfo, on_delete=models.CASCADE)
     productcode = models.CharField(max_length=3, default=0)
     halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    quantity = models.DecimalField(max_digits=6, decimal_places=3, default=0)
 
     class Meta:
         unique_together = ('product', 'halfproduct',)  # Ensures uniqueness of ingredient for each halfproduct
@@ -177,7 +177,7 @@ class ProductenHalfproducts(models.Model):
 class HalfproductenIngredienten(models.Model):
     halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    quantity = models.DecimalField(max_digits=6, decimal_places=3, default=0)
 
     class Meta:
         unique_together = ('halfproduct', 'ingredient',)  # Ensures uniqueness of ingredient for each halfproduct
