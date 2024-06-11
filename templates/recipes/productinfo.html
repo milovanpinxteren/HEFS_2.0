@@ -19,8 +19,7 @@
         }
 
         table {
-            {#width: 100%;#}
-            border-collapse: collapse;
+        {#width: 100%;#} border-collapse: collapse;
             margin-bottom: 20px;
         }
 
@@ -85,6 +84,7 @@
                         item.name = columns.eq(0).text().trim();
                         item.quantity = parseFloat(columns.eq(1).text().trim()) * quantity;
                         item.meeteenheid = columns.eq(2).text().trim();
+                        item.kosten = (parseFloat(columns.eq(3).text().trim()) * quantity).toFixed(2);
                         data.push(item);
                     }
                 });
@@ -93,13 +93,15 @@
             var tableHeader = $('<tr></tr>')
                 .append('<th>Ingredient</th>')
                 .append('<th>Hoeveelheid</th>')
-                .append('<th>Meeteenheid</th>');
+                .append('<th>Meeteenheid</th>')
+                .append('<th>Kosten</th>');
             table.append(tableHeader);
             data.forEach(function (item) {
                 var tableRow = $('<tr></tr>')
                     .append('<td>' + item.name + '</td>')
                     .append('<td>' + item.quantity + '</td>')
-                    .append('<td>' + item.meeteenheid + '</td>');
+                    .append('<td>' + item.meeteenheid + '</td>')
+                    .append('<td>' + item.kosten + '</td>');
                 table.append(tableRow);
             });
             calculationResult.append(table);
@@ -135,17 +137,19 @@
                                         let tableHeader = $('<tr></tr>')
                                             .append('<th>Ingredient</th>')
                                             .append('<th>Hoeveelheid</th>')
-                                            .append('<th>Meeteenheid</th>');
+                                            .append('<th>Meeteenheid</th>')
+                                            .append('<th>Kosten</th>');
                                         table.append(tableHeader);
                                         data[key].forEach(item => {
                                             let tableRow = $('<tr></tr>')
                                                 .append('<td>' + item.name + '</td>')
                                                 .append('<td>' + item.quantity + '</td>')
-                                                .append('<td>' + item.meeteenheid + '</td>');
+                                                .append('<td>' + item.meeteenheid + '</td>')
+                                                .append('<td>' + item.kosten_per_eenheid + '</td>');
                                             table.append(tableRow);
                                         });
                                         ingredientsList.append('<h4>' + key + '</h4>');
-                                        ingredientsList.append('<p>' + data[data.length - 1]['bereidingswijze'] + '</p>');
+                                        {#ingredientsList.append('<p>' + data[data.length - 1]['bereidingswijze'] + '</p>');#}
                                         ingredientsList.append(table);
                                     }
 
@@ -217,16 +221,19 @@
                                     let tableHeader = $('<tr></tr>')
                                         .append('<th>Ingredient</th>')
                                         .append('<th>Hoeveelheid</th>')
-                                        .append('<th>Meeteenheid</th>');
+                                        .append('<th>Meeteenheid</th>')
+                                        .append('<th>Kosten</th>');
                                     table.append(tableHeader);
                                     data[key].forEach(item => {
                                         let tableRow = $('<tr></tr>')
                                             .append('<td>' + item.name + '</td>')
                                             .append('<td>' + item.quantity + '</td>')
-                                            .append('<td>' + item.meeteenheid + '</td>');
+                                            .append('<td>' + item.meeteenheid + '</td>')
+                                            .append('<td>' + item.kosten_per_eenheid + '</td>');
                                         table.append(tableRow);
                                     });
                                     ingredientsList.append('<h4>' + key + '</h4>');
+                                    {#ingredientsList.append('<p>' + data[data.length - 1]['bereidingswijze'] + '</p>');#}
                                     ingredientsList.append(table);
                                 }
                             }

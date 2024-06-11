@@ -1,4 +1,3 @@
-
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -39,6 +38,7 @@ def show_halfproducten(request):
 
     return render(request, 'recipes/halfproducten.html', context)
 
+
 def show_productinfo(request):
     if request.method == 'POST':
         form = ProductenHalfproductenForm(request.POST)
@@ -71,6 +71,8 @@ def show_productinfo(request):
 
 def show_ingredienten(request):
     return render(request, 'recipes/ingredienten.html')
+
+
 def ingredient_autocomplete(request):
     if 'term' in request.GET:
         qs = Ingredienten.objects.filter(naam__icontains=request.GET.get('term'))
@@ -79,6 +81,7 @@ def ingredient_autocomplete(request):
             names.append(ingredient.naam)
         return JsonResponse(names, safe=False)
     return JsonResponse([], safe=False)
+
 
 def halfproduct_autocomplete(request):
     if 'term' in request.GET:
@@ -135,15 +138,18 @@ def get_halfproducts_and_ingredients(request):
             ingredients = HalfproductenIngredienten.objects.filter(halfproduct=halfproduct.halfproduct)
             for hi in ingredients:
                 ingredients_list.append({
-                    'name': hi.ingredient.naam,  # Assuming Ingredienten has a 'name' field
-                    'quantity': hi.quantity,  # Assuming Ingredienten has a 'quantity' field
-                    'meeteenheid': hi.ingredient.meeteenheid  # Assuming Ingredienten has a 'meeteenheid' field
+                    'name': hi.ingredient.naam,
+                    'quantity': hi.quantity,
+                    'meeteenheid': hi.ingredient.meeteenheid,
+                    'kosten_per_eenheid': hi.quantity * hi.ingredient.kosten_per_eenheid
                 })
-            halfproductinfo = halfproduct.halfproduct.naam + ': ' + str(halfproduct.quantity) + ' ' + halfproduct.halfproduct.meeteenheid
-            ingredients_dict[halfproductinfo] = ingredients_list
+            ingredients_list.append({
+                'name': 'Bereiding: ' + halfproduct.halfproduct.naam,
+                'quantity': halfproduct.halfproduct.nodig_per_portie,
+                'meeteenheid':halfproduct.halfproduct.meeteenheid,
+                'kosten_per_eenheid': halfproduct.halfproduct.nodig_per_portie * halfproduct.halfproduct.bereidingskosten_per_eenheid
+            })
+            ingredients_dict[halfproduct.halfproduct.naam] = ingredients_list
         return JsonResponse(ingredients_dict, safe=False)
     except Halfproducten.DoesNotExist:
         return JsonResponse([], safe=False)
-
-
-
