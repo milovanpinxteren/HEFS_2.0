@@ -56,3 +56,21 @@ class InfoGetter:
                 print('gaat niet goed hiero')
         except Exception as e:
             print('get_inventory_item_id exception: ', e)
+
+    def get_product_handle_from_partner(self, productID, request_domain):
+        domain = request_domain.rsplit('.', 1)[0]
+
+        get_product_handle_url = f"https://{domain}.myshopify.com/admin/api/2023-10/products/{productID}.json"
+        headers = {"Accept": "application/json", "Content-Type": "application/json",
+                   "X-Shopify-Access-Token": settings.GERIJPTEBIEREN_ACCESS_TOKEN}
+        get_product_handle_url_response = requests.get(url=get_product_handle_url, headers=headers)
+        if get_product_handle_url_response.status_code == 200:
+            return get_product_handle_url_response.json()['product']['handle']
+        elif get_product_handle_url_response.status_code == 429:
+            time.sleep(1.2)
+            get_product_handle_url_response = requests.get(url=get_product_handle_url, headers=headers)
+            if get_product_handle_url_response.status_code == 200:
+                return get_product_handle_url_response.json()['product']['handle']
+        else:
+            print('no handle found: ', productID)
+            return False
