@@ -37,7 +37,7 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
 
 <div id="quantity-form">
     <form id="calculation-form">
-        <label for="quantity">Aantal porties:</label>
+        <label for="quantity">Aantal KG/L/Stuks:</label>
         <input type="number" id="quantity" name="quantity" min="1" required>
         <button type="submit">Bereken</button>
     </form>
@@ -199,7 +199,7 @@ Het aanmaken van halfproducten en ingredienten moet in de Admin pagina.
                                 data.pop();
                             }
                             ingredientsList.append('<hr>')
-                            ingredientsList.append('<h4>Ingredienten</h4>')
+                            ingredientsList.append('<h4>Ingredienten (per ' + meeteenheid + ')</h4>')
                             let list = $('<ul></ul>');
                             data.forEach(function (item) {
                                 list.append('<li>' + item.name + ': ' + item.quantity + ' ' + item.meeteenheid + '</li>');

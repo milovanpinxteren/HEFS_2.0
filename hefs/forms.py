@@ -31,7 +31,7 @@ class HalfproductenIngredientenForm(forms.ModelForm):
         }
 
         labels = {
-            'quantity': 'Nodig per portie',
+            'quantity': 'Nodig per Eenheid',
         }
 
 class ProductenHalfproductenForm(forms.ModelForm):

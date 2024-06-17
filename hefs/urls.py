@@ -41,5 +41,6 @@ urlpatterns = [
          name='get_ingredients_for_halfproduct'),
     path('get_halfproducts_and_ingredients/', recipe_views.get_halfproducts_and_ingredients,
          name='get_halfproducts_and_ingredients'),
+    path('get_ingredients_list/', recipe_views.get_ingredients_list, name='get_ingredients_list'),
 
 ]
