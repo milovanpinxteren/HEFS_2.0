@@ -26,7 +26,7 @@ class WebhookHandler():
         if request_domain in partner_websites:
             if headers["x-shopify-topic"] == "orders/create":
                 self.error_handler.log_error('Order ontvangen ' + customer_name + request_domain)
-                if request_domain == 'gerijptebieren.nl':
+                if 'GEB' in json_body['name']:
                     for product in json_body['line_items']:
                         handle = self.info_getter.get_product_handle_from_partner(product['product_id'], request_domain)
                         headers = {"Accept": "application/json", "Content-Type": "application/json",
@@ -63,7 +63,7 @@ class WebhookHandler():
                           <Note></Note>
                         </Order>
                                 """
-                    if len(xml_string) < 7500:
+                    if len(json_body['line_items']) < 8:
                         invoice_sender = InvoiceSender()
                         invoice_sender.send_invoice(xml_string)
                     else:

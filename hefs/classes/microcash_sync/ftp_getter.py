@@ -20,7 +20,7 @@ class FTPGetter:
         # 7c70bf.myshopify.com is HouseOfBeers
         self.websites = {'7c70bf.myshopify.com': settings.HOB_ACCESS_TOKEN,
                          'gerijptebieren.myshopify.com': settings.GERIJPTEBIEREN_ACCESS_TOKEN}  # add domains here
-        self.locations = {'7c70bf.myshopify.com': 89627787602, 'gerijptebieren.myshopify.com': 73763651849}
+        self.locations = {'7c70bf.myshopify.com': 89627787602, 'gerijptebieren.myshopify.com': 82852282633}
 
         self.column_names = []
         self.info_getter = InfoGetter()
@@ -135,7 +135,7 @@ class FTPGetter:
                 for line in file:
                     self.callback(line.strip(), sync_function)
         except Exception as e:
-            print(e)
+            print('Process file error: ',e)
 
     def sync_product(self, row):
         try:
@@ -171,7 +171,7 @@ class FTPGetter:
                         if status_code == 200:
                             self.corrected_inventory_of_items += 1
                         if not inventory_updated:
-                            self.error_handler.log_error('Inventory not updated ' + product_handle + domain_name + status_code)
+                            self.error_handler.log_error('Inventory not updated ' + product_handle + domain_name + str(status_code))
                 else:
                     try:
                         product_created = self.product_maker.create_product(shopifyID, domain_name, headers)
@@ -181,10 +181,10 @@ class FTPGetter:
                         elif product_created[0]:
                             self.created_items += 1
                     except Exception as e:
-                        print(e)
-                        self.error_handler.log_error('Could not create product (error) ' + product_handle + domain_name + e)
+                        print('Product making error: ', e)
+                        self.error_handler.log_error('Could not create product (error) ' + product_handle + domain_name + str(e))
         except Exception as e:
-            print(e)
+            print('sync product error: ',e)
             self.error_handler.log_error('Could not check product ' + row + e)
         return
 
