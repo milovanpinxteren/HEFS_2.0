@@ -1,10 +1,13 @@
+from collections import defaultdict
+
 from django.db import IntegrityError
+from django.db.models import Sum, F, FloatField, DecimalField
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from hefs.forms import HalfproductenIngredientenForm, ProductenHalfproductenForm
 from hefs.models import ApiUrls, Halfproducten, Ingredienten, HalfproductenIngredienten, Productinfo, \
-    ProductenHalfproducts
+    ProductenHalfproducts, PickItems
 
 
 def show_halfproducten(request):
@@ -139,17 +142,53 @@ def get_halfproducts_and_ingredients(request):
             for hi in ingredients:
                 ingredients_list.append({
                     'name': hi.ingredient.naam,
-                    'quantity': hi.quantity,
+                    'quantity': hi.quantity * halfproduct.quantity,
                     'meeteenheid': hi.ingredient.meeteenheid,
-                    'kosten_per_eenheid': hi.quantity * hi.ingredient.kosten_per_eenheid
+                    'kosten_per_eenheid': (hi.quantity * halfproduct.quantity) * hi.ingredient.kosten_per_eenheid
                 })
             ingredients_list.append({
                 'name': 'Bereiding: ' + halfproduct.halfproduct.naam,
                 'quantity': halfproduct.halfproduct.nodig_per_portie,
-                'meeteenheid':halfproduct.halfproduct.meeteenheid,
+                'meeteenheid': halfproduct.halfproduct.meeteenheid,
                 'kosten_per_eenheid': halfproduct.halfproduct.nodig_per_portie * halfproduct.halfproduct.bereidingskosten_per_eenheid
             })
             ingredients_dict[halfproduct.halfproduct.naam] = ingredients_list
         return JsonResponse(ingredients_dict, safe=False)
     except Halfproducten.DoesNotExist:
         return JsonResponse([], safe=False)
+
+
+def get_ingredients_list(request):
+    annotated_pickitems = (
+        PickItems.objects.annotate(
+            halfproduct_id=F('product__productenhalfproducts__halfproduct_id'),
+            halfproduct_quantity=F('product__productenhalfproducts__quantity'),
+            ingredient_id=F('product__productenhalfproducts__halfproduct__halfproducteningredienten__ingredient_id'),
+            ingredient_quantity=F('product__productenhalfproducts__halfproduct__halfproducteningredienten__quantity'),
+            ingredient_name=F('product__productenhalfproducts__halfproduct__halfproducteningredienten__ingredient__naam'),
+            kosten_per_eenheid=F(
+                'product__productenhalfproducts__halfproduct__halfproducteningredienten__ingredient__kosten_per_eenheid')
+
+        ).values(
+            'ingredient_id', 'ingredient_name', 'product__productnaam', 'hoeveelheid', 'halfproduct_quantity',
+            'ingredient_quantity', 'kosten_per_eenheid'
+        ).annotate(
+            total_quantity=Sum(F('hoeveelheid') * F('halfproduct_quantity') * F('ingredient_quantity'),
+                               output_field=DecimalField())
+        )
+    )
+
+    # Aggregate the total quantities of each ingredient
+    total_ingredients = defaultdict(lambda: {'quantity': 0, 'cost': 0})
+    for item in annotated_pickitems:
+        ingredient_name = item['ingredient_name']
+        if ingredient_name != None:
+            print(item)
+            total_quantity = item['total_quantity']
+            kosten_per_eenheid = item['kosten_per_eenheid']
+            total_ingredients[ingredient_name]['quantity'] += total_quantity
+            total_ingredients[ingredient_name]['cost'] += total_quantity * kosten_per_eenheid
+
+    context = {'total_ingredients': total_ingredients.items()}
+
+    return render(request, 'recipes/ingredients_list_page.html', context)
