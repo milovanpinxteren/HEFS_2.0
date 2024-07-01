@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
-    VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten
+    VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
+    ProductenIngredienten, VerpakkingsSoort
 
 
 @admin.register(JSONData)
@@ -37,8 +38,6 @@ class IngredientenAdmin(admin.ModelAdmin):
 
 
 
-
-
 @admin.register(Productinfo)
 class ProductInfoAdmin(admin.ModelAdmin):
     # inlines = [IngredientenInline, ]
@@ -55,7 +54,14 @@ class HalfproductenAdmin(admin.ModelAdmin):
     # autocomplete_fields = ['ingredienten']
 
 
+@admin.register(AlreadyProduced)
+class AlreadyProducedAdmin(admin.ModelAdmin):
+    list_display = ['product', 'halfproduct', 'ingredient', 'quantity']
 
+
+@admin.register(ProductenIngredienten)
+class ProductenIngredientenAdmin(admin.ModelAdmin):
+    list_display = ['product', 'ingredient', 'quantity']
 
 
 @admin.register(Productextra)
@@ -69,6 +75,11 @@ class OrderExtraAdmin(admin.ModelAdmin):
     list_display = ['productnaam']
     search_fields = ("product__productnaam",)
 
+
+@admin.register(VerpakkingsSoort)
+class VerpakkingsSoortAdmin(admin.ModelAdmin):
+    list_display = ['naam']
+    search_fields = ("naam__contains",)
 
 @admin.register(VerpakkingsMogelijkheden)
 class VerpakkingsMogelijkhedenAdmin(admin.ModelAdmin):
@@ -109,3 +120,4 @@ class ApiUrlAdmin(admin.ModelAdmin):
 @admin.register(AlgemeneInformatie)
 class AlgemeneInformatieAdmin(admin.ModelAdmin):
     list_display = ['naam', 'waarde']
+

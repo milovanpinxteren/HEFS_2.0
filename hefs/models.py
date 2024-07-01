@@ -9,6 +9,10 @@ class MeasurementUnit(models.TextChoices):
     ST = 'ST', 'per stuk'
     LT = 'LT', 'Liter'
 
+class BTW(models.TextChoices):
+    H = 'H', 'Hoog (21%)'
+    L = 'L', 'Laag (9%)'
+    G = '0', 'Geen/0'
 #############################################Orders below###############################################################
 class VerzendOpties(models.Model):
     verzendoptie = models.CharField(max_length=250)
@@ -19,7 +23,7 @@ class NewOrders(models.Model):
     conversieID = models.IntegerField(default=0, db_index=True)
     shopifyID = models.BigIntegerField(default=0)
     besteldatum = models.DateTimeField(null=True, blank=True)
-    verzendoptie = models.ForeignKey(VerzendOpties, on_delete=models.CASCADE, default='', blank=True)
+    verzendoptie = models.ForeignKey(VerzendOpties, on_delete=models.CASCADE, null=True, blank=True)
     afleverdatum = models.DateTimeField(null=True, blank=True, db_index=True)
     aflevertijd = models.TimeField(null=True, blank=True)
     verzendkosten = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
@@ -56,7 +60,7 @@ class Orders(models.Model):
     afleverdatum = models.DateField(null=True, blank=True)
     aflevertijd = models.TimeField(null=True, blank=True)
     verzendkosten = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
-    verzendoptie = models.ForeignKey(VerzendOpties, on_delete=models.CASCADE, default='', blank=True)
+    verzendoptie = models.ForeignKey(VerzendOpties, on_delete=models.CASCADE, null=True, blank=True)
     korting = models.IntegerField(default=0, null=True, blank=True)
     orderprijs = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
     organisatieID = models.IntegerField(default=0, null=True, blank=True)
@@ -77,7 +81,7 @@ class Orders(models.Model):
         return str(self.conversieID)
 
 class Orderline(models.Model):
-    order = models.ForeignKey(Orders, on_delete=models.CASCADE, default='', blank=True)
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE, null=True, blank=True)
     product = models.CharField(max_length=250, null=True, blank=True)
     productSKU = models.CharField(max_length=250, null=True, blank=True)
     aantal = models.IntegerField(default=0, null=True, blank=True)
@@ -93,13 +97,24 @@ class VerpakkingsMogelijkheden(models.Model):
 
 
 class VerpakkingsCombinaties(models.Model):
-    verpakkingsmogelijkheid = models.ForeignKey(VerpakkingsMogelijkheden, on_delete=models.CASCADE)
+    verpakkingsmogelijkheid = models.ForeignKey(VerpakkingsMogelijkheden, on_delete=models.CASCADE, null=True, blank=True)
     bestelde_hoeveelheid = models.FloatField()
     verpakkingscombinatie = models.CharField(max_length=1000)
 
     def __str__(self):
         return f"{self.bestelde_hoeveelheid} -> {self.verpakkingscombinatie}"
 
+
+class VerpakkingsSoort(models.Model):
+    naam = models.CharField(max_length=250)
+    afmeting_lengte_mm = models.IntegerField(default=0)
+    afmeting_breedte_mm = models.IntegerField(default=0)
+    afmeting_hoogte_mm = models.IntegerField(default=0)
+    stuks_per_krat = models.IntegerField(default=0)
+    kosten_per_eenheid = models.DecimalField(default=0, decimal_places=2, max_digits=6)
+
+    def __str__(self):
+        return self.naam
 
 
 #############################################Products below#############################################################
@@ -110,29 +125,33 @@ class Gang(models.Model):
     def __str__(self):
         return self.gangnaam
 
+class Leveranciers(models.Model):
+    naam = models.CharField(max_length=250, blank=True, null=True)
+    emailadres = models.CharField(max_length=250, blank=True, null=True)
+
 class Productinfo(models.Model):
     productID = models.CharField(help_text="Alleen invullen als je geen automatisch gegenereerd nummer wil", max_length=5, primary_key=True, default='', blank=True, db_index=True)
     omschrijving = models.CharField(max_length=250)
     productcode = models.CharField(help_text="Alleen invullen als je geen automatisch gegenereerd nummer wil", max_length=3, default='', blank=True, db_index=True)
     productnaam = models.CharField(max_length=250)
-    leverancier = models.CharField(max_length=250)
+    leverancier = models.ForeignKey(Leveranciers, on_delete=models.PROTECT, null=True, blank=True)
     verpakkingseenheid = models.IntegerField(default=0)
-    verpakkingscombinatie = models.ForeignKey(VerpakkingsMogelijkheden, on_delete=models.PROTECT, related_name='VerpakkingsMogelijkheden', default='', blank=True)
-    gang = models.ForeignKey(Gang, on_delete=models.PROTECT, related_name='gang', default='', blank=True)
+    verpakkingscombinatie = models.ForeignKey(VerpakkingsMogelijkheden, on_delete=models.PROTECT, related_name='VerpakkingsMogelijkheden', null=True, blank=True)
+    gang = models.ForeignKey(Gang, on_delete=models.PROTECT, related_name='gang', null=True, blank=True)
     picknaam = models.CharField(max_length=250)
     pickvolgorde = models.IntegerField(default=0)
-    inkoop = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    btw_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="9% is 1.09")
+    bereidingskosten = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    # btw_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="9% is 1.09")
+    btw = models.CharField(choices=BTW.choices, max_length=1, null=True, blank=True)
     verkoop_incl_btw = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     verkoop_excl_btw = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    verpakkingsoort = models.CharField(max_length=15, default='')
-    afmeting_lengte_mm = models.IntegerField(default=0)
-    afmeting_breedte_mm = models.IntegerField(default=0)
-    afmeting_hoogte_mm = models.IntegerField(default=0)
+    verpakkingsoort = models.ForeignKey(VerpakkingsSoort, on_delete=models.PROTECT, null=True, blank=True)
+    bereidingskosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    etiket = models.BinaryField(blank=True, null=True)
 
 
     def __str__(self):
-        return self.productnaam
+        return self.picknaam
 
     def save(self):
         if not (self.productcode or self.productcode):
@@ -144,28 +163,35 @@ class Productinfo(models.Model):
 
 class Halfproducten(models.Model):
     naam = models.CharField(max_length=250, default='')
-    product = models.ForeignKey(Productinfo, on_delete=models.PROTECT, default='', blank=False)
+    product = models.ForeignKey(Productinfo, on_delete=models.PROTECT, null=True, blank=True)
     meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
-    nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=3, default=0)
+    bruikbare_hoeveelheid = models.DecimalField(max_digits=6, decimal_places=3, default=0)
     bereidingswijze = models.TextField(default='')
-    bereidingskosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    bereidingskosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text='Per KG/L/Stuk')
+    leverancier = models.ForeignKey(Leveranciers, on_delete=models.PROTECT, null=True, blank=True)
+    verpakkingsoort = models.ForeignKey(VerpakkingsSoort, on_delete=models.PROTECT, null=True, blank=True)
+    btw = models.CharField(choices=BTW.choices, max_length=1, null=True, blank=True)
 
     def __str__(self):
         return self.naam
+
+
 class Ingredienten(models.Model):
     naam = models.CharField(max_length=250, default='')
     meeteenheid = models.CharField(choices=MeasurementUnit.choices, default=MeasurementUnit.KG, max_length=2)
-    # nodig_per_portie = models.DecimalField(max_digits=6, decimal_places=3, default=0)
-    kosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    kosten_per_eenheid = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text='Per KG/L/Stuk')
+    leverancier = models.ForeignKey(Leveranciers, on_delete=models.PROTECT, null=True, blank=True)
+    btw = models.CharField(choices=BTW.choices, max_length=1, null=True, blank=True)
+    verpakkingsoort = models.ForeignKey(VerpakkingsSoort, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         return self.naam
 
 
 class ProductenHalfproducts(models.Model):
-    product = models.ForeignKey(Productinfo, on_delete=models.CASCADE)
+    product = models.ForeignKey(Productinfo, on_delete=models.CASCADE, null=True, blank=True)
     productcode = models.CharField(max_length=3, default=0)
-    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
+    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.DecimalField(max_digits=6, decimal_places=3, default=0)
 
     class Meta:
@@ -175,8 +201,8 @@ class ProductenHalfproducts(models.Model):
         return f"{self.product} - {self.halfproduct} - {self.quantity}"
 
 class HalfproductenIngredienten(models.Model):
-    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE)
+    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.CASCADE, null=True, blank=True)
+    ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.DecimalField(max_digits=6, decimal_places=3, default=0)
 
     class Meta:
@@ -185,29 +211,57 @@ class HalfproductenIngredienten(models.Model):
     def __str__(self):
         return f"{self.halfproduct} - {self.ingredient} - {self.quantity}"
 
+
+class ProductenIngredienten(models.Model):
+    product = models.ForeignKey(Productinfo, on_delete=models.CASCADE, null=True, blank=True)
+    ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE, null=True, blank=True)
+    quantity = models.DecimalField(max_digits=6, decimal_places=3, default=0)
+
+    class Meta:
+        unique_together = ('product', 'ingredient',)  # Ensures uniqueness of ingredient for each halfproduct
+
+    def __str__(self):
+        return f"{self.product} - {self.ingredient} - {self.quantity}"
+
+
+class AlreadyProduced(models.Model):
+    product = models.ForeignKey(Productinfo, on_delete=models.SET_NULL, null=True, blank=True)
+    halfproduct = models.ForeignKey(Halfproducten, on_delete=models.SET_NULL, null=True, blank=True)
+    ingredient = models.ForeignKey(Ingredienten, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        # Ensure only one of product, half_product, ingredient is set
+        model_count = sum([1 for val in [self.product, self.halfproduct, self.ingredient] if val is not None])
+        if model_count != 1:
+            raise Exception("One and only one of Product, Halfproduct, Ingredient must be set.")
+        super(AlreadyProduced, self).save(*args, **kwargs)
+
+
+
 #############################################Extras below###############################################################
 
 
 class Productextra(models.Model):
-    productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_productnaam', default='', blank=True)
-    extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_extra_productnaam', default='', blank=True)
+    productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_productnaam', null=True, blank=True)
+    extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_extra_productnaam', null=True, blank=True)
 
 
 
 class Orderextra(models.Model):
-    productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='orderextra_productnaam', default='', blank=True)
+    productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='orderextra_productnaam', blank=True, null=True)
 
 
 
 #############################################Pick models below##########################################################
 
 class PickOrders(models.Model):
-    order = models.ForeignKey(Orders, on_delete=models.CASCADE)
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE, null=True, blank=True)
 
 
 class PickItems(models.Model):
-    pick_order = models.ForeignKey(PickOrders, on_delete=models.CASCADE)
-    product = models.ForeignKey(Productinfo, null=True, on_delete=models.SET_NULL)
+    pick_order = models.ForeignKey(PickOrders, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Productinfo, on_delete=models.SET_NULL, null=True, blank=True)
     omschrijving = models.CharField(max_length=250, null=True)
     hoeveelheid = models.FloatField()
 
