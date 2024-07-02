@@ -69,11 +69,13 @@ class WebhookHandler():
                     else:
                         self.error_handler.log_error(
                             'Order te lang, voor ieder product 1 invoice aanmaken ' + json_body['name'])
+                        product_counter = 0
                         for product in json_body['line_items']:
                             if 'atiegeld' not in product['name']:
+                                product_counter += 1
                                 xml_string = f"""
                                                             <Order>
-                                                              <Reference>{json_body['name']}</Reference>
+                                                              <Reference>{json_body['name'] + str(product_counter)}</Reference>
                                                               <WebShop>House Of Beers</WebShop>
                                                               <Naw>
                                                                 <Naam>{customer_name}</Naam>
