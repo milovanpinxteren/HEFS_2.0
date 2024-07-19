@@ -100,8 +100,8 @@
                 var tableRow = $('<tr></tr>')
                     .append('<td>' + item.name + '</td>')
                     .append('<td>' + item.quantity + '</td>')
-                    .append('<td>' + parseFloat(item.meeteenheid).toFixed(4) + '</td>')
-                    .append('<td>' + parseFloat(item.kosten).toFixed(2) + '</td>');
+                    .append('<td>' + item.meeteenheid + '</td>')
+                    .append('<td> € ' + parseFloat(item.kosten).toFixed(2) + '</td>');
                 table.append(tableRow);
             });
             calculationResult.append(table);
@@ -129,7 +129,7 @@
                                 ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
                             } else {
 
-                                ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
+                                ingredientsList.append('<h3>Halfproducten</h3>')
                                 for (const key in data) {
                                     {#let list = $('<ul></ul>').append('<h4>' + key + '</h4>');#}
                                     if (data.hasOwnProperty(key)) {
@@ -144,7 +144,7 @@
                                             let tableRow = $('<tr></tr>')
                                                 .append('<td>' + item.name + '</td>')
                                                 .append('<td>' + parseFloat(item.quantity).toFixed(4) + '</td>')
-                                                .append('<td>' + parseFloat(item.meeteenheid).toFixed(4) + '</td>')
+                                                .append('<td>' + item.meeteenheid + '</td>')
                                                 .append('<td>' + parseFloat(item.kosten_per_eenheid).toFixed(4) + '</td>');
                                             table.append(tableRow);
                                         });
@@ -214,7 +214,7 @@
                             ingredientsList.append('<p>Geen Ingredienten gevonden.</p>');
                         } else {
 
-                            ingredientsList.append('<h3>Halfproducten en Ingredienten</h3>')
+                            ingredientsList.append('<h3>Halfproducten</h3>')
                             for (const key in data) {
                                 if (data.hasOwnProperty(key)) {
                                     let table = $('<table></table>');

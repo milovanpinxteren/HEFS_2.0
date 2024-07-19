@@ -214,6 +214,7 @@ class HalfproductenIngredienten(models.Model):
 
 class ProductenIngredienten(models.Model):
     product = models.ForeignKey(Productinfo, on_delete=models.CASCADE, null=True, blank=True)
+    productcode = models.CharField(max_length=3, default=0)
     ingredient = models.ForeignKey(Ingredienten, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.DecimalField(max_digits=6, decimal_places=3, default=0)
 
