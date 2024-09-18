@@ -111,7 +111,10 @@ class CustomerInfo():
         aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
         aantal_brunches = AlgemeneInformatie.objects.get(naam='aantalBrunch').waarde
         aantal_personen = aantal_hoofdgerechten + aantal_brunches
-        percentage_brunch = float((aantal_brunches / aantal_personen) * 100)
+        try:
+            percentage_brunch = float((aantal_brunches / aantal_personen) * 100)
+        except ZeroDivisionError:
+            percentage_brunch = 0
 
         distribution_2023 = {"aantal personen": aantal_personen, "percentage brunch": percentage_brunch,
                              "aantal personen brunch": aantal_brunches

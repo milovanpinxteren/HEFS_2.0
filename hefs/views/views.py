@@ -46,9 +46,10 @@ def show_sync_page(request):
 
 
 def start_product_sync(request):
+    print('start sync')
     ftp_getter = FTPGetter()
-    ftp_getter.get_ftp_full_file()
-    # ftp_getter.get_ftp_changed_file()
+    # ftp_getter.get_ftp_full_file()
+    ftp_getter.get_ftp_changed_file()
     # partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
     # type = request.GET['type']
     # if type == 'all_original_products':
@@ -110,13 +111,13 @@ def update_general_numbers(request):
 
 
 def show_customerinfo(request):
-    try:
+    # try:
         userid = request.user.id
         context = CustomerInfo().prepare_view(userid)
         return render(request, 'info_pages/customerinfo.html', context)
-    except Exception as e:
-        context = {'error': True, 'ErrorMessage': e}
-        return render(request, 'info_pages/customerinfo.html', context)
+    # except Exception as e:
+    #     context = {'error': True, 'ErrorMessage': e}
+    #     return render(request, 'info_pages/customerinfo.html', context)
 
 
 def show_customerlocationplot(request):
