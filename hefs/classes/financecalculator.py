@@ -12,6 +12,8 @@ class FinanceCalculator():
         brunch_orders = Orders.objects.filter(organisatieID__in=organisations_to_show,
                                               orderline__productSKU__in=[700, 701])
         sum_brunch_incl_btw = brunch_orders.aggregate(total_orderprijs=Sum('orderprijs'))
+        if sum_brunch_incl_btw['total_orderprijs'] == None:
+            sum_brunch_incl_btw['total_orderprijs'] = 0
         self.sum_brunch_incl_btw = float(sum_brunch_incl_btw['total_orderprijs'])
         self.sum_brunch_ex_btw = float(self.sum_brunch_incl_btw) / 1.09
 
@@ -50,30 +52,54 @@ class FinanceCalculator():
         variable_costs = VariableKosten.objects.all()
         fixed_costs = VasteKosten.objects.all()
 
-        total_inkoop_diner_ex_btw = float(PickItems.objects.exclude(product__gang=7).annotate(
-            total_kosten=ExpressionWrapper(F('product__inkoop') * F('hoeveelheid'),
-                                           output_field=DecimalField(max_digits=8, decimal_places=2))
-        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+        try:
+            total_bereidingskosten_diner_ex_btw = float(
+                PickItems.objects.exclude(product__gang=7).annotate(
+                    total_kosten=ExpressionWrapper(
+                        F('product__bereidingskosten') * F('hoeveelheid'),
+                        output_field=DecimalField(max_digits=8, decimal_places=2)
+                    )
+                ).aggregate(total_bereidingskosten=Sum('total_kosten'))['total_bereidingskosten'] or 0
+            )
 
-        total_inkoop_diner_incl_btw = float(PickItems.objects.exclude(product__gang=7).annotate(
-            total_kosten=ExpressionWrapper(F('product__inkoop') * F('product__btw_percentage') * F('hoeveelheid'),
-                                           output_field=DecimalField(max_digits=8, decimal_places=2))
-        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+            total_bereidingskosten_diner_incl_btw = float(
+                PickItems.objects.exclude(product__gang=7).annotate(
+                    total_kosten=ExpressionWrapper(
+                        F('product__bereidingskosten') * F('product__btw') * F('hoeveelheid'),
+                        output_field=DecimalField(max_digits=8, decimal_places=2)
+                    )
+                ).aggregate(total_bereidingskosten=Sum('total_kosten'))['total_bereidingskosten'] or 0
+            )
 
-        # costs_table_tuple.append(['Inkoop diner', '', '', '', total_inkoop_diner_ex_btw, total_inkoop_diner_incl_btw])
+            total_bereidingskosten_brunch_ex_btw = float(
+                PickItems.objects.filter(product__gang=7).annotate(
+                    total_kosten=ExpressionWrapper(
+                        F('product__bereidingskosten') * F('hoeveelheid'),
+                        output_field=DecimalField(max_digits=8, decimal_places=2)
+                    )
+                ).aggregate(total_bereidingskosten=Sum('total_kosten'))['total_bereidingskosten'] or 0
+            )
 
-        total_inkoop_brunch_ex_btw = float(PickItems.objects.filter(product__gang=7).annotate(
-            total_kosten=ExpressionWrapper(F('product__inkoop') * F('hoeveelheid'),
-                                           output_field=DecimalField(max_digits=8, decimal_places=2))
-        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+            total_bereidingskosten_brunch_incl_btw = float(
+                PickItems.objects.filter(product__gang=7).annotate(
+                    total_kosten=ExpressionWrapper(
+                        F('product__bereidingskosten') * F('product__btw') * F('hoeveelheid'),
+                        output_field=DecimalField(max_digits=8, decimal_places=2)
+                    )
+                ).aggregate(total_bereidingskosten=Sum('total_kosten'))['total_bereidingskosten'] or 0
+            )
 
-        total_inkoop_brunch_incl_btw = float(PickItems.objects.filter(product__gang=7).annotate(
-            total_kosten=ExpressionWrapper(F('product__inkoop') * F('product__btw_percentage') * F('hoeveelheid'),
-                                           output_field=DecimalField(max_digits=8, decimal_places=2))
-        ).aggregate(total_inkoop=Sum('total_kosten'))['total_inkoop']) or 0
+        except Exception as e:
+            # If an error occurs, assign 0 to each variable
+            total_bereidingskosten_diner_ex_btw = 0
+            total_bereidingskosten_diner_incl_btw = 0
+            total_bereidingskosten_brunch_ex_btw = 0
+            total_bereidingskosten_brunch_incl_btw = 0
+            # Optional: Log the exception for debugging purposes
+            print(f"An error occurred: {e}")
 
         costs_table_tuple.append(
-            ['Inkoop food', '', '', '', total_inkoop_diner_ex_btw + total_inkoop_brunch_ex_btw, total_inkoop_diner_incl_btw + total_inkoop_brunch_incl_btw])
+            ['bereidingskosten food', '', '', '', total_bereidingskosten_diner_ex_btw + total_bereidingskosten_brunch_ex_btw, total_bereidingskosten_diner_incl_btw + total_bereidingskosten_brunch_incl_btw])
 
         for percentual_cost in percentual_costs:
             percentage = float(percentual_cost.percentage)
@@ -107,13 +133,17 @@ class FinanceCalculator():
         for cost in costs_table_tuple:
             cost[1] = float((cost[4] / inkomsten_zonder_verzendkosten_ex_btw) * 100)
 
-        percentage_costs_dinner_ex_btw = float((total_inkoop_diner_ex_btw / self.sum_diner_ex_btw) * 100)
-        percentage_costs_brunch_ex_btw = float((total_inkoop_brunch_ex_btw / self.sum_brunch_ex_btw) * 100)
+        try:
+            percentage_costs_dinner_ex_btw = float((total_bereidingskosten_diner_ex_btw / self.sum_diner_ex_btw) * 100)
+            percentage_costs_brunch_ex_btw = float((total_bereidingskosten_brunch_ex_btw / self.sum_brunch_ex_btw) * 100)
+        except Exception as e:
+            percentage_costs_dinner_ex_btw = 0
+            percentage_costs_brunch_ex_btw = 0
 
-        costs_of_inkoop_dict = {'Percentage kosten diner t.o.v. inkomsten diner': percentage_costs_dinner_ex_btw,
+        costs_of_bereidingskosten_dict = {'Percentage kosten diner t.o.v. inkomsten diner': percentage_costs_dinner_ex_btw,
                                 'Percentage kosten brunch t.o.v. inkomsten brunch': percentage_costs_brunch_ex_btw,
                                 }
-        return costs_table_tuple, self.total_costs_ex_btw, self.total_costs_incl_btw, costs_of_inkoop_dict
+        return costs_table_tuple, self.total_costs_ex_btw, self.total_costs_incl_btw, costs_of_bereidingskosten_dict
 
     def calculate_revenue_table(self, total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw):
         difference_ex_btw = total_ex_btw - total_costs_ex_btw
@@ -138,9 +168,14 @@ class FinanceCalculator():
         self.prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
         self.prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
 
-        prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
-        prognose_factor_brunch = self.prognosegetal_brunch / self.aantal_brunch
-        prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
+        try:
+            prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
+            prognose_factor_brunch = self.prognosegetal_brunch / self.aantal_brunch
+            prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
+        except ZeroDivisionError:
+            prognose_factor_diner = 0
+            prognose_factor_brunch = 0
+            prognose_factor_totaal = 0
 
         for row in profit_table:
             if 'diner' in row[0]:
@@ -166,8 +201,12 @@ class FinanceCalculator():
 
     def calculate_prognose_costs_table(self, costs_table):
 
-        prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
-        prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
+        try:
+            prognose_factor_diner = self.prognosegetal_diner / self.aantal_hoofdgerechten
+            prognose_factor_totaal = (self.prognosegetal_diner + self.prognosegetal_brunch) / (self.aantal_hoofdgerechten + self.aantal_brunch)
+        except ZeroDivisionError:
+            prognose_factor_diner = 0
+            prognose_factor_totaal = 0
 
         prognose_cost_table = []
         for cost in costs_table:
@@ -193,7 +232,10 @@ class FinanceCalculator():
         for cost in prognose_cost_table:
             exists_in_database = PercentueleKosten.objects.filter(kostennaam=cost[0])
             if not exists_in_database:
-                cost[1] = (cost[4] / self.prognose_ex_verzendk_ex_btw) * 100
+                try:
+                    cost[1] = (cost[4] / self.prognose_ex_verzendk_ex_btw) * 100
+                except ZeroDivisionError:
+                    cost[1] = 0
             elif exists_in_database:
                 percentage = float(exists_in_database[0].percentage) / 100
                 cost[1] = percentage * 100
