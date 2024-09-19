@@ -30,9 +30,11 @@ class FTPGetter:
         self.product_maker = ProductMaker()
         self.error_handler = ErrorHandler()
         self.file_comparer = FileComparer()
-        self.host = '86.88.43.117'
+        # self.host = '86.88.43.117'
+        self.host = 'haarlem.microcash.nl'
         self.port = 21
-        self.username = 'Webshop'
+        # self.username = 'Webshop'
+        self.username = 'web_ud_pri'
         self.password = settings.MICROCASH_FTP_PASSWORD
         self.corrected_price_of_items = 0
         self.corrected_inventory_of_items = 0
