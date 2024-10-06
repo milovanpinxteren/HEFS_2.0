@@ -18,11 +18,13 @@ class CustomerInfo():
         data_2020 = JSONData.objects.get(key='data_2020').value
         data_2021 = JSONData.objects.get(key='data_2021').value
         data_2022 = JSONData.objects.get(key='data_2022').value
+        data_2023 = JSONData.objects.get(key='data_2023').value
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs
         df_dates = pd.DataFrame.from_records(
             Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('besteldatum'),
             columns=['besteldatum'])
         try:
+            df_dates['besteldatum'] = pd.to_datetime(df_dates['besteldatum']) - pd.DateOffset(years=1)
             df_dates['Besteldatum'] = df_dates['besteldatum'].dt.strftime("%Y-%m-%d")
         except AttributeError:
             df_dates['Besteldatum'] = '2023-12-01'
@@ -31,9 +33,9 @@ class CustomerInfo():
             df_dates.groupby(by=['Besteldatum'], as_index=False)['Bestellingen per dag'].sum())
         df_dates_grouped['Totaal aantal bestellingen'] = df_dates_grouped['Bestellingen per dag'].cumsum()
         df_dates_grouped['Totaal aantal personen'] = df_dates_grouped['Totaal aantal bestellingen'] * persons_per_order
-        df_dates_grouped['Jaar'] = 2023
+        df_dates_grouped['Jaar'] = 2024
 
-        frames = [pd.DataFrame(data=data_2020), pd.DataFrame(data=data_2021), pd.DataFrame(data=data_2022),
+        frames = [pd.DataFrame(data=data_2020), pd.DataFrame(data=data_2021), pd.DataFrame(data=data_2022), pd.DataFrame(data=data_2023),
                   df_dates_grouped]
         df_merged = pd.concat(frames).reset_index(drop=True)
 
