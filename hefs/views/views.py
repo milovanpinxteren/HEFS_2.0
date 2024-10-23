@@ -27,7 +27,21 @@ from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijpt
 from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
-    return HttpResponse("test")
+    try:
+        if request.user.groups.filter(name='leverancier').exists():
+            organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
+            veh_handler = VehHandler()
+            context = veh_handler.handle_veh(organisations_to_show, request.user)
+            form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
+                                               'prognosegetal_brunch': context['prognosegetal_brunch'],
+                                               'prognosegetal_gourmet': context['prognosegetal_gourmet']})
+            context['form'] = form
+            return render(request, 'info_pages/veh.html', context)
+        return render(request, 'helpers/landingspage.html')
+    except Exception as e:
+        print('index exception')
+        context = {'error': True, 'ErrorMessage': e}
+        return render(request, 'info_pages/veh.html', context)
 
 @csrf_exempt
 def recieve_webhook(request):

@@ -1,5 +1,5 @@
 <div class="navbar">
-    <a href="/">Home</a>
+    <a href={% url 'index' %}>Home</a>
 
     {% if user.is_authenticated and user.groups.all.0.name == 'leverancier' %}
         <div class="dropdown">
@@ -84,5 +84,5 @@
     <div class="accountdiv">
         Ingelogd als: {{ user.username }}
     </div>
-    <a style="float: right" href="/admin/logout/">Uitloggen</a>
+    <a style="float: right" href="/logout">Uitloggen</a>
 </div>
