@@ -1,13 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
 
-from hefs.models import AlgemeneInformatie, Orderline, Orders, ApiUrls
+from hefs.models import AlgemeneInformatie, Orderline, Orders, ApiUrls, LeverancierUserLink
 from hefs.sql_commands import SqlCommands
 from django.db import connection
 
 
 class VehHandler():
-    def handle_veh(self, organisations_to_show):
+    def handle_veh(self, organisations_to_show, user):
         try:
             prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
             prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
@@ -51,9 +51,22 @@ class VehHandler():
             for date in dates:
                 date_array.append(date)
             cursor = connection.cursor()
-            sql_veh = SqlCommands().get_veh_command(date_array)
-            cursor.execute(sql_veh)
-            veh = cursor.fetchall()
+            sql_commands = SqlCommands()
+            if user.groups.filter(name='leverancier').exists():
+                try:
+                    leverancier_link = LeverancierUserLink.objects.get(user_id=user.id)
+                    leverancier_id = leverancier_link.leverancier.id
+                    sql_veh = sql_commands.get_veh_command_for_leverancier(dates, leverancier_id)
+                except LeverancierUserLink.DoesNotExist:
+                    return {
+                        'table': '', 'column_headers': '',
+                        'veh_is_empty': 'Geen leverancier gelinkt aan dit account.'
+                    }
+            else:
+                sql_veh = sql_commands.get_veh_command(dates)
+
+        cursor.execute(sql_veh)
+        veh = cursor.fetchall()
         veh = sorted(veh, key=lambda tup: tup[1])
         for i, row in enumerate(veh):
             productcode = row[2]

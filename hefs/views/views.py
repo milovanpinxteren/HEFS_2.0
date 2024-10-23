@@ -82,7 +82,7 @@ def show_veh(request):
         organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
         veh_handler = VehHandler()
         # half_product_shower = HalfProductShower()
-        context = veh_handler.handle_veh(organisations_to_show)
+        context = veh_handler.handle_veh(organisations_to_show, request.user)
         form = GeneralNumbersForm(initial={'prognosegetal_diner': context['prognosegetal_diner'],
                                            'prognosegetal_brunch': context['prognosegetal_brunch'],
                                            'prognosegetal_gourmet': context['prognosegetal_gourmet']})
