@@ -1,68 +1,88 @@
 <div class="navbar">
-
     <a href="/">Home</a>
 
-    <div class="dropdown">
-        <button class="dropbtn">
-            Productoverzicht
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-            <a href={% url 'veh' %}>VEH</a>
+    {% if user.is_authenticated and user.groups.all.0.name == 'leverancier' %}
+        <div class="dropdown">
+            <button class="dropbtn">
+                Productoverzicht
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'veh' %}>VEH</a>
+            </div>
         </div>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn">
-            Recepten
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-            <a href={% url 'productinfo' %}>Producten</a>
-            <a href={% url 'halfproducten' %}>Halfproducten</a>
-            <a href={% url 'ingredienten' %}>Ingrediënten</a>
-            <a href={% url 'get_ingredients_list' %}>Totaallijst</a>
+
+        <div class="dropdown">
+            <button class="dropbtn">
+                Ordersoverzicht
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'customerinfo' %}>Klantinformatie en kerngetallen</a>
+            </div>
         </div>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn">
-            Ordersoverzicht
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-            <a href={% url 'getorderspage' %}>Nieuwe orders ophalen</a>
-            <a href={% url 'makeorderspage' %}>Nieuwe order aanmaken</a>
-            <a href={% url 'customerlocationplot' %}>Klantlocaties</a>
-            <a href={% url 'customerinfo' %}>Klantinformatie en kerngetallen</a>
-            <a href={% url 'pickbonnen_page' %}>Pickbonnen</a>
-            <a href={% url 'routes_page' %}>Routes</a>
+    
+    {% elif user.is_authenticated and user.groups.all.0.name == 'manager' %}
+        <div class="dropdown">
+            <button class="dropbtn">
+                Productoverzicht
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'veh' %}>VEH</a>
+            </div>
         </div>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn">
-            Financieel overzicht
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-            <a href={% url 'financial_overview_page' %}>Omzet overzicht</a>
-            <a href={% url 'facturen_page' %}>Facturatie</a>
-            <a href={% url 'orders_overview' %}>Shopify Orders Overzicht</a>
+        <div class="dropdown">
+            <button class="dropbtn">
+                Recepten
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'productinfo' %}>Producten</a>
+                <a href={% url 'halfproducten' %}>Halfproducten</a>
+                <a href={% url 'ingredienten' %}>Ingrediënten</a>
+                <a href={% url 'get_ingredients_list' %}>Totaallijst</a>
+            </div>
         </div>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn">
-            House Of Beers
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-            <a href={% url 'show_sync_page' %}>Synchronisatie overzicht</a>
-            {#            <a href="../hefs/make_products_page">Productmaker</a>#}
+        <div class="dropdown">
+            <button class="dropbtn">
+                Ordersoverzicht
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'getorderspage' %}>Nieuwe orders ophalen</a>
+                <a href={% url 'makeorderspage' %}>Nieuwe order aanmaken</a>
+                <a href={% url 'customerlocationplot' %}>Klantlocaties</a>
+                <a href={% url 'customerinfo' %}>Klantinformatie en kerngetallen</a>
+                <a href={% url 'pickbonnen_page' %}>Pickbonnen</a>
+                <a href={% url 'routes_page' %}>Routes</a>
+            </div>
         </div>
-    </div>
+        <div class="dropdown">
+            <button class="dropbtn">
+                Financieel overzicht
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'financial_overview_page' %}>Omzet overzicht</a>
+                <a href={% url 'facturen_page' %}>Facturatie</a>
+                <a href={% url 'orders_overview' %}>Shopify Orders Overzicht</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">
+                House Of Beers
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href={% url 'show_sync_page' %}>Synchronisatie overzicht</a>
+            </div>
+        </div>
+    {% endif %}
 
     <a href="/admin">Admin pagina</a>
     <div class="accountdiv">
         Ingelogd als: {{ user.username }}
-
     </div>
     <a style="float: right" href="/admin/logout/">Uitloggen</a>
 </div>

@@ -28,3 +28,34 @@ class SqlCommands:
             GROUP BY "hefs_productinfo"."omschrijving","productID"            
         """
         return make_veh_command
+
+
+
+    def get_veh_command_for_leverancier(self, dates, leverancier_id):
+        """
+        Returns a SQL query that filters products by leverancier for 'leverancier' group users.
+        """
+        make_veh_command = """
+        SELECT "hefs_productinfo"."omschrijving","productID", "productcode",
+        """
+
+        for date in dates:
+            make_veh_command += f"""
+               COALESCE(SUM(CASE
+                                WHEN "hefs_orders"."afleverdatum" = '{date[0]}' THEN "hefs_pickitems"."hoeveelheid"
+                                ELSE NULL END), NULL) AS "{date[0]}",
+            """
+        make_veh_command += """
+               COALESCE(SUM("hefs_pickitems"."hoeveelheid")) AS "Totaal"
+        """
+
+        make_veh_command += f"""
+        FROM "hefs_pickitems"
+            LEFT OUTER JOIN "hefs_productinfo" ON ("hefs_pickitems"."product_id" = "hefs_productinfo"."productID")
+            INNER JOIN "hefs_pickorders" ON ("hefs_pickitems"."pick_order_id" = "hefs_pickorders"."id")
+            INNER JOIN "hefs_orders" ON ("hefs_pickorders"."order_id" = "hefs_orders"."id")
+        WHERE "hefs_productinfo"."leverancier_id" = {leverancier_id}
+        GROUP BY "hefs_productinfo"."omschrijving", "productID", "productcode"
+        """
+
+        return make_veh_command

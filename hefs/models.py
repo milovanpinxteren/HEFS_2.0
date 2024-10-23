@@ -1,5 +1,5 @@
 import random
-
+from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -301,6 +301,14 @@ class ApiUrls(models.Model):
     user_id = models.IntegerField(default=0)
     begindatum = models.DateField(null=True)
     organisatieIDs = ArrayField(models.IntegerField(default=0), blank=True, default=[])
+
+
+class LeverancierUserLink(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    leverancier = models.ForeignKey(Leveranciers, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.leverancier.naam}"
 
 class Customers(models.Model):
     emailadres = models.CharField(max_length=300, default='', unique=True)

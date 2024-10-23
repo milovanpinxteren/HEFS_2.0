@@ -20,145 +20,146 @@
             </div>
 
         </div>
+        {% if user.is_authenticated and user.groups.all.0.name == 'manager' %}
+            <div id="important-numbers-table">
+                <table class="table">
+                    <thead class="table-head"><span class="table-title">Kerngetallen</span><br><br>
+                    <th class="table-heading">Omschrijving</th>
+                    <th class="table-heading">Waarde</th>
+                    </thead>
+                    <tbody>
+                    <tr class="table-rows">
+                        <td class="table-data">Aantal personen</td>
+                        <td class="table-data">{{ aantal_personen }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">Aantal orders</td>
+                        <td class="table-data">{{ aantal_orders }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">Aantal personen per order</td>
+                        <td class="table-data">{{ personen_per_order|floatformat:1 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">Gemiddelde omzet per order (zonder verzendkosten)</td>
+                        <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">Gemiddelde omzet per persoon (zonder verzendkosten)</td>
+                        {% if  personen_per_order != 0 %}
+                            <td class="table-data">{{ gem_omzet_per_order|div:personen_per_order|floatformat:2 }}</td>
+                        {% endif %}
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+            <div id="returning-customers-table">
+                <table class="table">
+                    <thead class="table-head"><span class="table-title">Terugkerende klanten</span><br><br>
+                    <th class="table-heading">Jaar</th>
+                    <th class="table-heading">Aantal orders</th>
+                    <th class="table-heading">Aantal gasten</th>
+                    <th class="table-heading">Terugkerende orders</th>
+                    <th class="table-heading">Terugkerend percentage</th>
+                    </thead>
+                    <tbody>
+                    <tr class="table-rows">
+                        <td class="table-data">2020</td>
+                        <td class="table-data">{{ customers_2020 }}</td>
+                        <td class="table-data">{{ customers_2020|mul:5.7|floatformat:0 }}</td>
+                        <td class="table-data">N.v.t.</td>
+                        <td class="table-data">N.v.t.</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2021</td>
+                        <td class="table-data">{{ customers_2021 }}</td>
+                        <td class="table-data">{{ customers_2021|mul:5.8|floatformat:0 }}</td>
+                        <td class="table-data">{{ returning_customers_2021 }}</td>
+                        <td class="table-data">{{ returning_customers_2021|div:customers_2021|mul:100|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2022</td>
+                        <td class="table-data">{{ customers_2022 }}</td>
+                        <td class="table-data">{{ customers_2022|mul:5.7|floatformat:0 }}</td>
+                        <td class="table-data">{{ returning_customers_2022 }}</td>
+                        <td class="table-data">{{ returning_customers_2022|div:customers_2022|mul:100|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2023</td>
+                        <td class="table-data">{{ aantal_orders }}</td>
+                        <td class="table-data">{{ aantal_hoofdgerechten }}</td>
+                        <td class="table-data">{{ returning_customers_2023 }}</td>
+                        <td class="table-data">{{ returning_customers_2023|div:aantal_orders|mul:100|floatformat:2 }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="orders-worth-table">
+                <table class="table">
+                    <thead class="table-head"><span class="table-title">Orderwaarde vergelijking</span><br><br>
+                    <th class="table-heading">Jaar</th>
+                    <th class="table-heading">Aantal orders</th>
+                    <th class="table-heading">Gemiddelde orderwaarde</th>
+                    <th class="table-heading">Gemiddelde persoonwaarde</th>
+                    {#            <th class="table-heading">Terugkerend percentage</th>#}
+                    </thead>
+                    <tbody>
+                    <tr class="table-rows">
+                        <td class="table-data">2020</td>
+                        <td class="table-data">{{ customers_2020 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2020|floatformat:2 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2020|div:5.7|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2021</td>
+                        <td class="table-data">{{ customers_2021 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2021|floatformat:2 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2021|div:5.8|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2022</td>
+                        <td class="table-data">{{ customers_2022 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2022|floatformat:2 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2022|div:5.7|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2023</td>
+                        <td class="table-data">{{ aantal_orders }}</td>
+                        <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
+                        {% if  personen_per_order != 0 %}
 
-        <div id="important-numbers-table">
-            <table class="table">
-                <thead class="table-head"><span class="table-title">Kerngetallen</span><br><br>
-                <th class="table-heading">Omschrijving</th>
-                <th class="table-heading">Waarde</th>
-                </thead>
-                <tbody>
-                <tr class="table-rows">
-                    <td class="table-data">Aantal personen</td>
-                    <td class="table-data">{{ aantal_personen }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">Aantal orders</td>
-                    <td class="table-data">{{ aantal_orders }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">Aantal personen per order</td>
-                    <td class="table-data">{{ personen_per_order|floatformat:1 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">Gemiddelde omzet per order (zonder verzendkosten)</td>
-                    <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">Gemiddelde omzet per persoon (zonder verzendkosten)</td>
-                    {% if  personen_per_order != 0 %}
-                        <td class="table-data">{{ gem_omzet_per_order|div:personen_per_order|floatformat:2 }}</td>
-                    {% endif %}
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <br><br>
-        <div id="returning-customers-table">
-            <table class="table">
-                <thead class="table-head"><span class="table-title">Terugkerende klanten</span><br><br>
-                <th class="table-heading">Jaar</th>
-                <th class="table-heading">Aantal orders</th>
-                <th class="table-heading">Aantal gasten</th>
-                <th class="table-heading">Terugkerende orders</th>
-                <th class="table-heading">Terugkerend percentage</th>
-                </thead>
-                <tbody>
-                <tr class="table-rows">
-                    <td class="table-data">2020</td>
-                    <td class="table-data">{{ customers_2020 }}</td>
-                    <td class="table-data">{{ customers_2020|mul:5.7|floatformat:0 }}</td>
-                    <td class="table-data">N.v.t.</td>
-                    <td class="table-data">N.v.t.</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2021</td>
-                    <td class="table-data">{{ customers_2021 }}</td>
-                    <td class="table-data">{{ customers_2021|mul:5.8|floatformat:0 }}</td>
-                    <td class="table-data">{{ returning_customers_2021 }}</td>
-                    <td class="table-data">{{ returning_customers_2021|div:customers_2021|mul:100|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2022</td>
-                    <td class="table-data">{{ customers_2022 }}</td>
-                    <td class="table-data">{{ customers_2022|mul:5.7|floatformat:0 }}</td>
-                    <td class="table-data">{{ returning_customers_2022 }}</td>
-                    <td class="table-data">{{ returning_customers_2022|div:customers_2022|mul:100|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2023</td>
-                    <td class="table-data">{{ aantal_orders }}</td>
-                    <td class="table-data">{{ aantal_hoofdgerechten }}</td>
-                    <td class="table-data">{{ returning_customers_2023 }}</td>
-                    <td class="table-data">{{ returning_customers_2023|div:aantal_orders|mul:100|floatformat:2 }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="orders-worth-table">
-            <table class="table">
-                <thead class="table-head"><span class="table-title">Orderwaarde vergelijking</span><br><br>
-                <th class="table-heading">Jaar</th>
-                <th class="table-heading">Aantal orders</th>
-                <th class="table-heading">Gemiddelde orderwaarde</th>
-                <th class="table-heading">Gemiddelde persoonwaarde</th>
-                {#            <th class="table-heading">Terugkerend percentage</th>#}
-                </thead>
-                <tbody>
-                <tr class="table-rows">
-                    <td class="table-data">2020</td>
-                    <td class="table-data">{{ customers_2020 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2020|floatformat:2 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2020|div:5.7|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2021</td>
-                    <td class="table-data">{{ customers_2021 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2021|floatformat:2 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2021|div:5.8|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2022</td>
-                    <td class="table-data">{{ customers_2022 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2022|floatformat:2 }}</td>
-                    <td class="table-data">{{ avg_orders_worth_2022|div:5.7|floatformat:2 }}</td>
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2023</td>
-                    <td class="table-data">{{ aantal_orders }}</td>
-                    <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
-                    {% if  personen_per_order != 0 %}
-
-                        <td class="table-data">{{ gem_omzet_per_order|div:personen_per_order|floatformat:2 }}</td>
-                    {% endif %}
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="dinner-type-comparison-div">
-            <table id="dinner-type-comparison-table">
-                <thead class="table-head">
-                <th class="table-heading">Jaar</th>
-                {% for key in dinner_type_comparison.0.keys %}
-                    <th class="table-heading">{{ key }}</th>
-                {% endfor %}
-                </tr>
-                </thead>
-                <tr class="table-rows">
-                    <td class="table-data">2022</td>
-                    {% for value in dinner_type_comparison.0.values %}
-                        <td class="table-data">{{ value }}</td>
+                            <td class="table-data">{{ gem_omzet_per_order|div:personen_per_order|floatformat:2 }}</td>
+                        {% endif %}
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="dinner-type-comparison-div">
+                <table id="dinner-type-comparison-table">
+                    <thead class="table-head">
+                    <th class="table-heading">Jaar</th>
+                    {% for key in dinner_type_comparison.0.keys %}
+                        <th class="table-heading">{{ key }}</th>
                     {% endfor %}
-                </tr>
-                <tr class="table-rows">
-                    <td class="table-data">2023</td>
-                    {% for value in dinner_type_comparison.1.values %}
-                        <td class="table-data">{{ value|floatformat:1 }}</td>
-                    {% endfor %}
-                </tr>
-            </table>
-        </div>
-    </div>
+                    </tr>
+                    </thead>
+                    <tr class="table-rows">
+                        <td class="table-data">2022</td>
+                        {% for value in dinner_type_comparison.0.values %}
+                            <td class="table-data">{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2023</td>
+                        {% for value in dinner_type_comparison.1.values %}
+                            <td class="table-data">{{ value|floatformat:1 }}</td>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </div>
+            </div>
+        {% endif %}
 {% else %}
     <h2>{{ ErrorMessage }}</h2>
 {% endif %}
