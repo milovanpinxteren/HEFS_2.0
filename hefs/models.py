@@ -129,6 +129,9 @@ class Leveranciers(models.Model):
     naam = models.CharField(max_length=250, blank=True, null=True)
     emailadres = models.CharField(max_length=250, blank=True, null=True)
 
+    def __str__(self):
+        return self.naam
+
 class Productinfo(models.Model):
     productID = models.CharField(help_text="Alleen invullen als je geen automatisch gegenereerd nummer wil", max_length=5, primary_key=True, default='', blank=True, db_index=True)
     omschrijving = models.CharField(max_length=250)
@@ -321,6 +324,7 @@ class Customers(models.Model):
     ordered_2021 = models.BinaryField(blank=True, default=0, null=True)
     ordered_2022 = models.BinaryField(blank=True, default=0, null=True)
     ordered_2023 = models.BinaryField(blank=True, default=0, null=True)
+    ordered_2024 = models.BinaryField(blank=True, null=True)
 
 class JSONData(models.Model):
     key = models.CharField(max_length=25)
