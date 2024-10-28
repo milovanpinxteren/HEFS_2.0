@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from hefs.forms import CustomAuthenticationForm
 from hefs.views.auth_views import CustomLoginView, LogoutView, ChangePasswordView
 from . import views
 
@@ -25,7 +26,7 @@ urlpatterns = [
                   path('', views.index, name='index'),
                   path('hefs/', include('hefs.urls')),
                   path('admin/', admin.site.urls),
-                  path('login', CustomLoginView.as_view(template_name='login.html'), name='login'),
+                  path('login', CustomLoginView.as_view(template_name='login.html', authentication_form=CustomAuthenticationForm), name='login'),
                   path('logout', LogoutView.as_view(), name='logout'),
                   path('show_change_password_page', ChangePasswordView.as_view(), name='show_change_password_page'),
                   path('change_password', ChangePasswordView.as_view(), name='change_password'),

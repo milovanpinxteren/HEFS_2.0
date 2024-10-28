@@ -156,42 +156,45 @@ class Kerstdiner2024API:
     # Add the rest of your methods (add_to_new_orders, handle_coupons, etc.) here
     def add_to_new_orders(self, order):
         try:
-            verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shippingLine']['code'])[0]
-        except IndexError:
-            verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shippingLine']['title'])[0]
+            try:
+                verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shippingLine']['code'])[0]
+            except IndexError:
+                verzendoptie = VerzendOpties.objects.filter(verzendoptie=order['shippingLine']['title'])[0]
 
-        besteldatum = datetime.strptime(order['createdAt'][:10], '%Y-%m-%d')
-        tz = timezone.get_current_timezone()
-        timzone_besteldatum = timezone.make_aware(besteldatum, tz, True)
+            besteldatum = datetime.strptime(order['createdAt'][:10], '%Y-%m-%d')
+            tz = timezone.get_current_timezone()
+            timzone_besteldatum = timezone.make_aware(besteldatum, tz, True)
 
-        for newOrderLine in order['lineItems']['edges']:
-            newOrderLine = newOrderLine['node']
-            if int(newOrderLine['fulfillableQuantity']) > 0:
-                print(order['name'])
-                NewOrders.objects.create(conversieID=order['name'],
-                                         besteldatum=timzone_besteldatum,
-                                         verzendoptie=verzendoptie,
-                                         afleverdatum=verzendoptie.verzenddatum,
-                                         aflevertijd='00:00:00',
-                                         verzendkosten=float(verzendoptie.verzendkosten),
-                                         korting=float(order['totalDiscountsSet']['shopMoney']['amount']),
-                                         orderprijs=order['subtotalPriceSet']['shopMoney']['amount'],
-                                         totaal=float(order['totalPriceSet']['shopMoney']['amount']),
-                                         aantal=int(newOrderLine['quantity']),
-                                         product=newOrderLine['name'],
-                                         productSKU=newOrderLine['sku'],
-                                         voornaam=order['shippingAddress']['firstName'],
-                                         achternaam=order['shippingAddress']['lastName'],
-                                         emailadres=order['email'],
-                                         telefoonnummer=order['shippingAddress']['phone'],
-                                         straatnaam=order['shippingAddress']['address1'],
-                                         huisnummer=order['shippingAddress']['address2'],
-                                         postcode=order['shippingAddress']['zip'],
-                                         plaats=order['shippingAddress']['city'],
-                                         land=order['shippingAddress']['country'],
-                                         postadres_straatnaam=order['billingAddress']['address1'],
-                                         postadres_huisnummer=order['billingAddress']['address2'],
-                                         postadres_postcode=order['billingAddress']['zip'],
-                                         postadres_plaats=order['billingAddress']['city'],
-                                         postadres_land=order['billingAddress']['country'],
-                                         opmerkingen=order['customer']['note'])
+            for newOrderLine in order['lineItems']['edges']:
+                newOrderLine = newOrderLine['node']
+                if int(newOrderLine['fulfillableQuantity']) > 0:
+                    print(order['name'])
+                    NewOrders.objects.create(conversieID=order['name'],
+                                             besteldatum=timzone_besteldatum,
+                                             verzendoptie=verzendoptie,
+                                             afleverdatum=verzendoptie.verzenddatum,
+                                             aflevertijd='00:00:00',
+                                             verzendkosten=float(verzendoptie.verzendkosten),
+                                             korting=float(order['totalDiscountsSet']['shopMoney']['amount']),
+                                             orderprijs=order['subtotalPriceSet']['shopMoney']['amount'],
+                                             totaal=float(order['totalPriceSet']['shopMoney']['amount']),
+                                             aantal=int(newOrderLine['quantity']),
+                                             product=newOrderLine['name'],
+                                             productSKU=newOrderLine['sku'],
+                                             voornaam=order['shippingAddress']['firstName'],
+                                             achternaam=order['shippingAddress']['lastName'],
+                                             emailadres=order['email'],
+                                             telefoonnummer=order['shippingAddress']['phone'],
+                                             straatnaam=order['shippingAddress']['address1'],
+                                             huisnummer=order['shippingAddress']['address2'],
+                                             postcode=order['shippingAddress']['zip'],
+                                             plaats=order['shippingAddress']['city'],
+                                             land=order['shippingAddress']['country'],
+                                             postadres_straatnaam=order['billingAddress']['address1'],
+                                             postadres_huisnummer=order['billingAddress']['address2'],
+                                             postadres_postcode=order['billingAddress']['zip'],
+                                             postadres_plaats=order['billingAddress']['city'],
+                                             postadres_land=order['billingAddress']['country'],
+                                             opmerkingen=order['customer']['note'])
+        except Exception as e:
+            print('Adding to neworders error', e)
