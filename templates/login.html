@@ -17,20 +17,16 @@
 <div class="page-container">
     <div class="form-div">
         <form class="login-form form_main" role="form" method="POST">
-            <p class="heading">Kerstdiner Admin Login</p>
+            <p class="heading">Kerstdiner Login</p>
             <h4 style="z-index: 1000">{{ message }}</h4>
             {% csrf_token %}
             <div class="login-form-contents">
                 {{ form.as_p }}
             </div>
-            <button class="login-button" role="button">{% trans 'login' %}</button>
-{#            <div class="language-picker-div">#}
-{#                {% include 'components/language_picker.html' %}#}
-{#            </div>#}
-            <a class="forgotLink" href="{% url 'show_change_password_page' %}">Wijzig Wachtwoord</a>
+            <button class="login-button" role="button">Login</button>
+{#            <a class="forgotLink" href="{% url 'show_change_password_page' %}">Wijzig Wachtwoord</a>#}
         </form>
     </div>
-{#    {% include 'components/footer.html' %}#}
 </div>
 </body>
 </html>

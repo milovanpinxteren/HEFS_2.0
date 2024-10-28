@@ -3,9 +3,20 @@ from django.forms import DateInput
 from functools import partial
 
 from hefs.models import HalfproductenIngredienten, ProductenHalfproducts
+from django.contrib.auth.forms import AuthenticationForm
 
 DateInput = partial(forms.DateInput, {'class': 'datepicker'})
 
+
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        label='Username/Order-ID',  # Custom label
+        widget=forms.TextInput(attrs={'autofocus': True})
+    )
+    password = forms.CharField(
+        label='Password/Postcode',  # Custom label
+        widget=forms.PasswordInput
+    )
 
 class PickbonnenForm(forms.Form):
     begindatum = forms.DateField(widget=DateInput(), required=False)
