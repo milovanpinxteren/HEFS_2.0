@@ -156,6 +156,9 @@ class Productinfo(models.Model):
     def __str__(self):
         return self.picknaam
 
+    class Meta:
+        ordering = ['productnaam']  # Sorts by product name alphabetically
+
     def save(self):
         if not (self.productcode or self.productcode):
             self.productcode = random.randint(99, 999)
@@ -250,11 +253,14 @@ class Productextra(models.Model):
     productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_productnaam', null=True, blank=True)
     extra_productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='productextra_extra_productnaam', null=True, blank=True)
 
-
+    class Meta:
+        ordering = ['productnaam']  # Sorts by product name alphabetically
 
 class Orderextra(models.Model):
     productnaam = models.ForeignKey(Productinfo, on_delete=models.PROTECT, related_name='orderextra_productnaam', blank=True, null=True)
 
+    class Meta:
+        ordering = ['productnaam']  # Sorts by product name alphabetically
 
 
 #############################################Pick models below##########################################################

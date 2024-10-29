@@ -83,7 +83,10 @@ class ProductenIngredientenAdmin(admin.ModelAdmin):
 @admin.register(Productextra)
 class ProductExtraAdmin(admin.ModelAdmin):
     list_display = ['productnaam', 'extra_productnaam']
-    search_fields = ("product__productnaam",)
+    # search_fields = ("product__productnaam",)
+    search_fields = ["productnaam__productnaam__icontains", "productnaam__omschrijving__icontains",
+                     "extra_productnaam__productnaam__icontains", "extra_productnaam__omschrijving__icontains"]
+    autocomplete_fields = ['productnaam', 'extra_productnaam']  # Enables autocomplete
 
 
 @admin.register(Orderextra)
