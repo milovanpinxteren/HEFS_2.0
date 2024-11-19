@@ -14,8 +14,8 @@ class VehHandler():
             prognosegetal_gourmet = AlgemeneInformatie.objects.get(naam='prognosegetal_gourmet').waarde
             aantal_hoofdgerechten = AlgemeneInformatie.objects.get(naam='aantalHoofdgerechten').waarde
             aantal_brunch = Orderline.objects.filter(productSKU__in=[700, 701]).aggregate(Sum('aantal'))['aantal__sum']
-            # aantal_gourmet = Orderline.objects.filter(productSKU__in=[110, 111]).aggregate(Sum('aantal'))['aantal__sum']  # TODO: change to gourmet
-            aantal_gourmet = 0
+            aantal_gourmet = Orderline.objects.filter(productSKU__in=[750, 751, 752, 753]).aggregate(Sum('aantal'))['aantal__sum']
+            # aantal_gourmet = 0
             try:
                 prognosefractie_diner = prognosegetal_diner / aantal_hoofdgerechten
             except Exception as e:
@@ -79,14 +79,15 @@ class VehHandler():
                 updated_row = (*row, total_of_product)
             row_total = row[3 + len(date_array)]
             gang = row[1][0]
-            if gang == "7":
+            productcode = row[2]
+            if productcode in ['750', '751', '752', '753']:
+                prognose = row_total * prognosefractie_gourmet
+                total_prognose = total_of_product * prognosefractie_gourmet
+                updated_row = (*updated_row, prognose, total_prognose)
+            if gang == "7" and productcode not in ['750', '751', '752', '753']:
                 prognose = row_total * prognosefractie_brunch
                 total_prognose = total_of_product * prognosefractie_brunch
                 updated_row = (*updated_row, prognose, total_prognose)
-            # elif gang == "9":  # Gourmet
-            #     prognose = row_total * prognosefractie_gourmet
-            #     total_prognose = total_of_product * prognosefractie_gourmet
-            #     updated_row = (*updated_row, prognose, total_prognose)
             elif gang != "7":
                 prognose = row_total * prognosefractie_diner
                 total_prognose = total_of_product * prognosefractie_diner

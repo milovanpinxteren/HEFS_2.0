@@ -44,6 +44,9 @@
             for (i = 1; i < tr.length; i++) {
                 $(tr[i]).show()
                 let tdElem = tr[i].getElementsByTagName("td")[1]
+                let productcode = tr[i].getElementsByTagName("td")[2].textContent.trim()
+                const validProductCodes = ['750', '751', '752', '753', '760', '761', '762'];
+
                 let gang = tdElem.innerText[0]
                 if (type === "diner") {
                     if (gang === "7") {
@@ -55,6 +58,13 @@
                     if (gang !== "7") {
                         $(tr[i]).hide()
                     } else if (gang === "7") {
+                        $(tr[i]).show()
+                    }
+                } else if (type === "gourmet") {
+                    console.log('productcode', productcode)
+                    if (!validProductCodes.includes(productcode))  {
+                        $(tr[i]).hide()
+                    } else if (validProductCodes.includes(productcode))  {
                         $(tr[i]).show()
                     }
                 } else if (type === "all") {
@@ -107,6 +117,7 @@
         Filter VEH:
         <button onclick="filterVEH('diner')">Diner</button>
         <button onclick="filterVEH('brunch')">Brunch</button>
+        <button onclick="filterVEH('gourmet')">Gourmet</button>
         <button onclick="filterVEH('all')">Alles</button>
         <button onclick="showHalfProducts()">Halfproducten</button>
     </div>
