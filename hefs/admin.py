@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
     VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
-    ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers
+    ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers, Leveranciers
 
 
 @admin.register(JSONData)
@@ -142,6 +142,10 @@ class ApiUrlAdmin(admin.ModelAdmin):
 class AlgemeneInformatieAdmin(admin.ModelAdmin):
     list_display = ['naam', 'waarde']
 
+
+@admin.register(Leveranciers)
+class LeveranciersAdmin(admin.ModelAdmin):
+    list_display = ['naam', 'emailadres']
 
 @admin.register(LeverancierUserLink)
 class LeverancierUserLinkAdmin(admin.ModelAdmin):
