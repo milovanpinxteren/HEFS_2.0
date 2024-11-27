@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script src="https://unpkg.com/htmx.org"></script>
 
     <title>Routes</title>
 </head>
@@ -17,9 +18,20 @@
         </p>
     {% endfor %}
 </div>
-
+<h2>Bij indrukken van een van onderstaande knoppen gaan berekeningen lopen die geld kosten, alleen drukken met toestemming.</h2>
+    <form hx-get="{% url 'generate_routes' %}" hx-target="#response" hx-swap="innerHTML">
+        <label for="date">Select a date:</label>
+        <input type="date" id="date" name="date" required>
+        <button type="submit">Generate Routes</button>
+    </form>
 <div>
-    <a class="button-48" href="{% url 'copy_routes' %}">Map routes (alleen Milo drukken)</a>
+    <a class="button-48" href="{% url 'calculate_coordinates' %}">Update Coordinaten</a>
 </div>
+<div>
+    <a class="button-48" href="{% url 'update_distance_matrix' %}">Update Distance Matrix</a>
+</div>
+    <div id="response">
+        <!-- Response will be dynamically updated here -->
+    </div>
 </body>
 </html>

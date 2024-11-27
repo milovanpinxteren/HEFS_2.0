@@ -75,6 +75,8 @@ class Orders(models.Model):
     postcode = models.CharField(max_length=250, null=True, blank=True)
     plaats = models.CharField(max_length=250, null=True, blank=True)
     land = models.CharField(max_length=250, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     routenr = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
@@ -86,6 +88,45 @@ class Orderline(models.Model):
     productSKU = models.CharField(max_length=250, null=True, blank=True)
     aantal = models.IntegerField(default=0, null=True, blank=True)
 
+
+#############################################Routes below#############################################################
+
+class DistanceMatrix(models.Model):
+    origin = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name='distances_from')
+    destination = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name='distances_to')
+    distance_meters = models.IntegerField(null=True)
+
+class Vehicle(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vehicles")
+    vehicle_number = models.CharField(max_length=50, unique=True)
+    capacity = models.PositiveIntegerField()  # Example: max capacity in kg or volume
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Vehicle {self.vehicle_number} driven by {self.user.username}"
+
+
+class Route(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="routes")
+    date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Route {self.name} on {self.date}"
+
+
+class Stop(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="stops")
+    order = models.OneToOneField(Orders, on_delete=models.CASCADE, related_name="stop")
+    sequence_number = models.PositiveIntegerField()  # Order of the stop in the route
+    arrival_time = models.TimeField(null=True, blank=True)
+    departure_time = models.TimeField(null=True, blank=True)
+    visited = models.BooleanField(default=False)
+    notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Stop {self.sequence_number} on {self.route.name}"
 
 #############################################Verpakkingsmodels below####################################################
 

@@ -1,8 +1,8 @@
-from django.conf import settings
 from django.db.models import Count
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render
 from django_rq import job
+import datetime
 
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
@@ -12,14 +12,15 @@ from hefs.apis.paasontbijt2024transacties import Paasontbijt2024Transacties
 from hefs.classes.customer_info import CustomerInfo
 from hefs.classes.customer_location_plot import CustomerLocationPlot
 from hefs.classes.financecalculator import FinanceCalculator
-from hefs.classes.halfproduct_shower import HalfProductShower
 # from .classes.gerijptebieren.product_syncer import ProductSyncer
 # from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
 # from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from hefs.classes.make_factuur_overview import MakeFactuurOverview
 from hefs.classes.microcash_sync.ftp_getter import FTPGetter
 from hefs.classes.microcash_sync.webhook_handler import WebhookHandler
-from hefs.classes.route_copier import RouteCopier
+from hefs.classes.routingclasses.coordinate_calculator import CoordinateCalculator
+from hefs.classes.routingclasses.distance_matrix_updater import DistanceMatrixUpdater
+from hefs.classes.routingclasses.routes_generator import RoutesGenerator
 from hefs.classes.veh_handler import VehHandler
 # from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
@@ -291,14 +292,32 @@ def routes_page(request):
     return render(request, 'helpers/routespage.html', context)
 
 
-def copy_routes(request):
-    RouteCopier().copy_routes()
-    verzendopties_counts = Orders.objects.values('verzendoptie__verzendoptie').annotate(
-        count=Count('verzendoptie__verzendoptie')).order_by('-count')
-    verzendopties_dict = {item['verzendoptie__verzendoptie']: item['count'] for item in verzendopties_counts}
+def calculate_coordinates(request):
+    calculator = CoordinateCalculator()
+    calculator.calculate_coordinates()
+    return render(request, 'helpers/routespage.html')
 
-    context = {'verzendopties_dict': verzendopties_dict}
-    return render(request, 'helpers/routespage.html', context)
+def update_distance_matrix(request):
+    updater = DistanceMatrixUpdater()
+    updater.update_distances()
+    return render(request, 'helpers/routespage.html')
+
+def generate_routes(request):
+    if "date" in request.GET:
+        selected_date = request.GET["date"]
+        date_obj = datetime.datetime.strptime(selected_date, "%Y-%m-%d").date()
+
+        generator = RoutesGenerator()
+        generator.generate_routes(date_obj, selected_date)
+        return HttpResponse(f"<div>Routes generated for {selected_date}!</div>")
+    else:
+        return render(request, 'helpers/routespage.html')
+
+def copy_routes(request):
+    # RouteCopier().copy_routes()
+
+
+    return render(request, 'helpers/routespage.html')
 
 
 
