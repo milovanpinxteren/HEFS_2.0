@@ -37,3 +37,6 @@ Toegangstoken beheerders API <br>
 
 ## Gerijptebieren
 Add partner site to partner_sites and partner_websites
+
+## Routing
+Add the hub to orders with voornaam = 'Hub' and id 99999
