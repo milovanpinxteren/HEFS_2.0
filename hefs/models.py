@@ -110,6 +110,7 @@ class Route(models.Model):
     name = models.CharField(max_length=100, unique=True)
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="routes")
     date = models.DateField()
+    google_maps_link = models.URLField(null=True, blank=True, max_length=1000)  # Add this field
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -118,7 +119,7 @@ class Route(models.Model):
 
 class Stop(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="stops")
-    order = models.OneToOneField(Orders, on_delete=models.CASCADE, related_name="stop")
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name="stop")
     sequence_number = models.PositiveIntegerField()  # Order of the stop in the route
     arrival_time = models.TimeField(null=True, blank=True)
     departure_time = models.TimeField(null=True, blank=True)
