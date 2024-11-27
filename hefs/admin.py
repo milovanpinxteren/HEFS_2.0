@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
     VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
-    ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers, Leveranciers
+    ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers, Leveranciers, \
+    Vehicle, Route, Stop
 
 
 @admin.register(JSONData)
@@ -156,3 +157,22 @@ class LeverancierUserLinkAdmin(admin.ModelAdmin):
 class CustomersAdmin(admin.ModelAdmin):
     list_display = ['emailadres', 'achternaam', 'ordered_2020', 'ordered_2021', 'ordered_2022', 'ordered_2023',
                     'ordered_2024']
+
+@admin.register(Vehicle)
+class VehicleAdmin(admin.ModelAdmin):
+    list_display = ['user', 'vehicle_number', 'capacity', 'created_at']
+    search_fields = ['vehicle_number', 'user__username']
+    list_filter = ['capacity', 'created_at']
+
+@admin.register(Route)
+class RouteAdmin(admin.ModelAdmin):
+    list_display = ['name', 'vehicle', 'date', 'created_at']
+    search_fields = ['name', 'vehicle__vehicle_number']
+    list_filter = ['date', 'created_at']
+
+@admin.register(Stop)
+class StopAdmin(admin.ModelAdmin):
+    list_display = ['route', 'order', 'sequence_number', 'arrival_time',
+                    'departure_time', 'notes']
+    search_fields = ['route__name', 'order__order_number']
+    list_filter = ['route', 'sequence_number']

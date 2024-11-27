@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import qrcode as qrcode
+# import qrcode as qrcode
 
 from hefs.classes.pickbonnen import Pickbonnen
 from hefs.models import Orders, PickOrders, PickItems, AlgemeneInformatie
@@ -49,13 +49,13 @@ class PickbonnenGenerator:
             else:
                 naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   ' + 'Route ' + str(order.routenr) + '\n' + str(order.straatnaam) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
 
-            naw_qr_code = qrcode.make(naw_qr_text)
-            naw_qr_img = naw_qr_code.get_image()
-
-            pick_qr_code = qrcode.make(qr_text)
-            pick_qr_img = pick_qr_code.get_image()
-            pickbonnen.qr_codecell(pick_qr_img)
-            pickbonnen.klant_qr_cell(naw_qr_img)
+            # naw_qr_code = qrcode.make(naw_qr_text)
+            # naw_qr_img = naw_qr_code.get_image()
+            #
+            # pick_qr_code = qrcode.make(qr_text)
+            # pick_qr_img = pick_qr_code.get_image()
+            # pickbonnen.qr_codecell(pick_qr_img)
+            # pickbonnen.klant_qr_cell(naw_qr_img)
         pickbonnen.output('pickbonnen.pdf', "rb")
         AlgemeneInformatie.objects.filter(naam='status').delete()
         AlgemeneInformatie.objects.create(naam='status', waarde=100)
