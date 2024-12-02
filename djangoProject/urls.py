@@ -26,10 +26,11 @@ urlpatterns = [
                   path('', views.index, name='index'),
                   path('hefs/', include('hefs.urls')),
                   path('admin/', admin.site.urls),
-                  path('login', CustomLoginView.as_view(template_name='login.html', authentication_form=CustomAuthenticationForm), name='login'),
+                  path('login', CustomLoginView.as_view(template_name='login.html',
+                                                        authentication_form=CustomAuthenticationForm), name='login'),
                   path('logout', LogoutView.as_view(), name='logout'),
                   path('show_change_password_page', ChangePasswordView.as_view(), name='show_change_password_page'),
                   path('change_password', ChangePasswordView.as_view(), name='change_password'),
+                  path('track_order', views.track_order, name='track_order'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-

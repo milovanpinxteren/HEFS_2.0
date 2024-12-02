@@ -78,6 +78,7 @@ class Orders(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     routenr = models.IntegerField(null=True, blank=True)
+    opmerkingen = models.CharField(max_length=2500, null=True, blank=True)
 
     def __str__(self):
         return str(self.conversieID)
@@ -110,8 +111,11 @@ class Route(models.Model):
     name = models.CharField(max_length=100, unique=True)
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="routes")
     date = models.DateField()
+    departure_time = models.TimeField(null=True, blank=True)
     google_maps_link = models.URLField(null=True, blank=True, max_length=1000)  # Add this field
     created_at = models.DateTimeField(auto_now_add=True)
+    total_distance = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    total_travel_time = models.TimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Route {self.name} on {self.date}"

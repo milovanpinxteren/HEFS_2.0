@@ -2,6 +2,8 @@ import datetime
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from hefs.models import Orders, Vehicle, DistanceMatrix, Route, Stop, VerzendOpties
+from math import sqrt
+from math import radians, sin, cos, sqrt, atan2
 
 
 class RoutesGenerator():
@@ -32,8 +34,8 @@ class RoutesGenerator():
         # base_seconds = base_time.hour * 3600 + base_time.minute * 60  # Convert base time to seconds
 
         data['time_windows'] = [
-            (6 * 3600, 15 * 3600)  # Hub start time (6:00 AM to 6:00 AM)
-            if idx == 0 else (8 * 3600, 17 * 3600)  # Other stops: between 8:00 AM and 5:00 PM
+            (6 * 3600, 18 * 3600)  # Hub start time (6:00 AM to 6:00 AM)
+            if idx == 0 else (8 * 3600, 16 * 3600)  # Other stops: between 8:00 AM and 7:00 PM
             for idx in range(len(data['distance_matrix']))
         ]
 
@@ -81,39 +83,39 @@ class RoutesGenerator():
         )
 
         # Time Window constraint
-        # def time_callback(from_index, to_index):
-        #     """Calculate travel time between nodes."""
-        #     from_node = manager.IndexToNode(from_index)
-        #     to_node = manager.IndexToNode(to_index)
-        #     return data["travel_times"][from_node][to_node]
-        #
-        # time_callback_index = routing.RegisterTransitCallback(time_callback)
-        #
-        # routing.AddDimension(
-        #     time_callback_index,  # Index of the transit callback
-        #     10200,  # Allow 1 hour of slack
-        #     10 * 3600,  # Maximum route time is 10 hours (6:00 AM to 4:00 PM)
-        #     False,  # Don't force vehicles to return to depot
-        #     "Time"
-        # )
+        def time_callback(from_index, to_index):
+            """Calculate travel time between nodes."""
+            from_node = manager.IndexToNode(from_index)
+            to_node = manager.IndexToNode(to_index)
+            return data["travel_times"][from_node][to_node]
 
-        # time_dimension = routing.GetDimensionOrDie("Time")
+        time_callback_index = routing.RegisterTransitCallback(time_callback)
+
+        routing.AddDimension(
+            time_callback_index,  # Index of the transit callback
+            15200,  # Allow 1 hour of slack
+            12 * 3600,  # Maximum route time is 10 hours (6:00 AM to 4:00 PM)
+            False,  # Don't force vehicles to return to depot
+            "Time"
+        )
+
+        time_dimension = routing.GetDimensionOrDie("Time")
 
         # Set the time windows for each location
-        # for idx, time_window in enumerate(data["time_windows"]):
-        #     index = manager.NodeToIndex(idx)
-        #     time_dimension.CumulVar(index).SetRange(time_window[0], time_window[1])
-        #
-        # # Set start time for each vehicle
-        # for vehicle_id in range(data["num_vehicles"]):
-        #     start_index = routing.Start(vehicle_id)
-        #     time_dimension.CumulVar(start_index).SetRange(6 * 3600, 6 * 3600)  # Vehicles start at 6:00 AM
+        for idx, time_window in enumerate(data["time_windows"]):
+            index = manager.NodeToIndex(idx)
+            time_dimension.CumulVar(index).SetRange(time_window[0], time_window[1])
+
+        # Set start time for each vehicle
+        for vehicle_id in range(data["num_vehicles"]):
+            start_index = routing.Start(vehicle_id)
+            time_dimension.CumulVar(start_index).SetRange(6 * 3600, 12 * 3600)  # Vehicles start at 6:00 AM
 
         # Solve
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-        search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
-        search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.SIMULATED_ANNEALING
-        search_parameters.time_limit.seconds = 240  # Allow more time to explore solutions
+        search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+        search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+        search_parameters.time_limit.seconds = 340  # Allow more time to explore solutions
 
         #Results:
             # PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH = 2762.52 km
@@ -147,7 +149,35 @@ class RoutesGenerator():
             matrix.append(row)
         return matrix
 
-    def create_travel_time_matrix(self, distance_matrix, average_speed_kmh=60):
+    # def haversine(self, coord1, coord2):
+    #     """Calculate the Haversine distance between two points in meters."""
+    #     # Radius of the Earth in meters
+    #     R = 6371000.0
+    #
+    #     lat1, lon1 = radians(coord1[0]), radians(coord1[1])
+    #     lat2, lon2 = radians(coord2[0]), radians(coord2[1])
+    #
+    #     dlat = lat2 - lat1
+    #     dlon = lon2 - lon1
+    #
+    #     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    #     c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    #
+    #     distance = R * c
+    #     return distance
+    #
+    # def create_distance_matrix(self, orders):
+    #     """Generate the distance matrix based on Haversine distances in meters."""
+    #     coordinates = [(order.latitude, order.longitude) for order in orders if order.latitude and order.longitude]
+    #     matrix = []
+    #
+    #     for origin in coordinates:
+    #         row = [self.haversine(origin, destination) if origin != destination else 0 for destination in coordinates]
+    #         matrix.append(row)
+    #
+    #     return matrix
+
+    def create_travel_time_matrix(self, distance_matrix, average_speed_kmh=80):
         """
         Generate a travel time matrix based on the distance matrix and average speed.
         :param distance_matrix: 2D list of distances in meters.

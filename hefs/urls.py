@@ -1,6 +1,5 @@
 from django.urls import path
 
-
 from hefs.views import views
 from hefs.views.map_views import show_map_views
 from hefs.views.recipe_views import recipe_views
@@ -48,6 +47,7 @@ urlpatterns = [
     path('calculate_coordinates', views.calculate_coordinates, name='calculate_coordinates'),
     path('update_distance_matrix', views.update_distance_matrix, name='update_distance_matrix'),
     path('generate_routes/', views.generate_routes, name='generate_routes'),
+    path('calculate_arrival_times/', views.calculate_arrival_times, name='calculate_arrival_times'),
     path("map/", show_map_views.show_map, name="show_map"),
 
 ]

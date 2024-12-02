@@ -22,7 +22,7 @@ def show_map(request):
         query &= Q(id=route_id)
     if conversie_id:
         query &= Q(stops__order__ConversieID=conversie_id)
-    routes_queryset = Route.objects.filter(query).distinct()
+    routes_queryset = Route.objects.filter(query).distinct().order_by('name')
 
     for route in routes_queryset:
         vehicle = route.vehicle
@@ -38,9 +38,36 @@ def show_map(request):
                 "arrival_time": stop.arrival_time.strftime("%H:%M") if stop.arrival_time else None,
                 "departure_time": stop.departure_time.strftime("%H:%M") if stop.departure_time else None,
                 "visited": stop.visited,
-                "notes": stop.notes or "",
+                "notes": (stop.notes or "") + (order.opmerkingen or ""),
             })
 
     map = map_maker.make_map(map_dict, 'routes')
     context = {'map': map._repr_html_()}
+
+    if selected_date:
+        stops_table = generate_stops_table(routes_queryset)
+        context['stops_table'] = stops_table
     return render(request, 'map.html', context)
+
+
+
+
+def generate_stops_table(routes_queryset):
+    """Generate a table of stops for each route with Google Maps links."""
+    stops_table = defaultdict(list)
+
+    for route in routes_queryset:
+        for stop in route.stops.order_by("sequence_number"):
+            order = stop.order
+            stops_table[route.name].append({
+                "sequence": stop.sequence_number,
+                "conversieID": order.conversieID,
+                "address": f"{order.straatnaam or ''} {order.huisnummer or ''}, {order.postcode or ''}, {order.plaats or ''}",
+                "arrival_time": stop.arrival_time.strftime("%H:%M") if stop.arrival_time else None,
+                "departure_time": stop.departure_time.strftime("%H:%M") if stop.departure_time else None,
+                "visited": stop.visited,
+                "notes": stop.notes or "",
+                "google_maps_link": route.google_maps_link,
+            })
+    return dict(stops_table)
+

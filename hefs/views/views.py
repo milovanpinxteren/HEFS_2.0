@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render
 from django_rq import job
@@ -24,8 +24,11 @@ from hefs.classes.routingclasses.routes_generator import RoutesGenerator
 from hefs.classes.veh_handler import VehHandler
 # from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
-from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren
+from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route
 from django.views.decorators.csrf import csrf_exempt
+
+from hefs.views.map_views.arrival_time_calculator import ArrivalTimeCalculator
+
 
 def index(request):
     try:
@@ -315,12 +318,25 @@ def generate_routes(request):
 
 def copy_routes(request):
     # RouteCopier().copy_routes()
-
-
     return render(request, 'helpers/routespage.html')
 
 
-
+def calculate_arrival_times(request):
+    calculator = ArrivalTimeCalculator()
+    selected_date = request.GET.get("date")
+    route_id = request.GET.get("route_id")
+    conversie_id = request.GET.get("conversie_id")
+    # Build the query
+    query = Q()
+    if selected_date:
+        query &= Q(date=selected_date)
+    if route_id:
+        query &= Q(id=route_id)
+    if conversie_id:
+        query &= Q(stops__order__ConversieID=conversie_id)
+    routes_queryset = Route.objects.filter(query).distinct().order_by('name')
+    calculator.calculate_arrival_times(routes_queryset)
+    return HttpResponse(f"<div>Updated arrival times for query: {query}</div>")
 
 
 def orders_overview(request):
