@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'django_pivot',
     'mathfilters',
     'django_rq',
+    'corsheaders',
+
 ]
 
 MIDDLEWARE = [
@@ -64,6 +66,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'djangoProject.urls'
@@ -177,3 +181,19 @@ RQ_QUEUES = {
 
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://d36867-2.myshopify.com',
+    'https://kerstdiner.nl',
+    'https://www.kerstdiner.nl',
+    'https://kerstdiners.be',
+    'https://www.kerstdiners.be',
+]
+
+CORS_ALLOWED_ORIGINS  = [
+    'https://d36867-2.myshopify.com',
+    'https://kerstdiner.nl',
+    'https://www.kerstdiner.nl',
+    'https://kerstdiners.be',
+    'https://www.kerstdiners.be',
+]
