@@ -1,6 +1,5 @@
-from django.conf import settings
-import json
 import requests
+from django.conf import settings
 from hefs.classes.gerijptebieren import product_creator
 from hefs.classes.gerijptebieren.error_handler import ErrorHandler
 from hefs.classes.gerijptebieren.translator import Translator

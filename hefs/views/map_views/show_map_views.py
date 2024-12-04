@@ -1,10 +1,10 @@
-from django.contrib.auth.decorators import login_required
 from collections import defaultdict
-from django.shortcuts import render, get_object_or_404
+
 from django.db.models import Q
-from hefs.models import Route, Stop
+from django.shortcuts import render
 
 from hefs.classes.routingclasses.map_maker import MapMaker
+from hefs.models import Route
 
 
 def show_map(request):

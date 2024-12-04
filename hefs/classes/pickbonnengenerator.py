@@ -1,9 +1,10 @@
 from datetime import datetime
 
-# import qrcode as qrcode
-
 from hefs.classes.pickbonnen import Pickbonnen
 from hefs.models import Orders, PickOrders, PickItems, AlgemeneInformatie
+
+
+# import qrcode as qrcode
 
 
 class PickbonnenGenerator:

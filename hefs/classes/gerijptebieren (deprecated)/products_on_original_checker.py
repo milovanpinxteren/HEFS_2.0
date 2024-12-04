@@ -2,7 +2,6 @@ import time
 
 import requests
 from django.conf import settings
-
 from hefs.classes.gerijptebieren.error_handler import ErrorHandler
 from hefs.classes.gerijptebieren.product_creator import ProductCreator
 from hefs.classes.gerijptebieren.product_updater import ProductUpdater

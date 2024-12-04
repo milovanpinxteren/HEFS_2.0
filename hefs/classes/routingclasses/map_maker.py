@@ -5,10 +5,8 @@ e.g.: {'hubs': [{'name': '', 'address': '', 'lat': 51.708738, 'lon': 5.2674352}]
 'customers': [{'name': '', 'address': '', 'lat': 51.9863478, 'lon': 5.8763971}],
  'operators': [{'name': '', 'address': '', 'lat': 51.4236127, 'lon': 5.4635217}]}
 """
-import random
 
 import folium
-from branca.element import Template, MacroElement
 
 from hefs.data import ColorData
 

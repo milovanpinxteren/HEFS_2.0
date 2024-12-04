@@ -3,6 +3,7 @@ import time
 import requests
 from django.conf import settings
 
+
 class ProductMaker:
 
     def create_product(self, shopifyID, domain_name, headers):

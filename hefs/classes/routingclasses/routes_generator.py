@@ -1,9 +1,6 @@
-import datetime
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from hefs.models import Orders, Vehicle, DistanceMatrix, Route, Stop, VerzendOpties
-from math import sqrt
-from math import radians, sin, cos, sqrt, atan2
 
 
 class RoutesGenerator():

@@ -1,9 +1,9 @@
-from django import forms
-from django.forms import DateInput
 from functools import partial
 
-from hefs.models import HalfproductenIngredienten, ProductenHalfproducts
+from django import forms
 from django.contrib.auth.forms import AuthenticationForm
+
+from hefs.models import HalfproductenIngredienten, ProductenHalfproducts
 
 DateInput = partial(forms.DateInput, {'class': 'datepicker'})
 

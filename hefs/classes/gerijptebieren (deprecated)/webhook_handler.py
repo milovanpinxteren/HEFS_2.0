@@ -1,6 +1,4 @@
 import json
-import requests
-from django.conf import settings
 
 from hefs.classes.gerijptebieren.order_creator import OrderCreator
 from hefs.classes.gerijptebieren.product_creator import ProductCreator

@@ -31,7 +31,7 @@ aantalOrders
 Apps en verkoopkanalen <br>
 App maken <br>
 configureren <br>
-Toegangstoken beheerders API <br>
+Toegangstoken beheerders API \
 ![img.png](img.png)
 
 
@@ -40,3 +40,15 @@ Add partner site to partner_sites and partner_websites
 
 ## Routing
 Add the hub to orders with voornaam = 'Hub' and id 99999
+
+## Configuring Dokku
+
+- ssh-keygen -t ed25519
+- copy .ssh/id_ed25519.pub to clipboard
+- Login to host that runs dokku.
+- sudo su
+- Create temp file and paste ssh key
+- dokku ssh-keys:add milo <temp file name>
+- On dev machine, in folder with git repo:
+- git remote add dokku dokku@89.145.161.168:hefs
+- git push dokku

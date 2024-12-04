@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 
-# from django.conf import settings
-
 from django_rq import get_queue
 
 from djangoProject import settings
 from djangoProject.tasks import update_product_inventory, sync_all_products
 from hefs.classes.error_handler import ErrorHandler
+
+
+# from django.conf import settings
 
 
 def start_schedule_tasks():
