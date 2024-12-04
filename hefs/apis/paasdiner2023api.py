@@ -2,10 +2,11 @@
 # https://depaascateraar.nl/assortiment/
 import datetime
 
-import requests
-import pandas as pd
 import bs4 as bs
+import pandas as pd
+import requests
 from django.db.models import Max
+
 from hefs.models import Orders, Orderline, NewOrders, ApiUrls
 
 

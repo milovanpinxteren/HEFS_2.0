@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
+
+from django_rq import get_queue
+
+from djangoProject import settings
 from hefs.classes.error_handler import ErrorHandler
 from hefs.classes.microcash_sync.ftp_getter import FTPGetter
-from django_rq import get_queue
-from djangoProject import settings
-from datetime import datetime, timedelta
 
 
 def update_product_inventory():

@@ -1,9 +1,8 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 from django.db.models import Sum
 
-from hefs.models import AlgemeneInformatie, Orderline, Orders, ApiUrls, LeverancierUserLink
+from hefs.models import AlgemeneInformatie, Orderline, Orders, LeverancierUserLink
 from hefs.sql_commands import SqlCommands
-from django.db import connection
 
 
 class VehHandler():

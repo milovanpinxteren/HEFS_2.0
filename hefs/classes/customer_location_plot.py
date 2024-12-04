@@ -6,6 +6,7 @@ from folium.plugins import HeatMap
 
 from hefs.models import Orders, ApiUrls
 
+
 class CustomerLocationPlot():
     def customer_location_plot(self, userid):
         organisations_to_show = ApiUrls.objects.get(user_id=userid).organisatieIDs

@@ -1,9 +1,6 @@
 # import opy as opy
-import folium
 import pandas as pd
-import pgeocode
-from django.db.models import Sum, Count, Avg
-from folium.plugins import HeatMap
+from django.db.models import Sum
 from plotly import express as px, offline as opy
 
 from hefs.models import Orders, AlgemeneInformatie, ApiUrls, Customers, JSONData

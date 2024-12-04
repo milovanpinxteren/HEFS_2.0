@@ -1,13 +1,12 @@
 from collections import defaultdict
-from decimal import Decimal
 
 from django.db import IntegrityError
-from django.db.models import Sum, F, FloatField, DecimalField
+from django.db.models import Sum, F
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from hefs.forms import HalfproductenIngredientenForm, ProductenHalfproductenForm
-from hefs.models import ApiUrls, Halfproducten, Ingredienten, HalfproductenIngredienten, Productinfo, \
+from hefs.models import Halfproducten, Ingredienten, HalfproductenIngredienten, Productinfo, \
     ProductenHalfproducts, PickItems, ProductenIngredienten
 
 

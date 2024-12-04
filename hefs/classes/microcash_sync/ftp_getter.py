@@ -2,16 +2,15 @@ import os
 import tempfile
 from ftplib import FTP
 
+from django.conf import settings
+
 from hefs.classes.error_handler import ErrorHandler
 from hefs.classes.microcash_sync.file_comparer import FileComparer
-from hefs.classes.shopify.inventory_updater import InventoryUpdater
 from hefs.classes.shopify.info_getter import InfoGetter
+from hefs.classes.shopify.inventory_updater import InventoryUpdater
 from hefs.classes.shopify.product_checker import ProductChecker
 from hefs.classes.shopify.product_maker import ProductMaker
 from hefs.classes.shopify.product_updater import ProductUpdater
-
-from django.conf import settings
-
 from hefs.models import AlgemeneInformatie
 
 

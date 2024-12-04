@@ -1,7 +1,9 @@
 import random
+
 from django.contrib.auth.models import User
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
+
 
 #############################################Choices below###############################################################
 class MeasurementUnit(models.TextChoices):

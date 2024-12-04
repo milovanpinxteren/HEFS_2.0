@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
+
 import googlemaps
 from django.conf import settings
-from datetime import datetime, timedelta
 
 
 class ArrivalTimeCalculator:

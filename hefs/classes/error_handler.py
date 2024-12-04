@@ -1,6 +1,8 @@
-from hefs.models import ErrorLogDataGerijptebieren
-from datetime import datetime
 import warnings
+from datetime import datetime
+
+from hefs.models import ErrorLogDataGerijptebieren
+
 
 class ErrorHandler():
     def log_error(self, message):

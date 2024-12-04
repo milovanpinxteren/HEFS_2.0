@@ -1,12 +1,3 @@
-import time
-
-import requests
-from django.conf import settings
-
-from hefs.classes.gerijptebieren import error_handler
-from hefs.classes.gerijptebieren.error_handler import ErrorHandler
-from hefs.classes.gerijptebieren.product_creator import ProductCreator
-from hefs.classes.gerijptebieren.product_updater import ProductUpdater
 from hefs.classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
 from hefs.classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 

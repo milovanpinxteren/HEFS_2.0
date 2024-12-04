@@ -1,5 +1,5 @@
 import json
-import requests
+
 from django.conf import settings
 
 from hefs.classes.error_handler import ErrorHandler
