@@ -4,6 +4,9 @@ from hefs.models import Orders, Vehicle, DistanceMatrix, Route, Stop, VerzendOpt
 
 
 class RoutesGenerator():
+    def __init__(self):
+        print('init routes generator')
+
     def generate_routes(self, date_obj, date):
         print('generating routes')
         verzend_opties = VerzendOpties.objects.filter(verzenddatum=date,

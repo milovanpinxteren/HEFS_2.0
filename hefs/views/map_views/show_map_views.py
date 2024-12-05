@@ -59,7 +59,8 @@ def generate_stops_table(routes_queryset):
     for route in routes_queryset:
         for stop in route.stops.order_by("sequence_number"):
             order = stop.order
-            stops_table[route.name].append({
+            route_info = route.name + ' op ' + route.date.strftime('%d-%m') + ' ID: ' + str(route.id) + ' || voertuig: ' + str(route.vehicle)
+            stops_table[route_info].append({
                 "sequence": stop.sequence_number,
                 "conversieID": order.conversieID,
                 "address": f"{order.straatnaam or ''} {order.huisnummer or ''}, {order.postcode or ''}, {order.plaats or ''}",
