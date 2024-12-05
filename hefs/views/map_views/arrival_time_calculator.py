@@ -3,10 +3,13 @@ from datetime import datetime, timedelta
 import googlemaps
 from django.conf import settings
 
+from hefs.classes.routingclasses.routes_generator import RoutesGenerator
+
 
 class ArrivalTimeCalculator:
     def __init__(self):
         self.gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        self.routes_generator = RoutesGenerator()
 
 
     def calculate_arrival_times(self, routes_queryset):
@@ -18,6 +21,11 @@ class ArrivalTimeCalculator:
 
         for route in routes_queryset:
             stops = route.stops.order_by("sequence_number")
+            coordinates_for_map_link = []
+            for stop in stops:
+                coordinates_for_map_link.append((float(stop.order.latitude), float(stop.order.longitude)))
+            maps_link = self.routes_generator.create_google_maps_link(coordinates_for_map_link)
+
             coordinates = [
                 f"{stop.order.latitude},{stop.order.longitude}" for stop in stops if
                 stop.order.latitude and stop.order.longitude
@@ -67,14 +75,21 @@ class ArrivalTimeCalculator:
                 duration = leg["duration"]["value"]  # Time in seconds
 
                 stop.arrival_time = arrival_time.time()
-                stop.departure_time = (arrival_time + timedelta(minutes=3)).time()
+                stop.departure_time = (arrival_time + timedelta(minutes=5)).time()
                 total_distance += distance
                 stop.save()
                 total_duration += duration
                 arrival_time += timedelta(seconds=duration)
 
+            if stops.exists():
+                last_stop = stops.last()
+                last_stop.arrival_time = arrival_time.time()
+                last_stop.departure_time = (arrival_time + timedelta(minutes=5)).time()
+                last_stop.save()
+
             route.total_distance = total_distance / 1000  # Convert to km
             route.total_travel_time = (route_date + timedelta(seconds=total_duration)).time()
+            route.google_maps_link = maps_link
             route.save()
 
         return

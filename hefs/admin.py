@@ -165,11 +165,22 @@ class VehicleAdmin(admin.ModelAdmin):
     search_fields = ['vehicle_number', 'user__username']
     list_filter = ['capacity', 'created_at']
 
+class StopInline(admin.TabularInline):
+    model = Stop
+    extra = 1  # Number of blank stops to display for addition
+    fields = ['order', 'sequence_number', 'arrival_time', 'departure_time', 'visited', 'notes']
+    ordering = ['sequence_number']  # Order stops by sequence_number
+    show_change_link = True  # Adds a link to edit stop details
+    autocomplete_fields = ['order']  # Enable search for the 'order' field
+
+
 @admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
     list_display = ['name', 'vehicle', 'date', 'created_at']
     search_fields = ['name', 'vehicle__vehicle_number']
     list_filter = ['date', 'created_at']
+    inlines = [StopInline]  # Add stops inline in the route admin
+
 
 @admin.register(Stop)
 class StopAdmin(admin.ModelAdmin):
@@ -177,3 +188,4 @@ class StopAdmin(admin.ModelAdmin):
                     'departure_time', 'notes']
     search_fields = ['route__name', 'order__order_number']
     list_filter = ['route', 'sequence_number']
+    autocomplete_fields = ['order']  # Enable search for the 'order' field
