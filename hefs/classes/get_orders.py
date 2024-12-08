@@ -1,3 +1,4 @@
+from hefs.apis.kerstdiner2024api import Kerstdiner2024API
 from hefs.models import ApiUrls
 
 

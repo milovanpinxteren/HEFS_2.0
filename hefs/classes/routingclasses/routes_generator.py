@@ -16,14 +16,18 @@ class RoutesGenerator():
             afleverdatum=date_obj, verzendoptie_id__in=verzend_opties
         ))  # Add depot to the list of orders
 
-        vehicles = Vehicle.objects.all()
+        vehicles = Vehicle.objects.filter(capacity__gt=0)
         distance_matrix = self.create_distance_matrix(orders)
         travel_time_matrix = self.create_travel_time_matrix(distance_matrix)
+
+        demands = [0 if order.pk == 99999 else max(1, int(order.orderprijs // 300) + 1)
+                        for order in orders]
+        print('total demand', sum(demands))
 
         data = {
             "distance_matrix": distance_matrix,
             "travel_times": travel_time_matrix,
-            "demands": [0 if order.pk == 99999 else int((order.orderprijs * 0)) + 1 for order in orders],
+            "demands": demands,
             "vehicle_capacities": [vehicle.capacity for vehicle in vehicles],
             "num_vehicles": vehicles.count(),
             "depot": 0,
@@ -32,6 +36,7 @@ class RoutesGenerator():
         # Base time: 6:00 AM as the starting reference for normalization
         # base_time = datetime.time(6, 0)  # Reference start time (6:00 AM)
         # base_seconds = base_time.hour * 3600 + base_time.minute * 60  # Convert base time to seconds
+
 
         data['time_windows'] = [
             (6 * 3600, 18 * 3600)  # Hub start time (6:00 AM to 6:00 AM)
@@ -76,7 +81,6 @@ class RoutesGenerator():
             from_node = manager.IndexToNode(from_index)
             return data['demands'][from_node]
 
-
         demand_callback_index = routing.RegisterUnaryTransitCallback(demand_callback)
         routing.AddDimensionWithVehicleCapacity(
             demand_callback_index, 10200, data["vehicle_capacities"], True, "Capacity"
@@ -117,15 +121,15 @@ class RoutesGenerator():
         search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
         search_parameters.time_limit.seconds = 340  # Allow more time to explore solutions
 
-        #Results:
-            # PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH = 2762.52 km
-            # AUTOMATIC + AUTOMATIC = 2813.94 km
-            # SAVINGS + TABU_SEARCH = no solution
-            # BEST_INSERTION + GUIDED_LOCAL_SEARCH = no solution
-            # PARALLEL_CHEAPEST_INSERTION + GUIDED_LOCAL_SEARCH = 2947.64 km
-            # CHRISTOFIDES + GUIDED_LOCAL_SEARCH = 2880.09 km
-            # CHRISTOFIDES + TABU_SEARCH = 2877.12 km
-            #PARALLEL_CHEAPEST_INSERTION + SIMULATED_ANNEALING
+        # Results:
+        # PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH = 2762.52 km
+        # AUTOMATIC + AUTOMATIC = 2813.94 km
+        # SAVINGS + TABU_SEARCH = no solution
+        # BEST_INSERTION + GUIDED_LOCAL_SEARCH = no solution
+        # PARALLEL_CHEAPEST_INSERTION + GUIDED_LOCAL_SEARCH = 2947.64 km
+        # CHRISTOFIDES + GUIDED_LOCAL_SEARCH = 2880.09 km
+        # CHRISTOFIDES + TABU_SEARCH = 2877.12 km
+        # PARALLEL_CHEAPEST_INSERTION + SIMULATED_ANNEALING
 
         solution = routing.SolveWithParameters(search_parameters)
 
@@ -199,7 +203,6 @@ class RoutesGenerator():
 
         # time_dimension = routing.GetDimensionOrDie("Time")
 
-
         # Clear old routes
         Route.objects.all().delete()
         Stop.objects.all().delete()
@@ -251,7 +254,6 @@ class RoutesGenerator():
 
         total_distance_km = total_distance / 1000.0
         print(f"Total distance across all routes: {total_distance_km:.2f} km")
-
 
     def create_google_maps_link(self, route_stops):
         """
