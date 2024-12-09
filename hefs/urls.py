@@ -49,5 +49,6 @@ urlpatterns = [
     path('generate_routes/', views.generate_routes, name='generate_routes'),
     path('calculate_arrival_times/', views.calculate_arrival_times, name='calculate_arrival_times'),
     path("map/", show_map_views.show_map, name="show_map"),
+    path('update-route-delay/<int:route_id>/', views.update_route_delay, name='update-route-delay'),
 
 ]

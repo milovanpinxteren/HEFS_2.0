@@ -1,8 +1,9 @@
 import datetime
+from datetime import datetime, timedelta
 
 from django.db.models import Count, Q
 from django.http import HttpResponse, FileResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django_rq import job
 
@@ -22,11 +23,12 @@ from hefs.classes.microcash_sync.webhook_handler import WebhookHandler
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from hefs.classes.routingclasses.coordinate_calculator import CoordinateCalculator
 from hefs.classes.routingclasses.distance_matrix_updater import DistanceMatrixUpdater
+from hefs.classes.routingclasses.route_shower import RouteShower
 from hefs.classes.routingclasses.routes_generator import RoutesGenerator
 from hefs.classes.veh_handler import VehHandler
 # from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
-from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route
+from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop
 from hefs.views.map_views.arrival_time_calculator import ArrivalTimeCalculator
 
 
@@ -41,6 +43,13 @@ def index(request):
                                                'prognosegetal_gourmet': context['prognosegetal_gourmet']})
             context['form'] = form
             return render(request, 'info_pages/veh.html', context)
+        elif request.user.groups.filter(name='chauffeur').exists():
+            route_shower = RouteShower()
+            route = Route.objects.filter(vehicle__user=request.user)
+            context = route_shower.prepare_route_showing(route)
+            # return render(request, 'map.html', context)
+
+            return render(request, 'info_pages/chauffeur_overzicht.html', context)
         return render(request, 'helpers/landingspage.html')
     except Exception as e:
         print('index exception')
@@ -310,9 +319,13 @@ def generate_routes(request):
         selected_date = request.GET["date"]
         date_obj = datetime.datetime.strptime(selected_date, "%Y-%m-%d").date()
 
+        # try:
         generator = RoutesGenerator()
         generator.generate_routes(date_obj, selected_date)
         return HttpResponse(f"<div>Routes generated for {selected_date}!</div>")
+        # except Exception as e:
+        #     return HttpResponse(f"<div><h3>Error: </h3>{e}</div>")
+
     else:
         return render(request, 'helpers/routespage.html')
 
@@ -337,6 +350,31 @@ def calculate_arrival_times(request):
     routes_queryset = Route.objects.filter(query).distinct().order_by('name')
     calculator.calculate_arrival_times(routes_queryset)
     return HttpResponse(f"<div>Updated arrival times for query: {query}</div>")
+
+@csrf_exempt
+def update_route_delay(request, route_id):
+    print('update', route_id)
+    if request.method == "POST":
+        delay = int(request.POST.get("delay", 0))  # Get delay from the form
+        route = get_object_or_404(Route, pk=route_id)
+        stops = Stop.objects.filter(route=route)
+
+        for stop in stops:
+            if stop.arrival_time:
+                arrival_time = stop.arrival_time
+                base_date = datetime.combine(datetime.today(), arrival_time)
+
+                # Add the delay
+                new_datetime = base_date + timedelta(minutes=delay)
+
+                # Update stop.arrival_time with the new time
+                stop.arrival_time = new_datetime.time()
+                stop.save()
+    #
+    #     # Return updated stops as JSON
+    #     updated_stops = list(stops.values("id", "sequence", "address", "arrival_time"))
+    #     return JsonResponse({"status": "success", "updated_stops": updated_stops})
+    return JsonResponse({"status": "error", "message": "Invalid request"})
 
 
 def orders_overview(request):

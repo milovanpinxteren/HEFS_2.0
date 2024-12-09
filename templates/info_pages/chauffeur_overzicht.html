@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Route pagina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script src="https://unpkg.com/htmx.org"></script>
+
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Container */
+        div {
+        {#padding: 20px;#}
+        }
+
+        /* Headings */
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #map-container {
+            max-width: 50%;
+        }
+
+
+        /* Responsive for Smaller Screens */
+        @media screen and (max-width: 768px) {
+            #map-container {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<h1>Route Overzicht</h1>
+<div>
+    <div id="map-container">
+        {{ map|safe }}
+    </div>
+    {% if stops_table %}
+        <h2>Route Stops</h2>
+        <h4><a href="{{ maps_link }}" target="_blank">Google Maps Link</a></h4>
+        <hr>
+        {% for route_name, stops in stops_table.items %}
+            <h3>Route: {{ route_name }}</h3>
+            <div>
+            <div id="route-stops-{{ stops.0.route_id }}"></div>
+
+                <form
+                        hx-post="{% url 'update-route-delay' route_id=stops.0.route_id %}"
+                        hx-target="#route-stops-{{ stops.0.route_id }}"
+                        hx-swap="innerHTML">
+                    <label for="delay-{{ stops.0.route_id }}">Vertraging (minuten):</label>
+                    <input type="number" id="delay-{{ stops.0.route_id }}" name="delay" placeholder="0"
+                           required>
+                    <button type="submit">Update Route tijden</button>
+                </form>
+            </div>
+            <table border="1">
+                <thead>
+                <tr>
+                    <th>Nr</th>
+                    <th>Conversie ID</th>
+                    <th>Adres</th>
+                    <th>Aankomst</th>
+                    {#                    <th>Departure Time</th>#}
+{#                    <th>Visited</th>#}
+                    <th>Notes</th>
+{#                    <th>Google Maps</th>#}
+                </tr>
+                </thead>
+                <tbody>
+                {% for stop in stops %}
+                    <tr>
+                        <td>{{ stop.sequence }}</td>
+                        <td>{{ stop.conversieID }}</td>
+                        <td>{{ stop.address }}</td>
+                        <td>{{ stop.arrival_time }}</td>
+                        {#                        <td>{{ stop.departure_time }}</td>#}
+{#                        <td>{{ stop.visited }}</td>#}
+{#                        <td>{{ stop.notes }}</td>#}
+                        {#                        <td>#}
+                        {#                            {% if stop.google_maps_link %}#}
+                        {#                                <a href="{{ stop.google_maps_link }}" target="_blank">View on Map</a>#}
+                        {#                            {% else %}#}
+                        {#                                N/A#}
+                        {#                            {% endif %}#}
+                        {#                        </td>#}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endif %}
+
+
+</div>
+</body>
+</html>

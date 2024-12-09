@@ -98,7 +98,7 @@ class RoutesGenerator():
         routing.AddDimension(
             time_callback_index,  # Index of the transit callback
             15200,  # Allow 1 hour of slack
-            12 * 3600,  # Maximum route time is 10 hours (6:00 AM to 4:00 PM)
+            24 * 3600,  # Maximum route time is 10 hours (6:00 AM to 4:00 PM)
             False,  # Don't force vehicles to return to depot
             "Time"
         )
@@ -116,10 +116,12 @@ class RoutesGenerator():
             time_dimension.CumulVar(start_index).SetRange(6 * 3600, 12 * 3600)  # Vehicles start at 6:00 AM
 
         # Solve
+        routing.SetFixedCostOfAllVehicles(900000)
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-        search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+        search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
         search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-        search_parameters.time_limit.seconds = 340  # Allow more time to explore solutions
+        search_parameters.time_limit.seconds = 240  # Allow more time to explore solutions
+        # search_parameters.log_search = True
 
         # Results:
         # PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH = 2762.52 km
@@ -148,8 +150,11 @@ class RoutesGenerator():
         for origin in orders:
             row = []
             for destination in orders:
-                distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
-                row.append(distance)
+                try:
+                    distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                    row.append(distance)
+                except Exception as e:
+                    print(e)
             matrix.append(row)
         return matrix
 
@@ -255,13 +260,33 @@ class RoutesGenerator():
         total_distance_km = total_distance / 1000.0
         print(f"Total distance across all routes: {total_distance_km:.2f} km")
 
+    # def create_google_maps_link(self, route_stops):
+    #     """
+    #     Create a Google Maps link for a route.
+    #     :param stops: List of (latitude, longitude) tuples for the stops.
+    #     :return: A Google Maps link as a string.
+    #     """
+    #     # stops = Stop.objects.filter(route=route)
+    #     base_url = "https://www.google.com/maps/dir/"
+    #     waypoints = "/".join([f"{lat},{lng}" for lat, lng in route_stops])
+    #     return base_url + waypoints
+
     def create_google_maps_link(self, route_stops):
         """
-        Create a Google Maps link for a route.
-        :param stops: List of (latitude, longitude) tuples for the stops.
-        :return: A Google Maps link as a string.
+        Create Google Maps links by splitting the route into smaller segments.
+        :param route_stops: List of (latitude, longitude) tuples for the stops.
+        :param max_waypoints: Maximum waypoints allowed in a single Google Maps link.
+        :return: A concatenated string of Google Maps links for storage.
         """
-        # stops = Stop.objects.filter(route=route)
+        max_waypoints = 23
         base_url = "https://www.google.com/maps/dir/"
-        waypoints = "/".join([f"{lat},{lng}" for lat, lng in route_stops])
-        return base_url + waypoints
+        links = []
+
+        for i in range(0, len(route_stops), max_waypoints):
+            segment_stops = route_stops[i:i + max_waypoints]
+            waypoints = "/".join([f"{lat},{lng}" for lat, lng in segment_stops])
+            links.append(base_url + waypoints)
+
+        # Combine all links into a single string for storage
+        return " | ".join(links)  # Use a delimiter to separate multiple links
+

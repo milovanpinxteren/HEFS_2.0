@@ -32,6 +32,7 @@ class Kerstdiner2024API:
                         email
                         updatedAt
                         discountCodes
+                        note
                         totalDiscountsSet {
                             shopMoney {
                                 amount
@@ -197,6 +198,6 @@ class Kerstdiner2024API:
                                              postadres_postcode=order['billingAddress']['zip'],
                                              postadres_plaats=order['billingAddress']['city'],
                                              postadres_land=order['billingAddress']['country'],
-                                             opmerkingen=order['customer']['note'])
+                                             opmerkingen=order['note'])
         except Exception as e:
             print('Adding to neworders error', e)
