@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -9,7 +10,6 @@ from hefs.models import Orders, Stop
 
 def index(request):
     return redirect('login')
-
 
 
 @csrf_exempt
@@ -30,12 +30,12 @@ def track_order(request):
                 return JsonResponse({"error": "Please provide either an orderID or email"}, status=400)
 
             if not order:
-                return JsonResponse({"error": "Order not found"}, status=404)
+                return JsonResponse({"error": "Bestelling niet gevonden"}, status=404)
 
             # Retrieve the related stop for the order
             stop = Stop.objects.filter(order=order).first()
             if not stop:
-                return JsonResponse({"error": "Stop not found for this order"}, status=404)
+                return JsonResponse({"error": "Bestelling niet gevonden"}, status=404)
 
             # Prepare the response data
             response_data = {
@@ -43,10 +43,13 @@ def track_order(request):
                 "email": order.emailadres,
                 "route_number": stop.route.id if stop.route else None,
                 # "sequence_number": stop.sequence_number,
-                "arrival_time": stop.arrival_time.strftime("%H:%M:%S") if stop.arrival_time else None,
+                "arrival_time": f"{(datetime.combine(datetime.today(), stop.arrival_time) - timedelta(minutes=30)).strftime('%H:%M')} - "
+                                f"{(datetime.combine(datetime.today(), stop.arrival_time) + timedelta(minutes=30)).strftime('%H:%M')}"
+                if stop.arrival_time else None,
                 # "departure_time": stop.departure_time.strftime("%H:%M:%S") if stop.departure_time else None,
                 # "visited": stop.visited,
                 # "notes": stop.notes,
+
             }
 
             return JsonResponse(response_data, status=200)
@@ -54,6 +57,7 @@ def track_order(request):
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON payload"}, status=400)
         except Exception as e:
+            print(e)
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid HTTP method"}, status=405)

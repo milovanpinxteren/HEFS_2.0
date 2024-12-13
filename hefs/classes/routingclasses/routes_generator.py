@@ -18,9 +18,11 @@ class RoutesGenerator():
 
         vehicles = Vehicle.objects.filter(capacity__gt=0)
         distance_matrix = self.create_distance_matrix(orders)
+        if distance_matrix is False:
+            return False
         travel_time_matrix = self.create_travel_time_matrix(distance_matrix)
 
-        demands = [0 if order.pk == 99999 else max(1, int(order.orderprijs // 300) + 1)
+        demands = [0 if order.pk in [99999, 99998, 99997] else max(1, int(order.orderprijs // 300) + 1)
                         for order in orders]
         print('total demand', sum(demands))
 
@@ -154,7 +156,17 @@ class RoutesGenerator():
                     distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
                     row.append(distance)
                 except Exception as e:
-                    print(e)
+                    if origin.conversieID == 99999:
+                        origin = Orders.objects.get(conversieID=origin.conversieID, afleverdatum=destination.afleverdatum)
+                        distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                        row.append(distance)
+                    elif destination.conversieID == 99999:
+                        destination = Orders.objects.get(conversieID=destination.conversieID, afleverdatum=origin.afleverdatum)
+                        distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                        row.append(distance)
+                    else:
+                        print(e)
+                        return False
             matrix.append(row)
         return matrix
 

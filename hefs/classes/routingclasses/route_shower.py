@@ -36,12 +36,13 @@ class RouteShower:
                 "arrival_time": stop.arrival_time.strftime("%H:%M") if stop.arrival_time else None,
                 "departure_time": stop.departure_time.strftime("%H:%M") if stop.departure_time else None,
                 "visited": stop.visited,
-                "notes": stop.notes or "",
+                "notes": (stop.notes or "") + (order.opmerkingen or ""),
                 # "google_maps_link": route.google_maps_link,
             })
+        maps_links = route.google_maps_link.split('|')  # Split the links
 
         map = self.map_maker.make_map(map_dict, 'routes')
-        context = {'map': map._repr_html_(), 'stops_table': dict(stops_table), 'maps_link': route.google_maps_link}
+        context = {'map': map._repr_html_(), 'stops_table': dict(stops_table), 'maps_links': maps_links}
 
 
         return context

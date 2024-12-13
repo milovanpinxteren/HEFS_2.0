@@ -64,17 +64,20 @@ class CalculateOrders():
 
     def make_product_extras(self, pickorderlines):
         print('MAKE PRODUCT EXTRAS')
-        product_extras_dict = {}
-        for product in pickorderlines:
-            productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
-            for productextra in productextras:
-                if productextra.extra_productnaam_id in product_extras_dict:
-                    product_extras_dict[productextra.extra_productnaam_id] += product.aantal
-                else:
-                    product_extras_dict[productextra.extra_productnaam_id] = product.aantal
-        order_id = pickorderlines[0].order_id
-        for key, value in product_extras_dict.items():
-            self.make_picks(key, value, order_id)
+        try:
+            product_extras_dict = {}
+            for product in pickorderlines:
+                productextras = Productextra.objects.filter(productnaam__productcode=product.productSKU)
+                for productextra in productextras:
+                    if productextra.extra_productnaam_id in product_extras_dict:
+                        product_extras_dict[productextra.extra_productnaam_id] += product.aantal
+                    else:
+                        product_extras_dict[productextra.extra_productnaam_id] = product.aantal
+            order_id = pickorderlines[0].order_id
+            for key, value in product_extras_dict.items():
+                self.make_picks(key, value, order_id)
+        except Exception as e:
+            print('make_product_extras_error', e)
 
 
     def make_order_extras(self, order):

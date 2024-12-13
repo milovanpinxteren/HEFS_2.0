@@ -317,12 +317,15 @@ def update_distance_matrix(request):
 def generate_routes(request):
     if "date" in request.GET:
         selected_date = request.GET["date"]
-        date_obj = datetime.datetime.strptime(selected_date, "%Y-%m-%d").date()
+        date_obj = datetime.strptime(selected_date, "%Y-%m-%d").date()
 
         # try:
         generator = RoutesGenerator()
-        generator.generate_routes(date_obj, selected_date)
-        return HttpResponse(f"<div>Routes generated for {selected_date}!</div>")
+        result = generator.generate_routes(date_obj, selected_date)
+        if result != False:
+            return HttpResponse(f"<div>Routes generated for {selected_date}!</div>")
+        else:
+            return HttpResponse(f"<div>Routes maken niet gelukt. Distance matrix niet compleet.</div>")
         # except Exception as e:
         #     return HttpResponse(f"<div><h3>Error: </h3>{e}</div>")
 
@@ -372,8 +375,8 @@ def update_route_delay(request, route_id):
                 stop.save()
     #
     #     # Return updated stops as JSON
-    #     updated_stops = list(stops.values("id", "sequence", "address", "arrival_time"))
-    #     return JsonResponse({"status": "success", "updated_stops": updated_stops})
+    #     updated_stops = list(stops.values("id", "sequence_number", "address", "arrival_time"))
+        return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error", "message": "Invalid request"})
 
 

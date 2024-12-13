@@ -45,18 +45,39 @@
 
 <body>
 <h1>Route Overzicht</h1>
+<div style="border: 5px solid green">
+<h2>Belangrijk!</h2>
+    <b><h3>Kijk goed hoeveel dozen je per locatie moet afgeven. Dit staat op de dozen aangegeven! 1/2 betekent doos 1 van de 2.
+        <br>Er zijn dan dus 2 dozen. Bij 1/3 zijn er 3 dozen. De andere dozen zijn aangegeven met 2/3 en 3/3</h3></b>
+<p>- Op de map zie je de route die je moet rijden <br>
+    - In de tabel onder aan de pagina zie je de stops incl adressen en eventuele notities. Lees de notities goed door.
+    <br>
+    - Je kan iedere stop handmatig invoeren in je navigatie, of op de google maps link drukken <br>
+    - Bij lange routes heb je meerdere google map links. De 2e gaat verder waar de 1e eindigt. <br>
+    - <b>Bij iedere stop/locatie:</b> <br>
+    - Kijk naar de aankomst. Als je later op bestemming bent, typ dan het aantal minuten vertraging in en klik op '<i>Update route tijden</i>'<br>
+    - Als je eerder op bestemming bent, typ dan - (minus) het aantal minuten in en druk op de knop. <br>
+    - <b>Dit wordt rechtstreeks aan de klant gecommuniceerd dus hou dit bij iedere stop bij!</b>
+
+
+</p>
+</div>
 <div>
     <div id="map-container">
         {{ map|safe }}
     </div>
     {% if stops_table %}
         <h2>Route Stops</h2>
-        <h4><a href="{{ maps_link }}" target="_blank">Google Maps Link</a></h4>
+        {#        <h4><a href="{{ maps_link }}" target="_blank">Google Maps Link</a></h4>#}
+        {% for link in maps_links %}
+            <h4><a href="{{ link }}" target="_blank">Google Maps Link {{ forloop.counter }}</a></h4>
+        {% endfor %}
+
         <hr>
         {% for route_name, stops in stops_table.items %}
             <h3>Route: {{ route_name }}</h3>
             <div>
-            <div id="route-stops-{{ stops.0.route_id }}"></div>
+                <div id="route-stops-{{ stops.0.route_id }}"></div>
 
                 <form
                         hx-post="{% url 'update-route-delay' route_id=stops.0.route_id %}"
@@ -76,9 +97,9 @@
                     <th>Adres</th>
                     <th>Aankomst</th>
                     {#                    <th>Departure Time</th>#}
-{#                    <th>Visited</th>#}
+                    {#                    <th>Visited</th>#}
                     <th>Notes</th>
-{#                    <th>Google Maps</th>#}
+                    {#                    <th>Google Maps</th>#}
                 </tr>
                 </thead>
                 <tbody>
@@ -88,9 +109,10 @@
                         <td>{{ stop.conversieID }}</td>
                         <td>{{ stop.address }}</td>
                         <td>{{ stop.arrival_time }}</td>
+                        <td>{{ stop.notes }}</td>
                         {#                        <td>{{ stop.departure_time }}</td>#}
-{#                        <td>{{ stop.visited }}</td>#}
-{#                        <td>{{ stop.notes }}</td>#}
+                        {#                        <td>{{ stop.visited }}</td>#}
+                        {#                        <td>{{ stop.notes }}</td>#}
                         {#                        <td>#}
                         {#                            {% if stop.google_maps_link %}#}
                         {#                                <a href="{{ stop.google_maps_link }}" target="_blank">View on Map</a>#}
