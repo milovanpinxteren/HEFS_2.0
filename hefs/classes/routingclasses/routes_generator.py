@@ -1,3 +1,4 @@
+from django.core.exceptions import MultipleObjectsReturned
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from hefs.models import Orders, Vehicle, DistanceMatrix, Route, Stop, VerzendOpties
@@ -155,18 +156,28 @@ class RoutesGenerator():
                 try:
                     distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
                     row.append(distance)
+                except MultipleObjectsReturned:
+                    distance = DistanceMatrix.objects.filter(origin=origin, destination=destination)[0].distance_meters
+                    row.append(distance)
                 except Exception as e:
-                    if origin.conversieID == 99999:
-                        origin = Orders.objects.get(conversieID=origin.conversieID, afleverdatum=destination.afleverdatum)
-                        distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                    try:
+                        if origin.conversieID == 99999:
+                            origin = Orders.objects.get(conversieID=origin.conversieID, afleverdatum=destination.afleverdatum)
+                            distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                            row.append(distance)
+                        elif destination.conversieID == 99999:
+                            destination = Orders.objects.get(conversieID=destination.conversieID, afleverdatum=origin.afleverdatum)
+                            distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                            row.append(distance)
+                        else:
+                            print(e)
+                            return False
+                    except MultipleObjectsReturned:
+                        distance = DistanceMatrix.objects.filter(origin=origin, destination=destination)[0].distance_meters
                         row.append(distance)
-                    elif destination.conversieID == 99999:
-                        destination = Orders.objects.get(conversieID=destination.conversieID, afleverdatum=origin.afleverdatum)
-                        distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
-                        row.append(distance)
-                    else:
-                        print(e)
-                        return False
+                    except DistanceMatrix.DoesNotExist:
+                        print('doesnt exist', origin, destination)
+
             matrix.append(row)
         return matrix
 

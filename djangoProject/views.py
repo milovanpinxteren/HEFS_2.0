@@ -46,10 +46,6 @@ def track_order(request):
                 "arrival_time": f"{(datetime.combine(datetime.today(), stop.arrival_time) - timedelta(minutes=30)).strftime('%H:%M')} - "
                                 f"{(datetime.combine(datetime.today(), stop.arrival_time) + timedelta(minutes=30)).strftime('%H:%M')}"
                 if stop.arrival_time else None,
-                # "departure_time": stop.departure_time.strftime("%H:%M:%S") if stop.departure_time else None,
-                # "visited": stop.visited,
-                # "notes": stop.notes,
-
             }
 
             return JsonResponse(response_data, status=200)
