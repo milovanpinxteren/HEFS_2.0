@@ -1,6 +1,7 @@
 from django.core.exceptions import MultipleObjectsReturned
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
-
+import googlemaps
+from django.conf import settings
 from hefs.models import Orders, Vehicle, DistanceMatrix, Route, Stop, VerzendOpties
 
 
@@ -149,6 +150,7 @@ class RoutesGenerator():
 
     def create_distance_matrix(self, orders):
         """Generate the distance matrix from the DistanceMatrix model."""
+        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
         matrix = []
         for origin in orders:
             row = []
@@ -177,6 +179,27 @@ class RoutesGenerator():
                         row.append(distance)
                     except DistanceMatrix.DoesNotExist:
                         print('doesnt exist', origin, destination)
+                        try:
+                            # Fetch the distance using Google Maps API
+                            gmaps_response = gmaps.distance_matrix(
+                                origins=[(origin.latitude, origin.longitude)],
+                                destinations=[(destination.latitude, destination.longitude)],
+                                mode="driving"
+                            )
+                            # Extract the distance in meters from the response
+                            distance = gmaps_response["rows"][0]["elements"][0]["distance"]["value"]
+
+                            # Save the new distance to the database
+                            DistanceMatrix.objects.create(
+                                origin=origin,
+                                destination=destination,
+                                distance_meters=distance
+                            )
+                            row.append(distance)
+                            print('created', origin, destination)
+                        except Exception as e:
+                            print(
+                                f"Error fetching distance from Google Maps for origin {origin.id} and destination {destination.id}: {e}")
 
             matrix.append(row)
         return matrix
