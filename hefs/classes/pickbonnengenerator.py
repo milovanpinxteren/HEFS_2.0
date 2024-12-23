@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from hefs.classes.pickbonnen import Pickbonnen
-from hefs.models import Orders, PickOrders, PickItems, AlgemeneInformatie
-
+from hefs.models import Orders, PickOrders, PickItems, AlgemeneInformatie, Stop
 
 import qrcode as qrcode
 
@@ -16,11 +15,11 @@ class PickbonnenGenerator:
         if begindatum != '' and einddatum != '' and routenr == '':
             begindate = datetime.strptime(begindatum, "%m/%d/%Y")
             enddate = datetime.strptime(einddatum, "%m/%d/%Y")
-            ordersqueryset = ordersqueryset.filter(afleverdatum__range=(begindate, enddate)).order_by('routenr')
+            ordersqueryset = ordersqueryset.filter(afleverdatum__range=(begindate, enddate)).order_by('stop__route__name', 'stop__sequence_number')
         elif begindatum != '' and einddatum != '' and routenr != '':
             begindate = datetime.strptime(begindatum, "%m/%d/%Y")
             enddate = datetime.strptime(einddatum, "%m/%d/%Y")
-            ordersqueryset = ordersqueryset.filter(afleverdatum__range=(begindate, enddate)).filter(routenr=routenr)
+            ordersqueryset = ordersqueryset.filter(afleverdatum__range=(begindate, enddate)).filter(stop__route__name=routenr).order_by('stop__route__name', 'stop__sequence_number')
         elif conversieID != '':
             ordersqueryset = ordersqueryset.filter(conversieID=conversieID)
         elif begindatum == '' and einddatum == '' and conversieID == '' and routenr == '':
@@ -28,16 +27,27 @@ class PickbonnenGenerator:
         pickbonnen = Pickbonnen()
         for order in ordersqueryset:
             naw = []
+            try:
+                route_name = Stop.objects.get(order=order).route.name
+            except Stop.DoesNotExist:
+                route_name = order.verzendoptie.verzendoptie  # Or handle the missing stop as needed
+            except Stop.MultipleObjectsReturned:
+                route_name = "Multiple Stops Found"  # Or handle appropriately
+
             if order.huisnummer != None:
                 naw.extend(
-                    [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, order.huisnummer, order.plaats, order.postcode, order.afleverdatum, order.routenr])
+                    [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, order.huisnummer, order.plaats, order.postcode, order.afleverdatum, route_name])
             else:
                 naw.extend(
-                    [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, '', order.plaats, order.postcode, order.afleverdatum, order.routenr])
+                    [order.conversieID, order.voornaam, order.achternaam, order.straatnaam, '', order.plaats, order.postcode, order.afleverdatum, route_name])
             pickbonnen.add_page()
             pickbonnen.naw_function(naw)
-            pick_order = PickOrders.objects.get(order=order)
-            pickqueryset = PickItems.objects.filter(pick_order=pick_order).order_by('product__pickvolgorde')
+            try:
+                pick_order = PickOrders.objects.get(order=order)
+                pickqueryset = PickItems.objects.filter(pick_order=pick_order).order_by('product__pickvolgorde')
+            except PickOrders.DoesNotExist:
+                print('pickorder does not exist', order.conversieID)
+                pickqueryset = []
             pickcount = 0
             qr_text = str(order.conversieID) + '\n'
             for pick in pickqueryset:
@@ -46,9 +56,9 @@ class PickbonnenGenerator:
                     pickcount += 1
                     qr_text += str(int(pick.hoeveelheid)) + '\t' + str(pick.product_id) + '\n'
             if order.huisnummer != None:
-                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   ' + 'Route ' + str(order.routenr) + '\n' + str(order.straatnaam) + ' ' + str(order.huisnummer) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
+                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   ' + 'Route ' + str(route_name) + '\n' + str(order.straatnaam) + ' ' + str(order.huisnummer) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
             else:
-                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   ' + 'Route ' + str(order.routenr) + '\n' + str(order.straatnaam) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
+                naw_qr_text = "[addr]" + '\n' + str(order.conversieID) + '   ' + 'Route ' + str(route_name) + '\n' + str(order.straatnaam) + '\n' + str(order.postcode) + ' ' + str(order.plaats) + '\n' + str(order.afleverdatum)
 
             naw_qr_code = qrcode.make(naw_qr_text)
             naw_qr_img = naw_qr_code.get_image()

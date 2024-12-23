@@ -28,6 +28,8 @@ class OrderInfoAdmin(admin.ModelAdmin):
 class OrderlineAdmin(admin.ModelAdmin):
     list_display = ["conversieID", 'product', 'productSKU', 'aantal']
     search_fields = ("order_id__conversieID__contains", "product__contains")
+    autocomplete_fields = ["order"]  # Enables search for the related 'order'
+
 
     def conversieID(self, obj):
         return obj.order.conversieID

@@ -10,7 +10,7 @@ class RouteShower:
     def prepare_route_showing(self, route):
         map_dict = defaultdict(list)
         stops_table = defaultdict(list)
-        route = route[0]
+        # route = route[0]
         vehicle = route.vehicle
         for stop in route.stops.order_by("sequence_number"):
             order = stop.order  # Assuming Orders has required fields

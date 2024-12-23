@@ -2,13 +2,21 @@ import fpdf
 
 
 class Pickbonnen(fpdf.FPDF):
+    # def __init__(self):
+    #     super().__init__()
+    #
+    #     self.add_font('DejaVu', '', 'DejaVu.ttf', uni=True)
+
+    def sanitize_text(self, text):
+        # Keep only characters in the ASCII range (supported by Helvetica)
+        return ''.join(c if ord(c) < 128 else '' for c in text)
 
     def footer(self):
         self.set_y(-15)
-        self.set_font('helvetica', 'B', 10)
+        self.set_font('Arial', 'B', 10)
         self.write(0,
                    'www.kerstdiner.nl         Vragen? Neem contact op via bestellen@kerstdiner.nl of in de chat op de website')
-        self.set_font('helvetica', 'B', 10)
+        self.set_font('Arial', 'B', 10)
 
     def klantcell(self, naw):
         self.image('hefs/static/images/kerstdiner.png', 2, 10, 30, 30)
@@ -18,7 +26,8 @@ class Pickbonnen(fpdf.FPDF):
         self.set_font('helvetica', '', 12)
         self.cell(32, 10)
         naw_string = f'{naw[1]} {naw[2]}\n{naw[3]} {naw[4]}\n{naw[5]} {naw[6]}\n{str(naw[7])}\nRoute: {str(naw[8])}'
-        self.multi_cell(100, 5, naw_string)
+        sanitized_text = self.sanitize_text(naw_string)
+        self.multi_cell(100, 5, sanitized_text)
         self.set_font('helvetica', 'B', 13)
         # self.cell(1, 3, 'Route: ' + str(naw[15]), ln=1)
 

@@ -45,7 +45,14 @@ def index(request):
             return render(request, 'info_pages/veh.html', context)
         elif request.user.groups.filter(name='chauffeur').exists():
             route_shower = RouteShower()
-            route = Route.objects.filter(vehicle__user=request.user)
+            # route = Route.objects.filter(vehicle__user=request.user)
+            routes = (
+                Route.objects.filter(vehicle__user=request.user)
+                .annotate(visited_stops=Count('stops', filter=Q(stops__visited=True)))  # Count visited stops
+                .filter(visited_stops=0)  # Only include routes with no visited stops
+                .order_by('date')  # Sort the queryset by date
+            )
+            route = routes[0]
             context = route_shower.prepare_route_showing(route)
             # return render(request, 'map.html', context)
 
@@ -182,15 +189,15 @@ def get_status(request):
 def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
-            get_new_orders(request.user.id)
-            add_orders()
+            # get_new_orders(request.user.id)
+            # add_orders()
             calculate_orders()
             request.session['status'] = '100'
         else:
             AlgemeneInformatie.objects.filter(naam='status').delete()
             AlgemeneInformatie.objects.create(naam='status', waarde=1)
-            get_new_orders.delay(request.user.id)
-            add_orders.delay()
+            # get_new_orders.delay(request.user.id)
+            # add_orders.delay()
             calculate_orders.delay()
             request.session['status'] = '100'
         return show_busy(request)
