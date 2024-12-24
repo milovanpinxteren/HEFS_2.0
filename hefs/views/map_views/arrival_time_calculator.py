@@ -86,8 +86,8 @@ class ArrivalTimeCalculator:
                         distance = leg["distance"]["value"]  # Distance in meters
                         duration = leg["duration"]["value"]  # Time in seconds
 
-                        stop.arrival_time = cumulative_arrival_time.time()
-                        stop.departure_time = (cumulative_arrival_time + timedelta(minutes=5)).time()
+                        stop.arrival_time = (cumulative_arrival_time + timedelta(minutes=5)).time()
+                        stop.departure_time = (cumulative_arrival_time + timedelta(minutes=10)).time()
                         stop.save()
 
                         total_distance += distance
