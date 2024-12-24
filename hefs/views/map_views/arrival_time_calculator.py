@@ -86,13 +86,13 @@ class ArrivalTimeCalculator:
                         distance = leg["distance"]["value"]  # Distance in meters
                         duration = leg["duration"]["value"]  # Time in seconds
 
-                        stop.arrival_time = (cumulative_arrival_time + timedelta(minutes=5)).time()
-                        stop.departure_time = (cumulative_arrival_time + timedelta(minutes=10)).time()
+                        stop.arrival_time = cumulative_arrival_time.time()
+                        stop.departure_time = (cumulative_arrival_time + timedelta(minutes=5)).time()
                         stop.save()
+                        cumulative_arrival_time += timedelta(seconds=duration) + timedelta(minutes=5)
 
                         total_distance += distance
                         total_duration += duration
-                        cumulative_arrival_time += timedelta(seconds=duration)
 
             else:
                 # Original logic for routes within the limit
@@ -117,7 +117,7 @@ class ArrivalTimeCalculator:
 
                     total_distance += distance
                     total_duration += duration
-                    cumulative_arrival_time += timedelta(seconds=duration)
+                    cumulative_arrival_time += timedelta(seconds=duration) + timedelta(minutes=5)
 
             if stops.exists():
                 last_stop = stops.last()
