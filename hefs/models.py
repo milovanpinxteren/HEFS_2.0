@@ -387,3 +387,16 @@ class JSONData(models.Model):
 class ErrorLogDataGerijptebieren(models.Model):
     error_message = models.CharField(max_length=300, default='', null=True)
     timestamp = models.DateTimeField(null=True, blank=True)
+
+
+class TerminalLinks(models.Model):
+    shop_id = models.CharField(max_length=255, unique=True)
+    user_id = models.CharField(max_length=255)
+    shop_domain = models.URLField(max_length=255, unique=True)
+    location_id = models.CharField(max_length=255, blank=True, null=True)
+    staff_member_id = models.CharField(max_length=255, blank=True, null=True)
+    terminal_id = models.CharField(max_length=255, blank=True, null=True)
+    api_key = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.shop_domain

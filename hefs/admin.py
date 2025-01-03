@@ -4,7 +4,7 @@ from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, Verpakk
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
     VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
     ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers, Leveranciers, \
-    Vehicle, Route, Stop
+    Vehicle, Route, Stop, TerminalLinks
 
 
 @admin.register(JSONData)
@@ -191,3 +191,8 @@ class StopAdmin(admin.ModelAdmin):
     search_fields = ['route__name', 'order__order_number']
     list_filter = ['route', 'sequence_number']
     autocomplete_fields = ['order']  # Enable search for the 'order' field
+
+@admin.register(TerminalLinks)
+class ShopAdmin(admin.ModelAdmin):
+    list_display = ('shop_id', 'user_id', 'shop_domain', 'location_id', 'staff_member_id', 'terminal_id')
+    search_fields = ('shop_id', 'shop_domain', 'user_id')
