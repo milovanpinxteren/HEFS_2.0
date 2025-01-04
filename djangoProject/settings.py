@@ -110,6 +110,18 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  # Or your database backend
+#         'NAME': 'hefs',  # Replace with production DB name
+#         'USER': 'postgres',  # Replace with production DB user
+#         'PASSWORD': '8b1a150ecb4aadfdbd70cbb27fe538a4',  # Replace with production DB password
+#         'HOST': '89.145.161.168',  # Replace with production DB host
+#         'PORT': '13755',           # Replace with production DB port
+#     }
+# }
+
+
 import dj_database_url
 
 db_from_env = dj_database_url.config()
@@ -196,5 +208,12 @@ CORS_ALLOWED_ORIGINS  = [
     'https://www.kerstdiner.nl',
     'https://kerstdiners.be',
     'https://www.kerstdiners.be',
-    'https://extensions.shopifycdn.com'
+    'https://extensions.shopifycdn.com',
+]
+
+from corsheaders.defaults import default_headers
+
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "Access-Control-Allow-Origin",
 ]
