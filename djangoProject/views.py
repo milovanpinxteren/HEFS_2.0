@@ -5,11 +5,44 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 
-from hefs.models import Orders, Stop
+from hefs.models import Orders, Stop, TerminalLinks
 
 
 def index(request):
     return redirect('login')
+
+@csrf_exempt
+def get_terminal_for_user(request):
+    if request.method == "GET":
+        # Extract query parameters
+        shop_id = request.GET.get("shopId")
+        user_id = request.GET.get("userId")
+        shop_domain = request.GET.get("shopDomain")
+        location_id = request.GET.get("locationId")
+        staff_member_id = request.GET.get("staffMemberId")
+        # Validate mandatory fields
+        if not shop_domain:
+            return JsonResponse({"success": False, "error": "shopDomain is required"}, status=400)
+
+        # Query the database for matching instances
+        matching_shops = TerminalLinks.objects.filter(shop_domain=shop_domain)
+        # Serialize the matching instances
+        data = [
+            {
+                "shop_id": shop.shop_id,
+                "user_id": shop.user_id,
+                "shop_domain": shop.shop_domain,
+                "location_id": shop.location_id,
+                "staff_member_id": shop.staff_member_id,
+                "terminal_id": shop.terminal_id,
+                "api_key": shop.api_key,
+            }
+            for shop in matching_shops
+        ]
+        print(data)
+        return JsonResponse({"success": True, "data": data}, status=200)
+    else:
+        return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
 
 
 @csrf_exempt

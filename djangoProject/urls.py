@@ -32,5 +32,7 @@ urlpatterns = [
                   path('show_change_password_page', ChangePasswordView.as_view(), name='show_change_password_page'),
                   path('change_password', ChangePasswordView.as_view(), name='change_password'),
                   path('track_order', views.track_order, name='track_order'),
+                  path('get_terminal_for_user', views.get_terminal_for_user, name='get_terminal_for_user'),
+
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

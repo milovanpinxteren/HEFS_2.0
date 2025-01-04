@@ -392,7 +392,7 @@ class ErrorLogDataGerijptebieren(models.Model):
 class TerminalLinks(models.Model):
     shop_id = models.CharField(max_length=255, unique=True)
     user_id = models.CharField(max_length=255)
-    shop_domain = models.URLField(max_length=255, unique=True)
+    shop_domain = models.CharField(max_length=255, unique=True)
     location_id = models.CharField(max_length=255, blank=True, null=True)
     staff_member_id = models.CharField(max_length=255, blank=True, null=True)
     terminal_id = models.CharField(max_length=255, blank=True, null=True)
