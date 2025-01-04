@@ -196,5 +196,5 @@ CORS_ALLOWED_ORIGINS  = [
     'https://www.kerstdiner.nl',
     'https://kerstdiners.be',
     'https://www.kerstdiners.be',
-    'https://extensions.shopifycdn.com/'
+    'https://extensions.shopifycdn.com'
 ]
