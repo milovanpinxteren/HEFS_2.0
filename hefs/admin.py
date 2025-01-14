@@ -4,7 +4,7 @@ from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, Verpakk
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
     VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
     ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers, Leveranciers, \
-    Vehicle, Route, Stop, TerminalLinks
+    Vehicle, Route, Stop, TerminalLinks, FeeProducts
 
 
 @admin.register(JSONData)
@@ -29,7 +29,6 @@ class OrderlineAdmin(admin.ModelAdmin):
     list_display = ["conversieID", 'product', 'productSKU', 'aantal']
     search_fields = ("order_id__conversieID__contains", "product__contains")
     autocomplete_fields = ["order"]  # Enables search for the related 'order'
-
 
     def conversieID(self, obj):
         return obj.order.conversieID
@@ -151,6 +150,7 @@ class AlgemeneInformatieAdmin(admin.ModelAdmin):
 class LeveranciersAdmin(admin.ModelAdmin):
     list_display = ['naam', 'emailadres']
 
+
 @admin.register(LeverancierUserLink)
 class LeverancierUserLinkAdmin(admin.ModelAdmin):
     list_display = ['user', 'leverancier']
@@ -161,11 +161,13 @@ class CustomersAdmin(admin.ModelAdmin):
     list_display = ['emailadres', 'achternaam', 'ordered_2020', 'ordered_2021', 'ordered_2022', 'ordered_2023',
                     'ordered_2024']
 
+
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
     list_display = ['user', 'vehicle_number', 'capacity', 'created_at']
     search_fields = ['vehicle_number', 'user__username']
     list_filter = ['capacity', 'created_at']
+
 
 class StopInline(admin.TabularInline):
     model = Stop
@@ -192,7 +194,13 @@ class StopAdmin(admin.ModelAdmin):
     list_filter = ['route', 'sequence_number']
     autocomplete_fields = ['order']  # Enable search for the 'order' field
 
+
 @admin.register(TerminalLinks)
 class ShopAdmin(admin.ModelAdmin):
     list_display = ('shop_id', 'user_id', 'shop_domain', 'location_id', 'staff_member_id', 'terminal_id')
     search_fields = ('shop_id', 'shop_domain', 'user_id')
+
+@admin.register(FeeProducts)
+class FeeProductsAdmin(admin.ModelAdmin):
+    list_display = ('shop_url', 'tag_name', 'fee_variant_id')
+    search_fields = ('shop_url', 'tag_name')

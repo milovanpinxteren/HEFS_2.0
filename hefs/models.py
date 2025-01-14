@@ -384,6 +384,9 @@ class JSONData(models.Model):
     key = models.CharField(max_length=25)
     value = models.JSONField()
 
+
+#############################################HOB/Gerijptebieren########################################################
+
 class ErrorLogDataGerijptebieren(models.Model):
     error_message = models.CharField(max_length=300, default='', null=True)
     timestamp = models.DateTimeField(null=True, blank=True)
@@ -400,3 +403,14 @@ class TerminalLinks(models.Model):
 
     def __str__(self):
         return self.shop_domain
+
+
+# class Products(models.Model):
+#     title = models.CharField(max_length=250, default='')
+#     description = models.CharField(max_length=5000, default='')
+#     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+class FeeProducts(models.Model):
+    shop_url = models.CharField(max_length=255, unique=True)
+    tag_name = models.CharField(max_length=255, unique=True)
+    fee_variant_id = models.CharField(max_length=255, unique=True)
