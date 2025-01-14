@@ -1,11 +1,13 @@
 import json
 from datetime import datetime, timedelta
 
+import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
-from hefs.models import Orders, Stop, TerminalLinks
+from hefs.models import Orders, Stop, TerminalLinks, FeeProducts
 
 
 def index(request):
@@ -26,6 +28,20 @@ def get_terminal_for_user(request):
 
         # Query the database for matching instances
         matching_shops = TerminalLinks.objects.filter(shop_domain=shop_domain)
+        if user_id:
+            matching_shops = matching_shops.filter(user_id=user_id)
+        if matching_shops.count() > 1 and location_id:
+            matching_shops = matching_shops.filter(location_id=location_id)
+        if matching_shops.count() > 1 and staff_member_id:
+            matching_shops = matching_shops.filter(staff_member_id=staff_member_id)
+        if matching_shops.count() > 1 and shop_id:
+            matching_shops = matching_shops.filter(shop_id=shop_id)
+
+        # Get the first match or return an error if no match found
+        shop = matching_shops.first()
+        if not shop:
+            return JsonResponse({"success": False, "error": "No matching terminal found"}, status=404)
+
         # Serialize the matching instances
         data = [
             {
@@ -43,6 +59,49 @@ def get_terminal_for_user(request):
         return JsonResponse({"success": True, "data": data}, status=200)
     else:
         return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
+
+
+def get_product_fees(request):
+    fees_to_add = []
+    if request.method == "GET":
+        product_id = request.GET.get("productId")
+        full_product_id = f'gid://shopify/Product/{product_id}'  # Replace with your actual product ID
+        SHOPIFY_STORE = "7c70bf.myshopify.com"
+        ACCESS_TOKEN = settings.HOB_ACCESS_TOKEN
+        query = """
+        query GetProductTags($id: ID!) {
+          product(id: $id) {
+            id
+            title
+            tags
+          }
+        }
+        """
+        variables = {
+            "id": full_product_id
+        }
+        url = f"https://{SHOPIFY_STORE}/admin/api/2023-10/graphql.json"
+        headers = {
+            "Content-Type": "application/json",
+            "X-Shopify-Access-Token": ACCESS_TOKEN,
+        }
+        # Make the request
+        response = requests.post(url, json={"query": query, "variables": variables}, headers=headers)
+        print(response)
+        if response.status_code == 200:
+            data = response.json()
+            product = data.get("data", {}).get("product", {})
+
+            if product:
+                tags = product["tags"]
+                for tag in tags:
+                    if 'atiegeld' in tag:
+                        print('tag', tag)
+                        fee_product = FeeProducts.objects.get(tag_name=tag)
+                        variant_id = fee_product.fee_variant_id
+                        fees_to_add.append(variant_id)
+    return JsonResponse(fees_to_add, safe=False, status=200)
+
 
 
 @csrf_exempt

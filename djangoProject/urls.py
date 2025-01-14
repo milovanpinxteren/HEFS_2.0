@@ -20,6 +20,7 @@ from django.urls import path, include
 
 from hefs.forms import CustomAuthenticationForm
 from hefs.views.auth_views import CustomLoginView, LogoutView, ChangePasswordView
+
 from . import views
 
 urlpatterns = [
@@ -33,6 +34,6 @@ urlpatterns = [
                   path('change_password', ChangePasswordView.as_view(), name='change_password'),
                   path('track_order', views.track_order, name='track_order'),
                   path('get_terminal_for_user', views.get_terminal_for_user, name='get_terminal_for_user'),
-
+                  path('get_product_fees', views.get_product_fees, name='get_product_fees'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
