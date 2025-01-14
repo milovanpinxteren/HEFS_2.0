@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 
 import requests
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -66,8 +67,10 @@ def get_product_fees(request):
     if request.method == "GET":
         product_id = request.GET.get("productId")
         full_product_id = f'gid://shopify/Product/{product_id}'  # Replace with your actual product ID
-        SHOPIFY_STORE = "7c70bf.myshopify.com"
-        ACCESS_TOKEN = settings.HOB_ACCESS_TOKEN
+        # SHOPIFY_STORE = "7c70bf.myshopify.com" #hOUSE OF BEERS
+        SHOPIFY_STORE = "quickstart-767e0b0d.myshopify.com" #FEEFLEX
+        # ACCESS_TOKEN = settings.HOB_ACCESS_TOKEN
+        ACCESS_TOKEN = settings.FEEFLEX_API_KEY
         query = """
         query GetProductTags($id: ID!) {
           product(id: $id) {
@@ -97,10 +100,13 @@ def get_product_fees(request):
                 for tag in tags:
                     if 'atiegeld' in tag:
                         print('tag', tag)
-                        fee_product = FeeProducts.objects.get(tag_name=tag)
-                        variant_id = fee_product.fee_variant_id
-                        fees_to_add.append(variant_id)
-    return JsonResponse(fees_to_add, safe=False, status=200)
+                        try:
+                            fee_product = FeeProducts.objects.get(tag_name=tag)
+                            variant_id = fee_product.fee_variant_id
+                            fees_to_add.append(variant_id)
+                        except ObjectDoesNotExist:
+                            return JsonResponse({'variantsToAdd': fees_to_add}, status=200)
+    return JsonResponse({'variantsToAdd': fees_to_add}, status=200)
 
 
 
