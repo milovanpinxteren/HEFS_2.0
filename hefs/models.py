@@ -393,11 +393,11 @@ class ErrorLogDataGerijptebieren(models.Model):
 
 
 class TerminalLinks(models.Model):
-    shop_id = models.CharField(max_length=255, unique=True)
+    shop_id = models.CharField(max_length=255)
     user_id = models.CharField(max_length=255)
-    shop_domain = models.CharField(max_length=255, unique=True)
+    shop_domain = models.CharField(max_length=255)
     location_id = models.CharField(max_length=255, blank=True, null=True)
-    staff_member_id = models.CharField(max_length=255, blank=True, null=True)
+    staff_member_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     terminal_id = models.CharField(max_length=255, blank=True, null=True)
     api_key = models.CharField(max_length=255, blank=True, null=True)
 
@@ -405,12 +405,7 @@ class TerminalLinks(models.Model):
         return self.shop_domain
 
 
-# class Products(models.Model):
-#     title = models.CharField(max_length=250, default='')
-#     description = models.CharField(max_length=5000, default='')
-#     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
 class FeeProducts(models.Model):
-    shop_url = models.CharField(max_length=255, unique=True)
+    shop_url = models.CharField(max_length=255)
     tag_name = models.CharField(max_length=255, unique=True)
-    fee_variant_id = models.CharField(max_length=255, unique=True)
+    fee_variant_id = models.CharField(max_length=255)
