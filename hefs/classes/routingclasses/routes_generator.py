@@ -1,3 +1,5 @@
+from math import radians, sin, cos, atan2, sqrt
+
 from django.core.exceptions import MultipleObjectsReturned
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 import googlemaps
@@ -11,6 +13,7 @@ class RoutesGenerator():
 
     def generate_routes(self, date_obj, date):
         print('generating routes')
+        self.route_datum = date
         verzend_opties = VerzendOpties.objects.filter(verzenddatum=date,
                                                       verzendoptie__icontains="Bezorging").values_list('id', flat=True)
         depot_order = Orders.objects.get(pk=99999)  # Fetch the depot order
@@ -102,7 +105,7 @@ class RoutesGenerator():
         routing.AddDimension(
             time_callback_index,  # Index of the transit callback
             15200,  # Allow 1 hour of slack
-            24 * 3600,  # Maximum route time is 10 hours (6:00 AM to 4:00 PM)
+            14 * 3600,  # Maximum route time is 10 hours (6:00 AM to 4:00 PM)
             False,  # Don't force vehicles to return to depot
             "Time"
         )
@@ -120,11 +123,11 @@ class RoutesGenerator():
             time_dimension.CumulVar(start_index).SetRange(6 * 3600, 12 * 3600)  # Vehicles start at 6:00 AM
 
         # Solve
-        routing.SetFixedCostOfAllVehicles(900000)
+        routing.SetFixedCostOfAllVehicles(5000)
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
         search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-        search_parameters.time_limit.seconds = 240  # Allow more time to explore solutions
+        search_parameters.time_limit.seconds = 450  # Allow more time to explore solutions
         # search_parameters.log_search = True
 
         # Results:
@@ -156,8 +159,10 @@ class RoutesGenerator():
             row = []
             for destination in orders:
                 try:
-                    distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
-                    row.append(distance)
+                    distance = self.haversine((origin.latitude, origin.longitude),
+                                              (destination.latitude, destination.longitude))
+                    # distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
+                    row.append(int(distance))
                 except MultipleObjectsReturned:
                     distance = DistanceMatrix.objects.filter(origin=origin, destination=destination)[0].distance_meters
                     row.append(distance)
@@ -172,54 +177,90 @@ class RoutesGenerator():
                             distance = DistanceMatrix.objects.get(origin=origin, destination=destination).distance_meters
                             row.append(distance)
                         else:
-                            print(e)
-                            return False
+                            print('DM exception: ', e)
+                            try:
+                                distance = DistanceMatrix.objects.get(origin=origin.conversieID,
+                                                                      destination=destination.conversieID).distance_meters
+                                row.append(distance)
+                            except Exception as e:
+                                try:
+                                    distance = self.haversine((origin.latitude, origin.longitude),
+                                                              (destination.latitude, destination.longitude))
+
+                                    # Fetch the distance using Google Maps API
+                                    # gmaps_response = gmaps.distance_matrix(
+                                    #     origins=[(origin.latitude, origin.longitude)],
+                                    #     destinations=[(destination.latitude, destination.longitude)],
+                                    #     mode="driving"
+                                    # )
+                                    # # Extract the distance in meters from the response
+                                    # distance = gmaps_response["rows"][0]["elements"][0]["distance"]["value"]
+
+                                    # Save the new distance to the database
+                                    # DistanceMatrix.objects.create(
+                                    #     origin=origin,
+                                    #     destination=destination,
+                                    #     distance_meters=distance
+                                    # )
+                                    row.append(distance)
+                                    print('created', origin, destination)
+                                except Exception as e:
+                                    print(
+                                        f"Error fetching distance from Google Maps for origin {origin.id} and destination {destination.id}: {e}")
+
+                            # return False
                     except MultipleObjectsReturned:
                         distance = DistanceMatrix.objects.filter(origin=origin, destination=destination)[0].distance_meters
                         row.append(distance)
                     except DistanceMatrix.DoesNotExist:
                         print('doesnt exist', origin, destination)
                         try:
-                            # Fetch the distance using Google Maps API
-                            gmaps_response = gmaps.distance_matrix(
-                                origins=[(origin.latitude, origin.longitude)],
-                                destinations=[(destination.latitude, destination.longitude)],
-                                mode="driving"
-                            )
-                            # Extract the distance in meters from the response
-                            distance = gmaps_response["rows"][0]["elements"][0]["distance"]["value"]
-
-                            # Save the new distance to the database
-                            DistanceMatrix.objects.create(
-                                origin=origin,
-                                destination=destination,
-                                distance_meters=distance
-                            )
+                            distance = DistanceMatrix.objects.filter(origin__conversieID=origin.conversieID, destination__conversieID=destination.conversieID)[0].distance_meters
                             row.append(distance)
-                            print('created', origin, destination)
                         except Exception as e:
-                            print(
-                                f"Error fetching distance from Google Maps for origin {origin.id} and destination {destination.id}: {e}")
+                            try:
+                                # Fetch the distance using Google Maps API
+                                # gmaps_response = gmaps.distance_matrix(
+                                #     origins=[(origin.latitude, origin.longitude)],
+                                #     destinations=[(destination.latitude, destination.longitude)],
+                                #     mode="driving"
+                                # )
+                                # # Extract the distance in meters from the response
+                                # distance = gmaps_response["rows"][0]["elements"][0]["distance"]["value"]
+
+                                distance = self.haversine((origin.latitude, origin.longitude), (destination.latitude, destination.longitude))
+
+                                # Save the new distance to the database
+                                # DistanceMatrix.objects.create(
+                                #     origin=origin,
+                                #     destination=destination,
+                                #     distance_meters=distance
+                                # )
+                                row.append(distance)
+                                print('created', origin, destination)
+                            except Exception as e:
+                                print(
+                                    f"Error fetching distance from Google Maps for origin {origin.id} and destination {destination.id}: {e}")
 
             matrix.append(row)
         return matrix
 
-    # def haversine(self, coord1, coord2):
-    #     """Calculate the Haversine distance between two points in meters."""
-    #     # Radius of the Earth in meters
-    #     R = 6371000.0
-    #
-    #     lat1, lon1 = radians(coord1[0]), radians(coord1[1])
-    #     lat2, lon2 = radians(coord2[0]), radians(coord2[1])
-    #
-    #     dlat = lat2 - lat1
-    #     dlon = lon2 - lon1
-    #
-    #     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    #     c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    #
-    #     distance = R * c
-    #     return distance
+    def haversine(self, coord1, coord2):
+        """Calculate the Haversine distance between two points in meters."""
+        # Radius of the Earth in meters
+        R = 6371000.0
+
+        lat1, lon1 = radians(coord1[0]), radians(coord1[1])
+        lat2, lon2 = radians(coord2[0]), radians(coord2[1])
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        distance = R * c
+        return distance * 1.3
     #
     # def create_distance_matrix(self, orders):
     #     """Generate the distance matrix based on Haversine distances in meters."""
@@ -255,8 +296,8 @@ class RoutesGenerator():
         # time_dimension = routing.GetDimensionOrDie("Time")
 
         # Clear old routes
-        Route.objects.all().delete()
-        Stop.objects.all().delete()
+        Route.objects.filter(date=self.route_datum).delete()
+        # Stop.objects.all().delete()
 
         total_distance = 0  # Initialize total distance across all routes
 
@@ -265,7 +306,7 @@ class RoutesGenerator():
             route_distance = 0  # Initialize total distance for the current route
             route_stops = []
             route = Route.objects.create(
-                name=f"Route {vehicle_id}", vehicle=vehicles[vehicle_id], date=date_obj
+                name=f"Route {self.route_datum}, {vehicle_id}", vehicle=vehicles[vehicle_id], date=date_obj
             )
             index = routing.Start(vehicle_id)
             sequence_number = 0

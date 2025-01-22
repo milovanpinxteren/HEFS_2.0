@@ -1,12 +1,12 @@
 import datetime
 from datetime import datetime, timedelta
 
-from django.db.models import Count, Q
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django_rq import job
 
+from hefs import models
 from hefs.apis.paasontbijt2024transacties import Paasontbijt2024Transacties
 from hefs.classes.add_orders import AddOrders
 from hefs.classes.calculate_orders import CalculateOrders
@@ -25,11 +25,15 @@ from hefs.classes.routingclasses.coordinate_calculator import CoordinateCalculat
 from hefs.classes.routingclasses.distance_matrix_updater import DistanceMatrixUpdater
 from hefs.classes.routingclasses.route_shower import RouteShower
 from hefs.classes.routingclasses.routes_generator import RoutesGenerator
+from hefs.classes.shopify_sync.sync_table_updater import SyncTableUpdater
 from hefs.classes.veh_handler import VehHandler
 # from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
 from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop
 from hefs.views.map_views.arrival_time_calculator import ArrivalTimeCalculator
+
+from django.db.models import Count, Q
+from datetime import date
 
 
 def index(request):
@@ -63,6 +67,7 @@ def index(request):
         context = {'error': True, 'ErrorMessage': e}
         return render(request, 'info_pages/veh.html', context)
 
+
 @csrf_exempt
 def recieve_webhook(request):
     headers = request.headers
@@ -78,37 +83,15 @@ def show_sync_page(request):
     return render(request, 'helpers/sync_page.html', context)
 
 
-
 def start_product_sync(request):
     print('start sync')
-    ftp_getter = FTPGetter()
-    ftp_getter.get_ftp_full_file()
-    # ftp_getter.get_ftp_changed_file()
-    # partner_websites = {'387f61-2.myshopify.com': settings.GEREIFTEBIERE_ACCESS_TOKEN}
-    # type = request.GET['type']
-    # if type == 'all_original_products':
-    #     products_on_original_checker = ProductsOnOriginalChecker()
-    #     all_products_list = products_on_original_checker.get_all_original_products()
-    #     for domain_name, token in partner_websites.items():
-    #         for product_set in all_products_list: #one product_set is 250 products
-    #             if request.environ.get('OS', '') == "Windows_NT":
-    #                 batch_sync_products(product_set, domain_name, token)
-    #             else:
-    #                 batch_sync_products(product_set, domain_name, token).delay()
-    # elif type == 'all_partner_products': #only 1 request per products, can be one task (unless more websites)
-    #     products_on_partners_checker = ProductsOnPartnersChecker()
-    #     if request.environ.get('OS', '') == "Windows_NT":
-    #         products_on_partners_checker.check_existment_on_original()
-    #     else:
-    #         products_on_partners_checker.check_existment_on_original().delay()
+    updater = SyncTableUpdater()
+    update = updater.start_full_sync()
+
 
     error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
     return render(request, 'helpers/sync_page.html', context)
-
-# @job
-# def batch_sync_products(product_set, domain_name, token):
-#     ProductsOnOriginalChecker().check_products_on_partner_sites(product_set, domain_name, token)  # for all products on original, checks if it exists on partner
 
 
 def show_veh(request):
@@ -146,12 +129,10 @@ def update_general_numbers(request):
 
 def show_customerinfo(request):
     # try:
-        userid = request.user.id
-        context = CustomerInfo().prepare_view(userid)
-        return render(request, 'info_pages/customerinfo.html', context)
-    # except Exception as e:
-    #     context = {'error': True, 'ErrorMessage': e}
-    #     return render(request, 'info_pages/customerinfo.html', context)
+    userid = request.user.id
+    context = CustomerInfo().prepare_view(userid)
+    return render(request, 'info_pages/customerinfo.html', context)
+
 
 
 def show_customerlocationplot(request):
@@ -181,6 +162,7 @@ def show_busy(request):
     context = {'status': status, 'number_of_orders': numer_of_orders}
     return render(request, 'helpers/waitingpage.html', context)
 
+
 def get_status(request):
     status = AlgemeneInformatie.objects.get(naam='status').waarde
     return JsonResponse({'status': status})
@@ -189,15 +171,15 @@ def get_status(request):
 def get_orders(request):
     if request.method == 'POST':
         if request.environ.get('OS', '') == "Windows_NT":
-            # get_new_orders(request.user.id)
-            # add_orders()
+            get_new_orders(request.user.id)
+            add_orders()
             calculate_orders()
             request.session['status'] = '100'
         else:
             AlgemeneInformatie.objects.filter(naam='status').delete()
             AlgemeneInformatie.objects.create(naam='status', waarde=1)
-            # get_new_orders.delay(request.user.id)
-            # add_orders.delay()
+            get_new_orders.delay(request.user.id)
+            add_orders.delay()
             calculate_orders.delay()
             request.session['status'] = '100'
         return show_busy(request)
@@ -224,7 +206,6 @@ def calculate_orders():
     CalculateOrders()
 
 
-
 @job
 def add_orders():
     AddOrders()
@@ -236,7 +217,6 @@ def pickbonnen_page(request):
     AlgemeneInformatie.objects.filter(naam='status').delete()
     AlgemeneInformatie.objects.create(naam='status', waarde=0)
     return render(request, 'info_pages/pickbonnenpage.html', context)
-
 
 
 def get_pickbonnen(request):
@@ -259,13 +239,16 @@ def get_pickbonnen(request):
     context = {'form': form}
     return render(request, 'info_pages/pickbonnenpage.html', context)
 
+
 @job
 def generate_pickbonnen(begindatum, einddatum, conversieID, routenr):
     PickbonnenGenerator(begindatum, einddatum, conversieID, routenr)
 
+
 def download_pickbonnen(request):
     response = FileResponse(open('pickbonnen.pdf', 'rb'), content_type='application/pdf', as_attachment=True)
     return response
+
 
 def financial_overview_page(request):
     try:
@@ -273,13 +256,20 @@ def financial_overview_page(request):
         financecalculator = FinanceCalculator()
 
         profit_table, total_ex_btw, total_incl_btw = financecalculator.calculate_profit_table(userid)
-        costs_table, total_costs_ex_btw, total_costs_incl_btw, costs_of_inkoop_dict = financecalculator.calculate_costs_table(userid)
-        revenue_table = financecalculator.calculate_revenue_table(total_ex_btw, total_incl_btw, total_costs_ex_btw, total_costs_incl_btw)
+        costs_table, total_costs_ex_btw, total_costs_incl_btw, costs_of_inkoop_dict = financecalculator.calculate_costs_table(
+            userid)
+        revenue_table = financecalculator.calculate_revenue_table(total_ex_btw, total_incl_btw, total_costs_ex_btw,
+                                                                  total_costs_incl_btw)
 
         table_for_prognose = profit_table.copy()
-        prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw = financecalculator.calculate_prognose_profit_table(table_for_prognose)
-        prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw = financecalculator.calculate_prognose_costs_table(costs_table)
-        prognose_revenue_table = financecalculator.calculate_prognose_revenue_table(prognose_sum_total_ex_btw, prognose_sum_total_incl_btw, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw)
+        prognose_profit_table, prognose_sum_total_ex_btw, prognose_sum_total_incl_btw = financecalculator.calculate_prognose_profit_table(
+            table_for_prognose)
+        prognose_cost_table, prognose_total_costs_ex_btw, prognose_total_costs_incl_btw = financecalculator.calculate_prognose_costs_table(
+            costs_table)
+        prognose_revenue_table = financecalculator.calculate_prognose_revenue_table(prognose_sum_total_ex_btw,
+                                                                                    prognose_sum_total_incl_btw,
+                                                                                    prognose_total_costs_ex_btw,
+                                                                                    prognose_total_costs_incl_btw)
 
         prognosegetal_diner = AlgemeneInformatie.objects.get(naam='prognosegetal_diner').waarde
         prognosegetal_brunch = AlgemeneInformatie.objects.get(naam='prognosegetal_brunch').waarde
@@ -316,10 +306,12 @@ def calculate_coordinates(request):
     calculator.calculate_coordinates()
     return render(request, 'helpers/routespage.html')
 
+
 def update_distance_matrix(request):
     updater = DistanceMatrixUpdater()
     updater.update_distances()
     return render(request, 'helpers/routespage.html')
+
 
 def generate_routes(request):
     if "date" in request.GET:
@@ -338,6 +330,7 @@ def generate_routes(request):
 
     else:
         return render(request, 'helpers/routespage.html')
+
 
 def copy_routes(request):
     # RouteCopier().copy_routes()
@@ -361,6 +354,7 @@ def calculate_arrival_times(request):
     calculator.calculate_arrival_times(routes_queryset)
     return HttpResponse(f"<div>Updated arrival times for query: {query}</div>")
 
+
 @csrf_exempt
 def update_route_delay(request, route_id):
     print('update', route_id)
@@ -380,9 +374,9 @@ def update_route_delay(request, route_id):
                 # Update stop.arrival_time with the new time
                 stop.arrival_time = new_datetime.time()
                 stop.save()
-    #
-    #     # Return updated stops as JSON
-    #     updated_stops = list(stops.values("id", "sequence_number", "address", "arrival_time"))
+        #
+        #     # Return updated stops as JSON
+        #     updated_stops = list(stops.values("id", "sequence_number", "address", "arrival_time"))
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error", "message": "Invalid request"})
 

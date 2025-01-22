@@ -3,7 +3,6 @@ import json
 from django.conf import settings
 
 from hefs.classes.error_handler import ErrorHandler
-from hefs.classes.microcash_sync.invoice_sender import InvoiceSender
 from hefs.classes.shopify.info_getter import InfoGetter
 
 
@@ -36,65 +35,9 @@ class WebhookHandler():
                                                                                             headers)
                         product['product_id'] = productid
                 try:
-                    xml_string = f"""
-                            <Order>
-                              <Reference>{json_body['name']}</Reference>
-                              <WebShop>House Of Beers</WebShop>
-                              <Naw>
-                                <Naam>{customer_name}</Naam>
-                                <Adres>{json_body['shipping_address']['address1']}</Adres>
-                                <Postcode>{json_body['shipping_address']['zip']}</Postcode>
-                                <Plaats>{json_body['shipping_address']['city']}</Plaats>
-                                <Email>{json_body['email']}</Email>
-                              </Naw>
-                              <Products>
-                        """
-                    for product in json_body['line_items']:
-                        if 'atiegeld' not in product['name']:
-                            xml_string += f"""
-                                <Product>
-                                  <Barcode>{product['product_id']}</Barcode>
-                                  <Amount>{product['fulfillable_quantity']}</Amount>
-                                  <Price>{product['price']}</Price>
-                                </Product>
-                                                """
-                    xml_string += """
-                          </Products>
-                          <Note></Note>
-                        </Order>
-                                """
-                    if len(json_body['line_items']) < 8:
-                        invoice_sender = InvoiceSender()
-                        invoice_sender.send_invoice(xml_string)
-                    else:
-                        self.error_handler.log_error(
-                            'Order te lang, voor ieder product 1 invoice aanmaken ' + json_body['name'])
-                        product_counter = 0
-                        for product in json_body['line_items']:
-                            if 'atiegeld' not in product['name']:
-                                product_counter += 1
-                                xml_string = f"""
-                                                            <Order>
-                                                              <Reference>{json_body['name'] + str(product_counter)}</Reference>
-                                                              <WebShop>House Of Beers</WebShop>
-                                                              <Naw>
-                                                                <Naam>{customer_name}</Naam>
-                                                                <Adres>{json_body['shipping_address']['address1']}</Adres>
-                                                                <Postcode>{json_body['shipping_address']['zip']}</Postcode>
-                                                                <Plaats>{json_body['shipping_address']['city']}</Plaats>
-                                                                <Email>{json_body['email']}</Email>
-                                                              </Naw>
-                                                              <Products>
-                                                                <Product>
-                                                                  <Barcode>{product['product_id']}</Barcode>
-                                                                  <Amount>{product['fulfillable_quantity']}</Amount>
-                                                                  <Price>{product['price']}</Price> 
-                                                                </Product>
-                                                              </Products>
-                                                              <Note></Note>
-                                                            </Order>
-                                                                """
-                                invoice_sender = InvoiceSender()
-                                invoice_sender.send_invoice(xml_string)
+                    print(json_body['line_items'])
+                    #TODO: update inventory in HOB
+
+
                 except Exception as e:
                     self.error_handler.log_error('Order verzenden mislukt:, ' + str(e))
