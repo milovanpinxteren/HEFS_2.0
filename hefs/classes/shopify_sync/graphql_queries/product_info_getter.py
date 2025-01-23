@@ -34,6 +34,9 @@ class ProductInfoGetter():
                       weight
                       weightUnit
                       inventoryManagement
+                      inventoryItem {
+                        id
+                        }
                     }
                   }
                 }

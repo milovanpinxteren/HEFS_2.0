@@ -77,16 +77,17 @@ class GraphQLProductCreator:
                 return None, 400
             else:
                 created_product = response_data["data"]["productCreate"]["product"]
-                print("Created Product:", created_product)
                 product_id = created_product["id"]
-                print(f"Product created successfully with ID: {product_id}")
-
                 # Extract images from the product data
                 images = product_data.get("images", [])
-
                 if images:
-                    print("Adding images to product...")
-                    self.add_images_to_product(product_id, images, domain_name, access_token)
+                    added_images = self.add_images_to_product(product_id, images, domain_name, access_token)
+                    if added_images:
+                        published = self.publish_product_to_all_channels(product_id, domain_name, access_token)
+                        if published:
+                            return True
+                        else:
+                            return False
                 else:
                     print("No images to add for this product.")
                 return created_product, 201
@@ -94,6 +95,7 @@ class GraphQLProductCreator:
             print("HTTP Error:", response.status_code, response.text)
             return None, response.status_code
 
+    #TODO: Publish to sales channels
 
     def add_images_to_product(self, product_id, images, domain_name, access_token):
         # GraphQL endpoint
@@ -149,7 +151,75 @@ class GraphQLProductCreator:
                 response_data = response.json()
                 if response_data.get("data", {}).get("productCreateMedia", {}).get("userErrors", []):
                     print("User Errors:", response_data["data"]["productCreateMedia"]["userErrors"])
+                    return False
                 else:
                     print("Image added:", response_data["data"]["productCreateMedia"]["media"])
+                    return True
             else:
                 print("HTTP Error:", response.status_code, response.text)
+                return False
+
+    def publish_product_to_all_channels(self, product_id, domain_name, access_token):
+        headers = {
+            "Content-Type": "application/json",
+            "X-Shopify-Access-Token": access_token
+        }
+
+        sales_channels_query = """
+         query {
+           publications(first: 100) {
+             edges {
+               node {
+                 id
+                 name
+               }
+             }
+           }
+         }
+         """
+        response = requests.post(domain_name, json={"query": sales_channels_query}, headers=headers)
+        response_data = response.json()
+
+        # Check for errors
+        if "errors" in response_data:
+            raise Exception(response_data["errors"])
+        #Publish it to all
+
+        channels = response_data["data"]["publications"]["edges"]
+
+        # Step 2: Publish product to all channels
+        mutation = """
+            mutation publishablePublish($id: ID!, $input: [PublicationInput!]!) {
+              publishablePublish(id: $id, input: $input) {
+                shop {
+                  publicationCount
+                }
+                userErrors {
+                  field
+                  message
+                }
+              }
+            }
+        """
+
+
+        for channel in channels:
+            publication_id = channel["node"]["id"]
+            variables = {
+                "id": product_id,
+                "input": {"publicationId": publication_id}
+            }
+            publish_response = requests.post(
+                domain_name,
+                json={"query": mutation, "variables": variables},
+                headers=headers
+            )
+            publish_data = publish_response.json()
+
+            # Handle errors in publishing
+            if publish_data.get("data", {}).get("publishablePublish", {}).get("userErrors"):
+                errors = publish_data["data"]["publishablePublish"]["userErrors"]
+                for error in errors:
+                    print(f"Error publishing to channel {channel['node']['name']}: {error['message']}")
+
+        return True

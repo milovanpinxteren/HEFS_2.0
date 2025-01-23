@@ -65,7 +65,7 @@ class SyncTableUpdater:
                 # Save updates if there are changes
                 if update_fields:
                     sync_info.save(update_fields=update_fields)
-        pass
+        return
 
     def update_geb_info(self):
         products_to_create = SyncInfo.objects.filter(Q(geb_id__isnull=True) | Q(geb_id=""))

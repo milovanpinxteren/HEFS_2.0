@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from hefs.classes.shopify.graphql_inventory_updater import GraphQLInventoryUpdater
+from hefs.classes.shopify.inventory_updater import InventoryUpdater
 from hefs.classes.shopify_sync.graphql_queries.get_product_from_handle import GetProductFromHandle
 from hefs.classes.shopify_sync.graphql_queries.product_info_getter import ProductInfoGetter
 from hefs.classes.shopify_sync.graphql_queries.product_creator import GraphQLProductCreator
@@ -11,6 +13,7 @@ class ProductCreator:
         self.access_token = settings.GERIJPTEBIEREN_ACCESS_TOKEN
         self.product_info_getter = ProductInfoGetter()
         self.product_creator = GraphQLProductCreator()
+        self.inventory_updater = GraphQLInventoryUpdater()
         return
 
 
@@ -28,12 +31,15 @@ class ProductCreator:
                 else:
                     print('price discrepancy')
             else: #product cannot be found on GEB
-                self.create_product(product)
+                created = self.create_product(product)
+                if created:
+                    print('product created')
+                else:
+                    raise Exception('product not created')
                 
-        pass
+        return
 
     def create_product(self, product):
         info = self.product_info_getter.get_product_info(product.hob_id)
-        print(info)
         created = self.product_creator.create_product_with_graphql(info, self.url_to_check, self.access_token)
-        pass
+        return created
