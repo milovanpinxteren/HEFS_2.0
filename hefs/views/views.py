@@ -87,8 +87,6 @@ def start_product_sync(request):
     print('start sync')
     updater = SyncTableUpdater()
     update = updater.start_full_sync()
-
-
     error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
     context = {'error_logs': error_logs}
     return render(request, 'helpers/sync_page.html', context)
