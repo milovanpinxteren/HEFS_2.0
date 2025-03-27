@@ -27,6 +27,7 @@ PAASONTBIJT_ACCESS_TOKEN = env('PAASONTBIJT_ACCESS_TOKEN')
 KERSTDINER_ACCESS_TOKEN = env('KERSTDINER_ACCESS_TOKEN')
 GOOGLE_MAPS_API_KEY = env('GOOGLE_MAPS_API_KEY')
 FEEFLEX_API_KEY = env('FEEFLEX_API_KEY')
+UNTAPPD_TOKEN = env('UNTAPPD_TOKEN')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +41,8 @@ SECRET_KEY = 'django-insecure-tzuj9rtn&b0&uyhh@8mqhd#%g338+9cicqittsu2#j8c=eopyb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hefs.89.145.161.168.sslip.io', '127.0.0.1', 'localhost', 'hefs.nl', 'www.hefs.nl', '89.145.161.168']
+ALLOWED_HOSTS = ['hefs.89.145.161.168.sslip.io', '127.0.0.1', 'localhost', 'hefs.nl', 'www.hefs.nl', '89.145.161.168',
+                 'gerijptebieren.nl', 'www.gerijptebieren.nl']
 
 # Application definition
 

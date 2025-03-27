@@ -17,6 +17,9 @@ class GetProductFromHandle:
                   id
                   title
                   price
+                    inventoryItem {
+                        id
+                    }                 
                 }
               }
             }

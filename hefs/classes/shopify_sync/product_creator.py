@@ -24,6 +24,7 @@ class ProductCreator:
                 if float(data['variants']['edges'][0]['node']['price']) == float(product.hob_price):
                     product.geb_id = data['id']
                     product.geb_variant_id = data['variants']['edges'][0]['node']['id']
+                    product.geb_inventory_id = data['variants']['edges'][0]['node']['inventoryItem']['id']
                     product.geb_product_title = data['title']
                     product.geb_product_handle = data['handle']
                     product.geb_price = data['variants']['edges'][0]['node']['price']

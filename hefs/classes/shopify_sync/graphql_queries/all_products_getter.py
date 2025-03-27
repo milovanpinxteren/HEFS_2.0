@@ -32,6 +32,9 @@ class AllProductsGetter:
                       price
                       compareAtPrice
                       taxable
+                      inventoryItem {
+                        id
+                        }
                     }
                   }
                 }

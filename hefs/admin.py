@@ -207,5 +207,5 @@ class FeeProductsAdmin(admin.ModelAdmin):
 
 @admin.register(SyncInfo)
 class SyncInfoAdmin(admin.ModelAdmin):
-    list_display = ('hob_product_title', 'hob_product_handle', 'geb_product_title', 'geb_product_handle', 'quantity')
-    search_fields = ('hob_product_title', 'geb_product_title')
+    list_display = ('hob_product_title', 'untappd_id', 'quantity')
+    search_fields = ['hob_product_title']

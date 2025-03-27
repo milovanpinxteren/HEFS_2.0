@@ -67,10 +67,10 @@ def get_product_fees(request):
     if request.method == "GET":
         product_id = request.GET.get("productId")
         full_product_id = f'gid://shopify/Product/{product_id}'  # Replace with your actual product ID
-        SHOPIFY_STORE = "7c70bf.myshopify.com" #HOUSE OF BEERS
-        # SHOPIFY_STORE = "quickstart-767e0b0d.myshopify.com" #FEEFLEX
-        ACCESS_TOKEN = settings.HOB_ACCESS_TOKEN
-        # ACCESS_TOKEN = settings.FEEFLEX_API_KEY
+        # SHOPIFY_STORE = "7c70bf.myshopify.com" #HOUSE OF BEERS
+        SHOPIFY_STORE = "quickstart-767e0b0d.myshopify.com" #FEEFLEX
+        # ACCESS_TOKEN = settings.HOB_ACCESS_TOKEN
+        ACCESS_TOKEN = settings.FEEFLEX_API_KEY
         query = """
         query GetProductTags($id: ID!) {
           product(id: $id) {

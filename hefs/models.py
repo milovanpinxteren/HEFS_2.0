@@ -414,16 +414,11 @@ class FeeProducts(models.Model):
 class SyncInfo(models.Model):
     hob_product_title = models.CharField(max_length=255)
     hob_product_handle = models.CharField(max_length=255)
-    hob_id = models.CharField(max_length=255) #global graphql id
+    hob_id = models.CharField(max_length=255, blank=True, null=True) #global graphql id
     hob_variant_id = models.CharField(max_length=255) #global graphql id
     hob_inventory_id = models.CharField(max_length=255, null=True)  # global graphql id
     hob_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in euros (€)", default=0)
-    geb_id = models.CharField(max_length=255) #global graphql id
-    geb_variant_id = models.CharField(max_length=255) #global graphql id
-    geb_inventory_id = models.CharField(max_length=255, null=True)  # global graphql id
-    geb_product_title = models.CharField(max_length=255)
-    geb_product_handle = models.CharField(max_length=255)
-    geb_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in euros (€)", default=0)
     quantity = models.IntegerField(default=0)
+    untappd_id = models.IntegerField(default=0, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
