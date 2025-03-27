@@ -81,16 +81,20 @@ class AllProductsGetter:
 
         while has_next_page:
             result = self.fetch_products(after_cursor)
-            products = result['data']['products']['edges']
-            page_info = result['data']['products']['pageInfo']
+            try:
+                products = result['data']['products']['edges']
+                page_info = result['data']['products']['pageInfo']
 
-            for product_edge in products:
-                product = product_edge['node']
-                all_products.append(product)
+                for product_edge in products:
+                    product = product_edge['node']
+                    all_products.append(product)
 
-            has_next_page = page_info['hasNextPage']
+                has_next_page = page_info['hasNextPage']
 
-            if has_next_page:
-                after_cursor = products[-1]['cursor']
+                if has_next_page:
+                    after_cursor = products[-1]['cursor']
+            except Exception as e:
+                print(f'Get all products exception: {e}')
+                print(f'result: {result}')
 
         return all_products
