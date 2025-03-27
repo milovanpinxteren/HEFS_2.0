@@ -19,7 +19,7 @@ from hefs.classes.get_orders import GetOrders
 # from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from hefs.classes.make_factuur_overview import MakeFactuurOverview
 from hefs.classes.microcash_sync.ftp_getter import FTPGetter
-from hefs.classes.microcash_sync.webhook_handler import WebhookHandler
+# from hefs.classes.microcash_sync.webhook_handler import WebhookHandler
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from hefs.classes.routingclasses.coordinate_calculator import CoordinateCalculator
 from hefs.classes.routingclasses.distance_matrix_updater import DistanceMatrixUpdater
@@ -70,10 +70,10 @@ def index(request):
 
 @csrf_exempt
 def recieve_webhook(request):
-    headers = request.headers
-    body = request.body
-    webhook_handler = WebhookHandler()
-    webhook_handler.handle_request(headers, body)
+    # headers = request.headers
+    # body = request.body
+    # webhook_handler = WebhookHandler()
+    # webhook_handler.handle_request(headers, body)
     return HttpResponse(status=200)
 
 

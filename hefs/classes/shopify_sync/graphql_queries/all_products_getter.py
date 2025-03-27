@@ -1,3 +1,5 @@
+import time
+
 import requests
 from django.conf import settings
 
@@ -80,6 +82,7 @@ class AllProductsGetter:
         all_products = []
 
         while has_next_page:
+            time.sleep(1)
             result = self.fetch_products(after_cursor)
             try:
                 products = result['data']['products']['edges']
