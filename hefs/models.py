@@ -420,5 +420,37 @@ class SyncInfo(models.Model):
     hob_price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in euros (€)", default=0)
     quantity = models.IntegerField(default=0)
     untappd_id = models.IntegerField(default=0, blank=True, null=True)
+    deposit_money = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tags = models.CharField(max_length=255, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class HobOrders(models.Model):
+    name = models.CharField(default=0)
+    shopifyID = models.CharField(max_length=255, default=0)
+    sales_channel = models.CharField(max_length=255, blank=True, null=True)
+    besteldatum = models.DateTimeField(null=True, blank=True)
+    verzendkosten = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
+    korting = models.IntegerField(default=0, null=True, blank=True)
+    orderprijs = models.DecimalField(default=0, null=True, blank=True, decimal_places=2, max_digits=6)
+    voornaam = models.CharField(max_length=250, null=True, blank=True)
+    achternaam = models.CharField(max_length=250, null=True, blank=True)
+    tussenvoegsel = models.CharField(max_length=250, null=True, blank=True)
+    emailadres = models.CharField(max_length=250, null=True, blank=True)
+    telefoonnummer = models.CharField(max_length=250, null=True, blank=True)
+    straatnaam = models.CharField(max_length=250, null=True, blank=True)
+    huisnummer = models.CharField(max_length=250, null=True, blank=True)
+    postcode = models.CharField(max_length=250, null=True, blank=True)
+    plaats = models.CharField(max_length=250, null=True, blank=True)
+    land = models.CharField(max_length=250, null=True, blank=True)
+    opmerkingen = models.CharField(max_length=2500, null=True, blank=True)
+
+
+class HobOrderProducts(models.Model):
+    hoborder = models.ForeignKey(HobOrders, on_delete=models.CASCADE, null=True, blank=True)
+    productname = models.CharField(max_length=250, null=True, blank=True)
+    productid = models.CharField(max_length=250, null=True, blank=True)
+    aantal = models.IntegerField(default=0, null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in euros (€)", default=0)
+    product_tags = models.TextField(null=True, blank=True)

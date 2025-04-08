@@ -4,7 +4,7 @@ from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, Verpakk
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
     VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
     ProductenIngredienten, VerpakkingsSoort, ProductenHalfproducts, LeverancierUserLink, Customers, Leveranciers, \
-    Vehicle, Route, Stop, TerminalLinks, FeeProducts, SyncInfo
+    Vehicle, Route, Stop, TerminalLinks, FeeProducts, SyncInfo, HobOrders, HobOrderProducts
 
 
 @admin.register(JSONData)
@@ -209,3 +209,13 @@ class FeeProductsAdmin(admin.ModelAdmin):
 class SyncInfoAdmin(admin.ModelAdmin):
     list_display = ('hob_product_title', 'untappd_id', 'quantity')
     search_fields = ['hob_product_title']
+
+@admin.register(HobOrders)
+class HobOrders(admin.ModelAdmin):
+    list_display = ('name', 'sales_channel', 'besteldatum')
+    search_fields = ['name']
+
+@admin.register(HobOrderProducts)
+class HobOrderProducts(admin.ModelAdmin):
+    list_display = ('hoborder', 'productname', 'aantal', 'price')
+    search_fields = ['hoborder__name']

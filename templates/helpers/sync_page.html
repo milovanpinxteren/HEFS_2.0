@@ -6,19 +6,56 @@
     <title>Gerijptebieren sync pagina</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 </head>
 <body>
+</script>
+<script>
+    function ExportToExcel(type, fn, dl) {
+        var elt = document.getElementById('ordersTable');
+        var wb = XLSX.utils.table_to_book(elt, {sheet: "sheet1"});
+        return dl ?
+            XLSX.write(wb, {bookType: type, bookSST: true, type: 'base64'}) :
+            XLSX.writeFile(wb, fn || ('overzicht-orders.' + (type || 'xlsx')));
+    }
+</script>
+
 {% include "helpers/navbar.html" %}
 <h1 class="page-title">Gerijptebieren sync pagina</h1>
-    <a class="button-48" href="{% url 'start_product_sync' %}?type=all_original_products">Check of alle producten en aantallen op Gerijptebieren kloppen op partners</a>
-    <a class="button-48" href="{% url 'start_product_sync' %}?type=all_partner_products">Check of alle producten op partners nog bestaan op Gerijptebieren</a>
+{#<a class="button-48" href="{% url 'start_product_sync' %}?type=all_original_products">Check of alle producten en#}
+{#    aantallen op Gerijptebieren kloppen op partners</a>#}
 
 
-{% for errorlog in error_logs %}
-    <p>
-        {{ errorlog.timestamp }}: {{ errorlog.error_message }}
-    </p>
-{% endfor %}
+<form action="start_product_sync" method="post" enctype="multipart/form-data" autocomplete="off">
+    <div class="get-orders-div">
+        {% csrf_token %}
+            <button class="button-48" type="submit">Start sync</button>
+    </div>
+</form>
+
+
+
+{#<button class="button-48" onclick="ExportToExcel('xlsx')">Exporteer Orders naar Excel</button>#}
+
+{#<table border="1" cellspacing="0" cellpadding="5" id="ordersTable">#}
+{#    <thead>#}
+{#    <tr>#}
+{#        {% for header in headers %}#}
+{#            <th>{{ header }}</th>#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{#    </thead>#}
+{#    <tbody>#}
+{#    {% for row in rows %}#}
+{#        <tr>#}
+{#            {% for cell in row %}#}
+{#                <td>{{ cell }}</td>#}
+{#            {% endfor %}#}
+{#        </tr>#}
+{#    {% endfor %}#}
+{#    </tbody>#}
+{#</table>#}
 </body>
 
 

@@ -14,12 +14,8 @@ from hefs.classes.customer_info import CustomerInfo
 from hefs.classes.customer_location_plot import CustomerLocationPlot
 from hefs.classes.financecalculator import FinanceCalculator
 from hefs.classes.get_orders import GetOrders
-# from .classes.gerijptebieren.product_syncer import ProductSyncer
-# from .classes.gerijptebieren.products_on_original_checker import ProductsOnOriginalChecker
-# from .classes.gerijptebieren.products_on_partners_checker import ProductsOnPartnersChecker
 from hefs.classes.make_factuur_overview import MakeFactuurOverview
 from hefs.classes.microcash_sync.ftp_getter import FTPGetter
-# from hefs.classes.microcash_sync.webhook_handler import WebhookHandler
 from hefs.classes.pickbonnengenerator import PickbonnenGenerator
 from hefs.classes.routingclasses.coordinate_calculator import CoordinateCalculator
 from hefs.classes.routingclasses.distance_matrix_updater import DistanceMatrixUpdater
@@ -27,14 +23,10 @@ from hefs.classes.routingclasses.route_shower import RouteShower
 from hefs.classes.routingclasses.routes_generator import RoutesGenerator
 from hefs.classes.shopify_sync.sync_table_updater import SyncTableUpdater
 from hefs.classes.veh_handler import VehHandler
-# from hefs.classes.gerijptebieren.webhook_handler import WebhookHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
-from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop
+from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop, HobOrderProducts
 from hefs.views.map_views.arrival_time_calculator import ArrivalTimeCalculator
-
 from django.db.models import Count, Q
-from datetime import date
-
 
 def index(request):
     try:
@@ -78,18 +70,28 @@ def recieve_webhook(request):
 
 
 def show_sync_page(request):
-    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
-    context = {'error_logs': error_logs}
-    return render(request, 'helpers/sync_page.html', context)
+    return render(request, 'helpers/sync_page.html')
 
 
 def start_product_sync(request):
+    if request.method == 'POST':
+        if request.environ.get('OS', '') == "Windows_NT":
+            sync_hob()
+            request.session['status'] = '100'
+        else:
+            AlgemeneInformatie.objects.filter(naam='status').delete()
+            AlgemeneInformatie.objects.create(naam='status', waarde=1)
+            sync_hob.delay()
+            request.session['status'] = '100'
+        return show_busy(request)
+    else:
+        if request.session['status'] == '100':
+            return show_veh(request)
+        return show_busy(request)
+
     print('start sync')
-    updater = SyncTableUpdater()
-    update = updater.start_full_sync()
-    error_logs = ErrorLogDataGerijptebieren.objects.all().order_by('-timestamp')
-    context = {'error_logs': error_logs}
-    return render(request, 'helpers/sync_page.html', context)
+
+    return HttpResponse("Sync voltooid")
 
 
 def show_veh(request):
@@ -130,7 +132,6 @@ def show_customerinfo(request):
     userid = request.user.id
     context = CustomerInfo().prepare_view(userid)
     return render(request, 'info_pages/customerinfo.html', context)
-
 
 
 def show_customerlocationplot(request):
@@ -207,6 +208,11 @@ def calculate_orders():
 @job
 def add_orders():
     AddOrders()
+
+@job
+def sync_hob():
+    updater = SyncTableUpdater()
+    updater.start_full_sync()
 
 
 def pickbonnen_page(request):

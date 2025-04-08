@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models import Q
 import re
 
+from hefs.apis.hobApi import HobAPI
 from hefs.classes.shopify.graphql_inventory_updater import GraphQLInventoryUpdater
 from hefs.classes.shopify_sync.graphql_queries.all_products_getter import AllProductsGetter
 from hefs.classes.shopify_sync.product_creator import ProductCreator
@@ -17,12 +18,15 @@ class SyncTableUpdater:
         self.all_product_getter = AllProductsGetter()
         self.product_creator = ProductCreator()
         self.inventory_updater = GraphQLInventoryUpdater()
+        self.hob_api = HobAPI()
         self.locations = {'7c70bf.myshopify.com': "gid://shopify/Location/89627787602", }
         print('updating table')
         return
 
     def start_full_sync(self):
         print('starting full sync')
+        self.hob_api.get_shopify_orders()
+
         # FLOW:
         # - Get all products from House of Beers
         all_products = self.all_product_getter.get_all_products()
