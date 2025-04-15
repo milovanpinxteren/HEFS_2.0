@@ -11,7 +11,7 @@ from hefs.models import Orders, NewOrders, VerzendOpties, AlgemeneInformatie, Ho
 class HobAPI:
     def __init__(self):
         HobOrders.objects.all().delete()
-        self.get_shopify_orders()
+        # self.get_shopify_orders()
 
     def get_shopify_orders(self):
         shopify_access_token = settings.HOB_ACCESS_TOKEN
@@ -137,7 +137,10 @@ class HobAPI:
                 self.handle_shopify_orders(orders)
 
                 # Pagination handling
-                page_info = data['data']['orders']['pageInfo']
+                try:
+                    page_info = data['data']['orders']['pageInfo']
+                except KeyError:
+                    print('api error', data)
                 if page_info['hasNextPage']:
                     variables['cursor'] = page_info['endCursor']
                 else:
