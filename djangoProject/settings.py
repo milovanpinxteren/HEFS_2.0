@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'mathfilters',
     'django_rq',
     'corsheaders',
-
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -205,7 +205,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.kerstdiners.be',
 ]
 
-CORS_ALLOWED_ORIGINS  = [
+CORS_ALLOWED_ORIGINS = [
     'https://d36867-2.myshopify.com',
     'https://kerstdiner.nl',
     'https://www.kerstdiner.nl',
@@ -215,7 +215,6 @@ CORS_ALLOWED_ORIGINS  = [
 ]
 
 from corsheaders.defaults import default_headers
-
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "Access-Control-Allow-Origin",

@@ -1,5 +1,6 @@
 from django.contrib import admin
-
+from import_export import resources
+from import_export.admin import ExportMixin
 from .models import Productinfo, Productextra, VerpakkingsMogelijkheden, VerpakkingsCombinaties, \
     VasteKosten, VariableKosten, PercentueleKosten, Gang, Orderextra, Orders, ApiUrls, AlgemeneInformatie, Orderline, \
     VerzendOpties, JSONData, Halfproducten, Ingredienten, HalfproductenIngredienten, AlreadyProduced, \
@@ -205,10 +206,21 @@ class FeeProductsAdmin(admin.ModelAdmin):
     list_display = ('shop_url', 'tag_name', 'fee_variant_id')
     search_fields = ('shop_url', 'tag_name')
 
-@admin.register(SyncInfo)
-class SyncInfoAdmin(admin.ModelAdmin):
+class SyncInfoResource(resources.ModelResource):
+    class Meta:
+        model = SyncInfo  # Specify the model
+        # Optionally, specify which fields to include/exclude
+        # fields = ('hob_product_title', 'untappd_id', 'quantity')  # Only export these fields
+        # exclude = ('created_at', 'updated_at')  # Exclude certain fields
+
+# Define the admin class for SyncInfo
+class SyncInfoAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('hob_product_title', 'untappd_id', 'quantity')
     search_fields = ['hob_product_title']
+    resource_class = SyncInfoResource  # Link the resource class for export functionality
+
+admin.site.register(SyncInfo, SyncInfoAdmin)
+
 
 @admin.register(HobOrders)
 class HobOrders(admin.ModelAdmin):
