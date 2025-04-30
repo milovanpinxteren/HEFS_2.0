@@ -72,3 +72,25 @@ h2, h3 {
     font-size: 1.2em;
     margin: 0;
 }
+
+.notification {
+    position: fixed;
+    top: 20px;  /* Adjust as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;  /* Green for success */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;  /* Space between notifications */
+    display: block;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.notification.error {
+    background-color: #dc3545;  /* Red for error */
+}
+
