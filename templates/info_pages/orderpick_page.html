@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/camera_stylesheet.css' %}"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Picking QR & Barcode Scanner</title>
+</head>
+<body>
+<div class="container">
+    <div id="camera-container">
+        <div id="reader" style="width: 100%; height: 50%;"></div>
+    </div>
+
+    <div id="scanned-list-container">
+        <table id="scanned-list">
+            <thead>
+            <tr>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Pick Order</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Ensure the script is loaded here -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+
+<script>
+    const productData = {
+        {% for product in productinfo %}
+            "{{ product.productID }}": {
+                "picknaam": "{{ product.picknaam }}",
+                "pickvolgorde": "{{ product.pickvolgorde }}"
+            },
+        {% endfor %}
+    };
+    console.log('productData: ', productData)
+    let isOrderImportant = false;  // Flag to track if order matters
+
+    // Make sure this code comes after the script tag above
+    let scannedCodes = []; // Array to store scanned codes
+    let currentPicklist = []; // Array to store the current picklist
+
+    function toggleOrderImportance() {
+        isOrderImportant = !isOrderImportant;
+    }
+
+    // Initialize the QR code and barcode scanner
+    const qrCodeScanner = new Html5QrcodeScanner("reader", {
+        fps: 10,  // Frames per second
+        qrbox: 250,  // Size of the scanning area
+        readers: ["qr_code_reader", "ean_reader", "upc_reader", "code_128_reader"]
+    });
+
+    // Render the scanner and handle scanned QR codes or barcodes
+    qrCodeScanner.render((scanResult) => {
+        const scannedCode = scanResult;
+
+        console.log("Scanned code:", scannedCode); // Log the scanned data
+
+        if (isPicklist(scannedCode)) {
+            handlePicklist(scannedCode);
+        } else {
+            handleProductCode(scannedCode);
+        }
+    });
+
+    function isPicklist(code) {
+        // A simple way to detect a picklist (can be expanded based on your needs)
+        return code.includes("\t") || code.includes(",") || code.includes(";");
+    }
+
+    function handlePicklist(code) {
+        const confirmStart = confirm("New list found, start this list?");
+        if (confirmStart) {
+            currentPicklist = [];
+            const rows = code.split("\n");  // Assuming the picklist is a multi-line string
+            rows.forEach(row => {
+                const parts = parsePicklistRow(row);
+                if (parts) {
+                    const [quantity, productCode] = parts;
+                    for (let i = 0; i < quantity; i++) {
+                        currentPicklist.push(productCode);  // Add product code multiple times based on quantity
+                    }
+                }
+            });
+            updateScannedList();
+        }
+    }
+
+    // Parse a picklist row to get quantity and product code
+    function parsePicklistRow(row) {
+        const separators = ['\t', ',', ';'];  // Define possible separators
+        for (const separator of separators) {
+            const parts = row.split(separator);
+            if (parts.length === 2) {
+                const quantity = parseInt(parts[0].trim(), 10);
+                const productCode = parts[1].trim();
+                if (!isNaN(quantity)) {
+                    return [quantity, productCode];
+                }
+            }
+        }
+        return null;  // If row can't be parsed, return null
+    }
+
+    // Example validation logic
+    function isValidCode(code) {
+        // In real use, replace this with actual validation (e.g., check if the product exists)
+        return code.startsWith("validProduct"); // Replace with your validation criteria
+    }
+
+    function updateScannedList() {
+        const listBody = document.getElementById('scanned-list').getElementsByTagName('tbody')[0];
+        listBody.innerHTML = '';  // Clear previous list
+        currentPicklist.forEach((code, index) => {
+            const product = productData[code];
+            if (product) {
+                const row = document.createElement('tr');
+                row.classList.add(index % 2 === 0 ? 'even' : 'odd');
+                row.innerHTML = `
+                        <td>${code}</td>
+                        <td>${product.picknaam}</td>
+                        <td>${product.pickvolgorde}</td>
+                    `;
+                listBody.appendChild(row);
+            }
+        });
+    }
+
+    // Handle a product code scan
+    function handleProductCode(code) {
+        const index = currentPicklist.indexOf(code);
+        if (index !== -1) {
+            currentPicklist.splice(index, 1);  // Remove the product code from the list
+            updateScannedList();
+            console.log("Product code " + code + " removed from the list.");
+        } else {
+            console.log("Product code " + code + " not found in the list.");
+        }
+    }
+</script>
+</body>
+</html>

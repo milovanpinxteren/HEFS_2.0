@@ -24,7 +24,8 @@ from hefs.classes.routingclasses.routes_generator import RoutesGenerator
 from hefs.classes.shopify_sync.sync_table_updater import SyncTableUpdater
 from hefs.classes.veh_handler import VehHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
-from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop, HobOrderProducts
+from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop, HobOrderProducts, \
+    Productinfo
 from hefs.views.map_views.arrival_time_calculator import ArrivalTimeCalculator
 from django.db.models import Count, Q
 
@@ -53,6 +54,10 @@ def index(request):
             # return render(request, 'map.html', context)
 
             return render(request, 'info_pages/chauffeur_overzicht.html', context)
+        elif request.user.groups.filter(name='orderpicker').exists():
+            productinfo = Productinfo.objects.all()
+            context = {'productinfo': productinfo}
+            return render(request, 'info_pages/orderpick_page.html', context)
         return render(request, 'helpers/landingspage.html')
     except Exception as e:
         print('index exception')
