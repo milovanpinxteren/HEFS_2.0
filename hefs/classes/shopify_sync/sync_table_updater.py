@@ -25,7 +25,7 @@ class SyncTableUpdater:
 
     def start_full_sync(self):
         print('starting full sync')
-        self.hob_api.get_shopify_orders()
+        # self.hob_api.get_shopify_orders()
 
         # FLOW:
         # - Get all products from House of Beers
@@ -45,7 +45,14 @@ class SyncTableUpdater:
             variant_id = product['variants']['edges'][0]['node']['id']
             inventory_id = product['variants']['edges'][0]['node']['inventoryItem']['id']
             variant_price = product['variants']['edges'][0]['node']['price']
-            # untappd_id = self.get_untappd(title)
+            statiegeld_value = 0
+            for tag in product['tags']:
+                if 'Statiegeld' in tag:
+                    # Use regular expression to find a number after 'Statiegeld'
+                    match = re.search(r'Statiegeld:\s*(\d+\.\d+)', tag)
+                    if match:
+                        statiegeld_value = float(match.group(1))
+
             sync_info, created = SyncInfo.objects.get_or_create(
                 hob_id=id,
                 defaults={
@@ -55,7 +62,7 @@ class SyncTableUpdater:
                     'hob_variant_id': variant_id,
                     'hob_inventory_id': inventory_id,
                     'hob_price': variant_price,
-                    # 'untappd_id': untappd_id,
+                    'deposit_money': statiegeld_value,
                 }
             )
 
@@ -69,6 +76,7 @@ class SyncTableUpdater:
                 sync_info.hob_variant_id = variant_id
                 sync_info.hob_inventory_id = inventory_id
                 sync_info.hob_price = variant_price
+                sync_info.deposit_money = statiegeld_value
 
                 # Only set untappd_id if it is currently None.
                 if sync_info.untappd_id is None:
