@@ -27,8 +27,6 @@ urlpatterns = [
     path('get_order_transactions', views.get_order_transactions, name='get_order_transactions'),
     path('get_status', views.get_status, name='get_status'),
     path('recieve_webhook', views.recieve_webhook, name='recieve_webhook'),
-    path('show_sync_page', views.show_sync_page, name='show_sync_page'),
-    path('start_product_sync', views.start_product_sync, name='start_product_sync'),
 
     path('handle_alterated_new_orders', views.handle_alterated_new_orders, name='handle_alterated_new_orders'),
 

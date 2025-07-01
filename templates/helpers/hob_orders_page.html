@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'hefs/stylesheet.css' %}"/>
+    <script src="https://unpkg.com/htmx.org@1.9.5"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+</head>
+<body>
+{% include "helpers/navbar.html" %}
+<h1 class="page-title">House of beers order pagina</h1>
+
+
+<form hx-post="{% url 'houseofbeers:show_taxes' %}"
+      hx-target="#tax-response"
+      hx-swap="innerHTML"
+      method="post"
+      enctype="multipart/form-data"
+      autocomplete="off">
+    <div class="get-orders-div">
+        {% csrf_token %}
+
+        <label for="begin_date">Begin Date:</label>
+        <input type="date" id="begin_date" name="begin_date">
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date">
+
+        <button class="button-48" type="submit">get tax info</button>
+    </div>
+</form>
+
+<!-- Where the response will be shown -->
+<div id="tax-response" class="response-div"></div>
+
+
+</body>
+</html>

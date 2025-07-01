@@ -26,7 +26,6 @@ class SyncTableUpdater:
     def start_full_sync(self):
         print('starting full sync')
         # self.hob_api.get_shopify_orders()
-
         # FLOW:
         # - Get all products from House of Beers
         all_products = self.all_product_getter.get_all_products()

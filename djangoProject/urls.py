@@ -26,6 +26,7 @@ from . import views
 urlpatterns = [
                   path('', views.index, name='index'),
                   path('hefs/', include('hefs.urls')),
+                  path('houseofbeers/', include('houseofbeers.urls')),
                   path('admin/', admin.site.urls),
                   path('login', CustomLoginView.as_view(template_name='login.html',
                                                         authentication_form=CustomAuthenticationForm), name='login'),

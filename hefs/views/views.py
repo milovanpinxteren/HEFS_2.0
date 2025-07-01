@@ -74,31 +74,6 @@ def recieve_webhook(request):
     return HttpResponse(status=200)
 
 
-def show_sync_page(request):
-    return render(request, 'helpers/sync_page.html')
-
-
-def start_product_sync(request):
-    if request.method == 'POST':
-        if request.environ.get('OS', '') == "Windows_NT":
-            sync_hob()
-            request.session['status'] = '100'
-        else:
-            AlgemeneInformatie.objects.filter(naam='status').delete()
-            AlgemeneInformatie.objects.create(naam='status', waarde=1)
-            sync_hob.delay()
-            request.session['status'] = '100'
-        return show_busy(request)
-    else:
-        if request.session['status'] == '100':
-            return show_veh(request)
-        return show_busy(request)
-
-    print('start sync')
-
-    return HttpResponse("Sync voltooid")
-
-
 def show_veh(request):
     try:
         organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
@@ -213,11 +188,6 @@ def calculate_orders():
 @job
 def add_orders():
     AddOrders()
-
-@job
-def sync_hob():
-    updater = SyncTableUpdater()
-    updater.start_full_sync()
 
 
 def pickbonnen_page(request):

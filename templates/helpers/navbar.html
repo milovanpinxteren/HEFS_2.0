@@ -75,7 +75,8 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href={% url 'show_sync_page' %}>Synchronisatie overzicht</a>
+                <a href={% url 'houseofbeers:show_sync_page' %}>Synchronisatie overzicht</a>
+                <a href={% url 'houseofbeers:show_hob_orders_page' %}>Orders overzicht</a>
             </div>
         </div>
     {% endif %}

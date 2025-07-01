@@ -439,3 +439,22 @@
     float: left;
     border: 1px solid black;
 }
+
+.channel-table-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.channel-tables-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.channel-table {
+    flex: 1;
+    min-width: 300px;
+}
