@@ -16,13 +16,11 @@ def get_shopify_orders(start_date, end_date):
             edges {
                 cursor
                 node {
-                    id
-                    name
-                    createdAt
-                    email
-                    updatedAt
-                    discountCodes
-                    note
+                    totalRefundedSet {
+                      shopMoney {
+                        amount
+                      }
+                    }
                     paymentGatewayNames
                     channelInformation {
                         channelDefinition {
@@ -30,22 +28,27 @@ def get_shopify_orders(start_date, end_date):
                             subChannelName
                         }
                     }
-                    totalDiscountsSet { shopMoney { amount } }
-                    subtotalPriceSet { shopMoney { amount } }
-                    totalPriceSet { shopMoney { amount } }
-                    shippingLine {
-                        code
-                        title
-                        originalPriceSet { shopMoney { amount } }
+                    currentSubtotalPriceSet { shopMoney { amount } }
+                    totalShippingPriceSet {
+                      shopMoney {
+                        amount
+                      }
                     }
-                    customer { note }
-                    lineItems(first: 150) {
+                    totalRefundedSet {
+                      shopMoney {
+                        amount
+                      }
+                    }
+                    lineItems(first: 100) {
                         edges {
                             node {
                                 id
                                 quantity
-                                fulfillableQuantity
-                                name
+                                discountedUnitPriceSet {
+                                  shopMoney {
+                                    amount
+                                  }
+                                }
                                 product {
                                     id
                                     tags
@@ -55,12 +58,6 @@ def get_shopify_orders(start_date, end_date):
                                 }
                             }
                         }
-                    }
-                    shippingAddress {
-                        firstName lastName address1 address2 phone city zip country
-                    }
-                    billingAddress {
-                        address1 address2 zip city country
                     }
                 }
             }
@@ -81,18 +78,44 @@ def get_shopify_orders(start_date, end_date):
     orders = []
 
     while True:
-        time.sleep(0.3)
         response = requests.post(
             url="https://7c70bf.myshopify.com/admin/api/2024-01/graphql.json",
             headers=headers,
-            json={"query": query, "variables": variables}
+            json={"query": query, "variables": variables},
+            timeout=30  # seconds
+
         )
 
         if response.status_code == 200:
             data = response.json()
+            if 'errors' in data:
+                error_messages = [error['message'] for error in data['errors']]
+                if any('Throttled' in msg for msg in error_messages):
+                    print("Throttled: waiting before retry...")
+                    time.sleep(1.3)  # Simple backoff, or dynamically calculate if needed
+                    continue  # Retry same request after waiting
+                else:
+                    print("API error:", data['errors'])
+                    break  # Stop on other errors
+            throttle_status = data.get('extensions', {}).get('cost', {}).get('throttleStatus', {})
+            available = throttle_status.get('currentlyAvailable', 1000)
+            restore_rate = throttle_status.get('restoreRate', 100)
+
+            if available < 500:
+                wait_time = (552 - available) / restore_rate
+                wait_time *= 0.4
+                print(f"Low capacity ({available} units). Waiting {round(wait_time, 2)} seconds...")
+                time.sleep(max(wait_time, 0.3))
+
             try:
                 orders_data = data['data']['orders']['edges']
-                orders.extend([edge['node'] for edge in orders_data])
+                for edge in orders_data:
+                    order = edge['node']
+                    # Exclude cancelled
+                    if order.get('cancelledAt') is not None:
+                        print('cancelled order')
+                        continue
+                    orders.append(order)
                 page_info = data['data']['orders']['pageInfo']
                 if page_info['hasNextPage']:
                     variables['cursor'] = page_info['endCursor']

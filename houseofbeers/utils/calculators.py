@@ -18,48 +18,60 @@ def group_orders_by_channel_and_tag(orders):
         , "Statiegeld: 0.20", "Statiegeld: 0.30", "Statiegeld: 0.40", "Statiegeld: 0.50"
     ]
     for order in orders:
-        channel = order.get("channelInformation", {}).get("channelDefinition", {}).get("channelName", "Unknown")
+        try:
+            channel = order.get("channelInformation", {}).get("channelDefinition", {}).get("channelName", "Unknown")
+        except AttributeError:
+            print('manual order, skipping')
+            continue
+
         line_items = order.get("lineItems", {}).get("edges", [])
         payments = order.get("paymentGatewayNames", [])
-        subtotal_str = order.get("subtotalPriceSet", {}).get("shopMoney", {}).get("amount", "0.00")
+        subtotal_str = order.get("currentSubtotalPriceSet", {}).get("shopMoney", {}).get("amount", "0.00")
+        shipping_str = order.get("totalShippingPriceSet", {}).get("shopMoney", {}).get("amount", "0.00")
+        refunded_str = order.get("totalRefundedSet", {}).get("shopMoney", {}).get("amount", "0.00")
+
+        try:
+            shipping = Decimal(shipping_str)
+        except (TypeError, InvalidOperation):
+            shipping = Decimal("0.00")
+
+        try:
+            refunded = Decimal(refunded_str)
+        except (TypeError, InvalidOperation):
+            refunded = Decimal("0.00")
         try:
             subtotal = Decimal(subtotal_str)
         except (TypeError, InvalidOperation):
             subtotal = Decimal("0.00")
+        order_revenue = subtotal + shipping - refunded
+
         for gateway in payments:
             entry = grouped_data[channel]["payments"][gateway]
             entry["count"] += 1
-            entry["total_revenue"] += subtotal
+            entry["total_revenue"] += order_revenue
 
         for item_edge in line_items:
             item = item_edge["node"]
             quantity = item.get("quantity", 0)
             product = item.get("product", {})
+            price = Decimal(item_edge["node"]["discountedUnitPriceSet"]["shopMoney"]["amount"])
             if product:
                 tags = product.get("tags", []) or ["Untagged"]
-            else:
-                print('No product in line item')
-
-            # Extract price
-            try:
-                price = Decimal(product["variants"]["edges"][0]["node"]["price"])
-            except (KeyError, IndexError, TypeError):
-                price = Decimal("0.00")
 
             for tag in tags:
+                if tag.startswith("Statiegeld:"):
+                    statiegeld_value = Decimal(tag.split(":")[1].strip())
+                    revenue = statiegeld_value * quantity
+                    entry = grouped_data[channel]["tags"]["Statiegeld"]
+                    entry["total_quantity"] += quantity
+                    entry["total_revenue"] += revenue
+                    continue
+
+
                 if tag not in relevant_tags:
                     continue
 
                 revenue = price * quantity
-
-                if tag.startswith("Statiegeld:"):
-                    try:
-                        statiegeld_value = Decimal(tag.split(":")[1].strip())
-                        revenue = statiegeld_value * quantity
-                    except (IndexError, InvalidOperation):
-                        # Fallback to normal revenue if statiegeld can't be parsed
-                        pass
-
                 entry = grouped_data[channel]["tags"][tag]
                 entry["total_quantity"] += quantity
                 entry["total_revenue"] += revenue
