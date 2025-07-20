@@ -70,9 +70,10 @@ def show_taxes(request):
             return HttpResponse("Start and end date are required", status=400)
 
         if request.environ.get('OS', '') == "Windows_NT":
-            fetch_and_group_shopify_orders(begin, end)
-            return render(request, "partials/tax_fetch_started.html", {
-                "job_id": 1
+            orders = get_shopify_orders(start_date=begin, end_date=end)
+            grouped_data = group_orders_by_channel_and_tag(orders)
+            return render(request, "partials/tax_results.html", {
+                "grouped_data": grouped_data
             })
         else:
             job = fetch_and_group_shopify_orders.delay(begin, end)  # Enqueue via .delay()
@@ -85,18 +86,4 @@ def show_taxes(request):
 
     return HttpResponse("Invalid request", status=400)
 
-# def show_taxes(request):
-#     print('showing taxes')
-#     if request.method == "POST":
-#         begin = request.POST.get('begin_date')
-#         end = request.POST.get('end_date')
-#         if not begin or not end:
-#             return HttpResponse("Start and end date are required", status=400)
-#
-#         orders = get_shopify_orders(start_date=begin, end_date=end)
-#         grouped_data = group_orders_by_channel_and_tag(orders)
-#         # Render as HTML
-#         return render(request, "partials/tax_results.html", {
-#             "grouped_data": grouped_data
-#         })
-#     return HttpResponse("Invalid request", status=400)
+

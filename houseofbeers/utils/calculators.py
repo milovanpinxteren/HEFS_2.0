@@ -44,37 +44,44 @@ def group_orders_by_channel_and_tag(orders):
         except (TypeError, InvalidOperation):
             subtotal = Decimal("0.00")
         order_revenue = subtotal + shipping - refunded
+        skip_tag_calculation = 'key_name' in payments
 
         for gateway in payments:
-            entry = grouped_data[channel]["payments"][gateway]
+            key_name = 'Test Payment' if gateway == 'paypal' else gateway
+            entry = grouped_data[channel]["payments"][key_name]
             entry["count"] += 1
             entry["total_revenue"] += order_revenue
 
-        for item_edge in line_items:
-            item = item_edge["node"]
-            quantity = item.get("quantity", 0)
-            product = item.get("product", {})
-            price = Decimal(item_edge["node"]["discountedUnitPriceSet"]["shopMoney"]["amount"])
-            if product:
-                tags = product.get("tags", []) or ["Untagged"]
+        if not skip_tag_calculation:
+            for item_edge in line_items:
+                item = item_edge["node"]
+                quantity = item.get("quantity", 0)
+                product = item.get("product", {})
+                price = Decimal(item_edge["node"]["discountedUnitPriceSet"]["shopMoney"]["amount"])
+                if product:
+                    tags = product.get("tags", []) or ["Untagged"]
+                else:
+                    tags = []
 
-            for tag in tags:
-                if tag.startswith("Statiegeld:"):
-                    statiegeld_value = Decimal(tag.split(":")[1].strip())
-                    revenue = statiegeld_value * quantity
-                    entry = grouped_data[channel]["tags"]["Statiegeld"]
+                for tag in tags:
+                    if tag.startswith("Statiegeld:"):
+                        statiegeld_value = Decimal(tag.split(":")[1].strip())
+                        revenue = statiegeld_value * quantity
+                        entry = grouped_data[channel]["tags"]["Statiegeld"]
+                        entry["total_quantity"] += quantity
+                        entry["total_revenue"] += revenue
+                        continue
+
+
+                    if tag not in relevant_tags:
+                        continue
+
+                    revenue = price * quantity
+                    entry = grouped_data[channel]["tags"][tag]
                     entry["total_quantity"] += quantity
                     entry["total_revenue"] += revenue
-                    continue
-
-
-                if tag not in relevant_tags:
-                    continue
-
-                revenue = price * quantity
-                entry = grouped_data[channel]["tags"][tag]
-                entry["total_quantity"] += quantity
-                entry["total_revenue"] += revenue
+        else:
+            print('skipping paypall order')
 
     return {
         channel: {
