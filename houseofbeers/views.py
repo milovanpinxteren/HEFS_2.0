@@ -59,7 +59,7 @@ def check_taxes_status(request, job_id):
     elif job.is_failed:
         return HttpResponse("The task failed. Please try again.", status=500)
     else:
-        return render(request, "partials/tax_fetch_started.html")  # Optional "loading" message
+        return render(request, "partials/tax_fetch_started.html", {"job_id": job_id})  # Optional "loading" message
 
 def show_taxes(request):
     print('showing taxes')
