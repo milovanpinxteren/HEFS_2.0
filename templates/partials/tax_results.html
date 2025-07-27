@@ -1,4 +1,60 @@
 <h1>TAX info</h1>
+<button onclick="exportAllTablesSideBySide()">Export All to Excel</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script>
+    function exportAllTablesSideBySide() {
+        const container = document.querySelector('.channel-table-container');
+        const wb = XLSX.utils.book_new();
+        const ws = {};
+
+        let startCol = 0; // Column where the next table will be placed
+        const sections = container.querySelectorAll('.channel-section');
+
+        sections.forEach((section) => {
+            const channelName = section.querySelector('h3')?.innerText || '';
+            const tableWrappers = section.querySelectorAll('.channel-table');
+
+            tableWrappers.forEach((wrapper) => {
+                const tableTitle = wrapper.querySelector('h4')?.innerText || '';
+                const table = wrapper.querySelector('table');
+
+                const rows = [];
+
+                // Add table title
+                rows.push([tableTitle]);
+
+                const trs = table.querySelectorAll('tr');
+                trs.forEach((tr) => {
+                    const cells = tr.querySelectorAll('th, td');
+                    const row = Array.from(cells).map(cell => {
+                        const text = cell.innerText.trim();
+
+                        // Try to parse numbers (including floats with comma or dot)
+                        const normalized = text.replace(',', '.'); // Handle "1.234,56" or "1234,56"
+                        const asNumber = parseFloat(normalized);
+
+                        // Return number if it's a valid number, else return original text
+                        return (!isNaN(asNumber) && isFinite(asNumber)) ? asNumber : text;
+                    });
+                    rows.push(row);
+                });
+
+
+                // Add the rows to worksheet at (0, startCol)
+                XLSX.utils.sheet_add_aoa(ws, rows, {origin: {r: 0, c: startCol}});
+
+                // Move startCol to the right of the widest table
+                const maxCols = Math.max(...rows.map(r => r.length));
+                startCol += maxCols + 2; // Add some spacing between tables
+            });
+        });
+
+        XLSX.utils.book_append_sheet(wb, ws, "TAX info");
+        XLSX.writeFile(wb, "TAX_info.xlsx");
+    }
+</script>
+
 
 <div class="channel-table-container">
     {% for channel, data in grouped_data.items %}
@@ -10,20 +66,20 @@
                     <h4>Betalingsmethoden</h4>
                     <table>
                         <thead class="table-head">
-                            <tr>
-                                <th class="table-heading">Methode</th>
-                                <th class="table-heading">Aantal</th>
-                                <th class="table-heading">Totale omzet (€)</th>
-                            </tr>
+                        <tr>
+                            <th class="table-heading">Methode</th>
+                            <th class="table-heading">Aantal</th>
+                            <th class="table-heading">Totale omzet (€)</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for method, info in data.payments.items %}
-                                <tr class="table-rows">
-                                    <td class="table-data">{{ method }}</td>
-                                    <td class="table-data">{{ info.count }}</td>
-                                    <td class="table-data">{{ info.total_revenue|floatformat:2 }}</td>
-                                </tr>
-                            {% endfor %}
+                        {% for method, info in data.payments.items %}
+                            <tr class="table-rows">
+                                <td class="table-data">{{ method }}</td>
+                                <td class="table-data">{{ info.count }}</td>
+                                <td class="table-data">{{ info.total_revenue|floatformat:2 }}</td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -32,20 +88,20 @@
                     <h4>Tags</h4>
                     <table>
                         <thead class="table-head">
-                            <tr>
-                                <th class="table-heading">Tag</th>
-                                <th class="table-heading">Aantal</th>
-                                <th class="table-heading">Totale omzet (€)</th>
-                            </tr>
+                        <tr>
+                            <th class="table-heading">Tag</th>
+                            <th class="table-heading">Aantal</th>
+                            <th class="table-heading">Totale omzet (€)</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for tag, metrics in data.tags.items %}
-                                <tr class="table-rows">
-                                    <td class="table-data">{{ tag }}</td>
-                                    <td class="table-data">{{ metrics.total_quantity }}</td>
-                                    <td class="table-data">{{ metrics.total_revenue|floatformat:2 }}</td>
-                                </tr>
-                            {% endfor %}
+                        {% for tag, metrics in data.tags.items %}
+                            <tr class="table-rows">
+                                <td class="table-data">{{ tag }}</td>
+                                <td class="table-data">{{ metrics.total_quantity }}</td>
+                                <td class="table-data">{{ metrics.total_revenue|floatformat:2 }}</td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
