@@ -86,11 +86,18 @@
                         <td class="table-data">{{ returning_customers_2022|div:customers_2022|mul:100|floatformat:2 }}</td>
                     </tr>
                     <tr class="table-rows">
-                        <td class="table-data">2023</td>
+{#                        <td class="table-data">2023</td>#}
+{#                        <td class="table-data">{{ customers_2023 }}</td>#}
+{#                        <td class="table-data">{{ customers_2023|mul:5.7|floatformat:0 }}</td>#}
+{#                        <td class="table-data">{{ returning_customers_2023 }}</td>#}
+{#                        <td class="table-data">{{ returning_customers_2023|div:customers_2023|mul:100|floatformat:2 }}</td>#}
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2024</td>
                         <td class="table-data">{{ aantal_orders }}</td>
                         <td class="table-data">{{ aantal_hoofdgerechten }}</td>
-                        <td class="table-data">{{ returning_customers_2023 }}</td>
-                        <td class="table-data">{{ returning_customers_2023|div:aantal_orders|mul:100|floatformat:2 }}</td>
+                        <td class="table-data">{{ returning_customers_2024 }}</td>
+                        <td class="table-data">{{ returning_customers_2024|div:aantal_orders|mul:100|floatformat:2 }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -125,6 +132,12 @@
                     </tr>
                     <tr class="table-rows">
                         <td class="table-data">2023</td>
+                        <td class="table-data">{{ customers_2023 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2023|floatformat:2 }}</td>
+                        <td class="table-data">{{ avg_orders_worth_2023|div:5.7|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-rows">
+                        <td class="table-data">2024</td>
                         <td class="table-data">{{ aantal_orders }}</td>
                         <td class="table-data">{{ gem_omzet_per_order|floatformat:2 }}</td>
                         {% if  personen_per_order != 0 %}
