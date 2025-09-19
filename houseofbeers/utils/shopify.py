@@ -51,8 +51,9 @@ def get_shopify_orders(start_date, end_date):
                                 }
                                 product {
                                     id
+                                    title
                                     tags
-                                    variants(first: 1) {
+                                    variants(first: 2) {
                                         edges { node { price } }
                                     }
                                 }
