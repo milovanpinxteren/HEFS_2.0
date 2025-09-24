@@ -22,7 +22,7 @@ class CustomerInfo():
             Orders.objects.filter(organisatieID__in=organisations_to_show).values_list('besteldatum'),
             columns=['besteldatum'])
         try:
-            df_dates['besteldatum'] = pd.to_datetime(df_dates['besteldatum']) - pd.DateOffset(years=1)
+            df_dates['besteldatum'] = pd.to_datetime(df_dates['besteldatum']) - pd.DateOffset(years=2) #increase the offset every year
             df_dates['Besteldatum'] = df_dates['besteldatum'].dt.strftime("%Y-%m-%d")
         except AttributeError:
             df_dates['Besteldatum'] = '2023-12-01'

@@ -592,7 +592,7 @@ places_array = [
     "Kraggenburg"
 ]
 # places_array = ['Vinkel']
-place = 'test'
+place = 'Vinkel'
 seo_teksten_array = [
     f"""
             Geniet van een onvergetelijk kerstdiner aan huis in {place}!
