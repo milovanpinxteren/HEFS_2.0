@@ -64,7 +64,7 @@ def group_orders_by_channel_and_tag(orders):
             entry["total_revenue"] += order_revenue
 
         if not added_gateway:
-            print(f'No gateway: {channel}')
+            print(f'No gateway: {channel} on order {order['id']}')
             entry = grouped_data[channel]["payments"]['No payment info']
             entry["count"] += 1
             entry["total_revenue"] += order_revenue

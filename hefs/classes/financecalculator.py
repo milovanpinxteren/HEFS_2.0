@@ -64,7 +64,7 @@ class FinanceCalculator():
             total_bereidingskosten_diner_incl_btw = float(
                 PickItems.objects.exclude(product__gang=7).annotate(
                     total_kosten=ExpressionWrapper(
-                        F('product__bereidingskosten') * F('product__btw') * F('hoeveelheid'),
+                        F('product__bereidingskosten') * F('hoeveelheid'),
                         output_field=DecimalField(max_digits=8, decimal_places=2)
                     )
                 ).aggregate(total_bereidingskosten=Sum('total_kosten'))['total_bereidingskosten'] or 0
@@ -82,7 +82,7 @@ class FinanceCalculator():
             total_bereidingskosten_brunch_incl_btw = float(
                 PickItems.objects.filter(product__gang=7).annotate(
                     total_kosten=ExpressionWrapper(
-                        F('product__bereidingskosten') * F('product__btw') * F('hoeveelheid'),
+                        F('product__bereidingskosten')* F('hoeveelheid'),
                         output_field=DecimalField(max_digits=8, decimal_places=2)
                     )
                 ).aggregate(total_bereidingskosten=Sum('total_kosten'))['total_bereidingskosten'] or 0

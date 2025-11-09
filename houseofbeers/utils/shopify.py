@@ -16,6 +16,7 @@ def get_shopify_orders(start_date, end_date):
             edges {
                 cursor
                 node {
+                    id
                     totalRefundedSet {
                       shopMoney {
                         amount
