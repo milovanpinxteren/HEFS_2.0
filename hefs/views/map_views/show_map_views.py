@@ -37,7 +37,7 @@ def show_map(request):
                 "sequence": stop.sequence_number,
                 "arrival_time": stop.arrival_time.strftime("%H:%M") if stop.arrival_time else None,
                 "departure_time": stop.departure_time.strftime("%H:%M") if stop.departure_time else None,
-                "visited": stop.visited,
+                "telephone_number": stop.order.telefoonnummer,
                 "notes": (stop.notes or "") + (order.opmerkingen or ""),
             })
 
@@ -66,7 +66,7 @@ def generate_stops_table(routes_queryset):
                 "address": f"{order.straatnaam or ''} {order.huisnummer or ''}, {order.postcode or ''}, {order.plaats or ''}",
                 "arrival_time": stop.arrival_time.strftime("%H:%M") if stop.arrival_time else None,
                 "departure_time": stop.departure_time.strftime("%H:%M") if stop.departure_time else None,
-                "visited": stop.visited,
+                "telephone_number": stop.order.telefoonnummer if stop.order.telefoonnummer else '',
                 "notes": (stop.notes or "") + (order.opmerkingen or ""),
                 "google_maps_link": route.google_maps_link,
             })

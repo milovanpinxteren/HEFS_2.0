@@ -10,10 +10,10 @@
                 <tr>
                     <th>Sequence</th>
                     <th>Conversie ID</th>
-                    <th>Address</th>
-                    <th>Arrival Time</th>
-                    <th>Departure Time</th>
-                    <th>Visited</th>
+                    <th>Addres</th>
+                    <th>Aankomsttijd</th>
+                    <th>Vertrektijd</th>
+                    <th>Telefoon nummer</th>
                     <th>Notes</th>
                     <th>Google Maps</th>
                 </tr>
@@ -26,7 +26,7 @@
                         <td>{{ stop.address }}</td>
                         <td>{{ stop.arrival_time }}</td>
                         <td>{{ stop.departure_time }}</td>
-                        <td>{{ stop.visited }}</td>
+                        <td>{{ stop.telephone_number }}</td>
                         <td>{{ stop.notes }}</td>
                         <td>
                             {% if stop.google_maps_link %}
