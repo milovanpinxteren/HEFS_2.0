@@ -621,25 +621,21 @@ class RoutesGenerator:
         if routes_created > 0:
             print(f"Average per route: {total_distance_km / routes_created:.2f} km")
 
-    def create_google_maps_link(self, route_stops: List[Tuple[float, float]],
-                                max_waypoints: int = 23) -> str:
+    def create_google_maps_link(self, route_stops: List[Tuple[float, float]], max_waypoints: int = 25) -> str:
         """
-        Create Google Maps links by splitting route into segments.
-        Google Maps has a limit of ~25 waypoints per URL.
+        Create a Google Maps link with up to max_waypoints stops.
 
         Args:
             route_stops: List of (latitude, longitude) tuples
-            max_waypoints: Maximum waypoints per Google Maps link
+            max_waypoints: Maximum waypoints to include (default 25)
 
         Returns:
-            String of Google Maps links separated by ' | '
+            Google Maps directions URL
         """
         base_url = "https://www.google.com/maps/dir/"
-        links = []
 
-        for i in range(0, len(route_stops), max_waypoints):
-            segment_stops = route_stops[i:i + max_waypoints]
-            waypoints = "/".join([f"{lat},{lng}" for lat, lng in segment_stops])
-            links.append(base_url + waypoints)
+        # Take only the first max_waypoints stops
+        limited_stops = route_stops[:max_waypoints]
+        waypoints = "/".join([f"{lat},{lng}" for lat, lng in limited_stops])
 
-        return " | ".join(links)
+        return base_url + waypoints
