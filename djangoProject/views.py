@@ -133,7 +133,7 @@ def track_order(request):
             # Retrieve the related stop for the order
             stop = Stop.objects.filter(order=order).first()
             if not stop:
-                return JsonResponse({"error": "Bestelling niet gevonden"}, status=404)
+                return JsonResponse({"error": "Uw order is bekend, maar het bezorgtijdstip niet gevonden"}, status=404)
 
             # Prepare the response data
             response_data = {
@@ -141,8 +141,8 @@ def track_order(request):
                 "email": order.emailadres,
                 "route_number": stop.route.id if stop.route else None,
                 # "sequence_number": stop.sequence_number,
-                "arrival_time": f"{(datetime.combine(datetime.today(), stop.arrival_time) - timedelta(minutes=15)).strftime('%H:%M')} - "
-                                f"{(datetime.combine(datetime.today(), stop.arrival_time) + timedelta(minutes=105)).strftime('%H:%M')}"
+                "arrival_time": f"{(datetime.combine(datetime.today(), stop.arrival_time) - timedelta(minutes=30)).strftime('%H:%M')} - "
+                                f"{(datetime.combine(datetime.today(), stop.arrival_time) + timedelta(minutes=120)).strftime('%H:%M')}"
                 if stop.arrival_time else None,
             }
 

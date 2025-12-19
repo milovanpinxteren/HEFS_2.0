@@ -17,29 +17,24 @@ class RoutingConfig:
     first_solution_strategy: str = 'SAVINGS'
     local_search_metaheuristic: str = 'AUTOMATIC'
     # Results:
-    # PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH = 2762.52 km
-    # AUTOMATIC + AUTOMATIC = 2813.94 km
-    # SAVINGS + TABU_SEARCH = no solution
-    # BEST_INSERTION + GUIDED_LOCAL_SEARCH = no solution
-    # PARALLEL_CHEAPEST_INSERTION + GUIDED_LOCAL_SEARCH = 2947.64 km
-    # CHRISTOFIDES + GUIDED_LOCAL_SEARCH = 2880.09 km
-    # CHRISTOFIDES + TABU_SEARCH = 2877.12 km
-    # PARALLEL_CHEAPEST_INSERTION + SIMULATED_ANNEALING
+    #SAVINGS and AUTOMATIC: Routes created: 22, Total distance: 6406.94 km, Average per route: 291.22 km
+    #PARALLEL_CHEAPEST_INSERTION and GUIDED_LOCAL_SEARCH: Routes created: 22, Total distance: 6711.76 km, Average per route: 305.8 km
+    #CHRISTOFIDES and GUIDED_LOCAL_SEARCH: Routes created: 22, Total distance: 6794.15 km, Average per route: 308.8 km
 
     # Distance and Speed Parameters
     haversine_road_multiplier: float = 1.25  # Road distance multiplier (reduced from 1.3 for shorter routes)
     average_speed_kmh: float = 65  # Average speed for travel time calculation (reduced from 80 for realism)
 
     # Time Window Parameters (in hours, converted to seconds in code)
-    depot_start_hour: int = 6
-    depot_end_hour: int = 21
+    depot_start_hour: int = 3
+    depot_end_hour: int = 23
     customer_start_hour: int = 8
-    customer_end_hour: int = 15
-    vehicle_earliest_start_hour: int = 5
+    customer_end_hour: int = 16
+    vehicle_earliest_start_hour: int = 3
     vehicle_latest_start_hour: int = 16
 
     # Service and Route Parameters
-    service_time_minutes: int = 10  # Time spent at each stop
+    service_time_minutes: int = 5  # Time spent at each stop
     max_route_duration_hours: int = 16  # Maximum time a route can take
     slack_time_seconds: int = 25200  # Allow slack for delays (in seconds)
 
@@ -49,8 +44,8 @@ class RoutingConfig:
     vehicle_capacity_slack: int = 10200  # Slack capacity for vehicles
 
     # Optimization Parameters
-    vehicle_fixed_cost: int = 50000  # Cost to use a vehicle (higher = fewer vehicles used)
-    optimization_time_limit_seconds: int = 70  # Time limit for optimization
+    vehicle_fixed_cost: int = 700000  # Cost to use a vehicle (higher = fewer vehicles used)
+    optimization_time_limit_seconds: int = 180  # Time limit for optimization
     force_depot_return: bool = False  # Whether routes must return to depot
 
     # Special Order IDs
