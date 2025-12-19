@@ -22,7 +22,7 @@ class Kerstdiner2025API:
 
         query = """
         query($cursor: String) {
-            orders(first: 50, after: $cursor, query: "created_at:>=2025-09-01T00:00:00Z") {
+            orders(first: 50, after: $cursor, query: "created_at:>=2025-09-01T00:00:00Z -status:cancelled") {
                 edges {
                     cursor
                     node {
