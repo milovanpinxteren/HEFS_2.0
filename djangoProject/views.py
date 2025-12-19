@@ -142,7 +142,7 @@ def track_order(request):
                 "route_number": stop.route.id if stop.route else None,
                 # "sequence_number": stop.sequence_number,
                 "arrival_time": f"{(datetime.combine(datetime.today(), stop.arrival_time) - timedelta(minutes=30)).strftime('%H:%M')} - "
-                                f"{(datetime.combine(datetime.today(), stop.arrival_time) + timedelta(minutes=120)).strftime('%H:%M')}"
+                                f"{(datetime.combine(datetime.today(), stop.arrival_time) + timedelta(minutes=150)).strftime('%H:%M')}"
                 if stop.arrival_time else None,
             }
 
