@@ -14,12 +14,13 @@ class RoutingConfig:
     Centralized configuration for route optimization parameters.
     Tweak these values to adjust routing behavior.
     """
-    first_solution_strategy: str = 'SAVINGS'
-    local_search_metaheuristic: str = 'AUTOMATIC'
+    first_solution_strategy: str = 'PARALLEL_CHEAPEST_INSERTION'
+    local_search_metaheuristic: str = 'GUIDED_LOCAL_SEARCH'
     # Results:
-    #SAVINGS and AUTOMATIC: Routes created: 22, Total distance: 6406.94 km, Average per route: 291.22 km
-    #PARALLEL_CHEAPEST_INSERTION and GUIDED_LOCAL_SEARCH: Routes created: 22, Total distance: 6711.76 km, Average per route: 305.8 km
-    #CHRISTOFIDES and GUIDED_LOCAL_SEARCH: Routes created: 22, Total distance: 6794.15 km, Average per route: 308.8 km
+    #SAVINGS and AUTOMATIC: Routes created: 23, Total distance: 6443.94 km, Average per route: 280.22 km
+    #LOCAL_CHEAPEST_INSERTION and TABU_SEARCH: Routes created: 22, Total distance: 6580.77 km, Average per route: 299.13 km
+    #PARALLEL_CHEAPEST_INSERTION and TABU_SEARCH: Routes created: 22, Total distance: 6750.77 km, Average per route: 606.13 km
+    #AUTOMATIC and AUTOMATIC: Routes created: 22, Total distance: 6903.77 km, Average per route: 313.13 km
 
     # Distance and Speed Parameters
     haversine_road_multiplier: float = 1.25  # Road distance multiplier (reduced from 1.3 for shorter routes)
@@ -45,7 +46,7 @@ class RoutingConfig:
 
     # Optimization Parameters
     vehicle_fixed_cost: int = 700000  # Cost to use a vehicle (higher = fewer vehicles used)
-    optimization_time_limit_seconds: int = 180  # Time limit for optimization
+    optimization_time_limit_seconds: int = 780  # Time limit for optimization
     force_depot_return: bool = False  # Whether routes must return to depot
 
     # Special Order IDs
