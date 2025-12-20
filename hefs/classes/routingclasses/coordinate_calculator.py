@@ -7,6 +7,7 @@ from hefs.models import Orders
 import requests
 import re
 
+
 # Latitude: ~ 50.6° to 53.7°
 # Longitude: ~ 3.2°E to 7.3°E
 
@@ -45,6 +46,31 @@ class CoordinateCalculator:
             print(f"[PDOK geocode error] {e}")
         return None
 
+    def geocode_nominatim(self, address):
+        """
+        Nominatim (OpenStreetMap) geocoder - works worldwide.
+        Free but requires user-agent and 1 req/sec rate limit.
+        """
+        try:
+            url = "https://nominatim.openstreetmap.org/search"
+            params = {
+                "q": address,
+                "format": "json",
+                "limit": 1,
+            }
+            headers = {"User-Agent": "HEFS-Catering-Routing/2.0"}
+            r = requests.get(url, params=params, headers=headers, timeout=10)
+            r.raise_for_status()
+
+            results = r.json()
+            if results:
+                lat = float(results[0]["lat"])
+                lon = float(results[0]["lon"])
+                return lat, lon
+        except Exception as e:
+            print(f"[Nominatim geocode error] {e}")
+        return None
+
     def _parse_dutch_address(self, address):
         """Return (straat, huisnr, postcode, plaats) if we can extract them."""
         address = (address or "").strip()
@@ -69,7 +95,6 @@ class CoordinateCalculator:
             plaats = right.split(",")[0] if right else ""
         return straat, huisnr, postcode, plaats
 
-
     def calculate_coordinates(self):
         orders = Orders.objects.filter(latitude__isnull=True, longitude__isnull=True)
         for order in orders:
@@ -80,11 +105,26 @@ class CoordinateCalculator:
             print(address)
             try:
                 time.sleep(1)
-                # coordinates = self.geocode_address(address)
-                coordinates = self.geocode_pdok(address)
-                print(coordinates)
-                order.latitude = coordinates[0]
-                order.longitude = coordinates[1]
-                order.save()
+
+                # Route to appropriate geocoder based on country
+                coordinates = None
+                land_lower = (order.land or "").lower()
+
+                if land_lower in ("nl", "nederland", "netherlands"):
+                    coordinates = self.geocode_pdok(address)
+                    if not coordinates:
+                        print("[PDOK failed, trying Nominatim fallback]")
+                        coordinates = self.geocode_nominatim(address)
+                else:
+                    # Belgium, Germany, etc. → Nominatim
+                    coordinates = self.geocode_nominatim(address)
+
+                if coordinates:
+                    print(coordinates)
+                    order.latitude = coordinates[0]
+                    order.longitude = coordinates[1]
+                    order.save()
+                else:
+                    print(f"[No coordinates found for: {address}]")
             except Exception as e:
                 print(f"Error during geocoding: {e}")
