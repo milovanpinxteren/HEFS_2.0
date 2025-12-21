@@ -23,14 +23,14 @@ class RoutingConfig:
     #AUTOMATIC and AUTOMATIC: Routes created: 22, Total distance: 6903.77 km, Average per route: 313.13 km
 
     # Distance and Speed Parameters
-    haversine_road_multiplier: float = 1.25  # Road distance multiplier (reduced from 1.3 for shorter routes)
-    average_speed_kmh: float = 65  # Average speed for travel time calculation (reduced from 80 for realism)
+    haversine_road_multiplier: float = 1.20  # Road distance multiplier (reduced from 1.3 for shorter routes)
+    average_speed_kmh: float = 60  # Average speed for travel time calculation (reduced from 80 for realism)
 
     # Time Window Parameters (in hours, converted to seconds in code)
     depot_start_hour: int = 3
     depot_end_hour: int = 23
     customer_start_hour: int = 8
-    customer_end_hour: int = 16
+    customer_end_hour: int = 15
     vehicle_earliest_start_hour: int = 3
     vehicle_latest_start_hour: int = 16
 
