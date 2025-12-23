@@ -1,42 +1,80 @@
 <div id="map-container">
     {{ map|safe }}
 </div>
+
+<style>
+    .product-qty {
+        font-size: 1.4em;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+    td, th {
+        padding: 2px 5px;
+        line-height: 1.1;
+    }
+
+    .has-products {
+        background-color: #ff2828;
+    }
+
+    .alert-icon {
+        color: #dc3545;
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+
+    .address-col {
+        min-width: 450px;
+    }
+
+    .notes-col {
+        min-width: 25px;
+    }
+
+    .notes-col-wide {
+        min-width: 450px;
+    }
+</style>
+
 {% if stops_table %}
     <h2>Route Stops</h2>
     {% for route_name, stops in stops_table.items %}
         <h3>Route: {{ route_name }}</h3>
         <table border="1">
             <thead>
-                <tr>
-                    <th>Sequence</th>
-                    <th>Conversie ID</th>
-                    <th>Addres</th>
-                    <th>Aankomsttijd</th>
-                    <th>Vertrektijd</th>
-                    <th>Telefoon nummer</th>
-                    <th>Notes</th>
-                    <th>Google Maps</th>
-                </tr>
+            <tr>
+                <th>⚠</th>
+                <th>Sequence</th>
+                <th>Conversie ID</th>
+                <th class="address-col">Addres</th>
+                <th>Aankomsttijd</th>
+                <th>Telefoon nummer</th>
+                <th>Notes</th>
+                {% for name in product_names %}
+                    <th>{{ name }}</th>
+                {% endfor %}
+            </tr>
             </thead>
             <tbody>
-                {% for stop in stops %}
-                    <tr>
-                        <td>{{ stop.sequence }}</td>
-                        <td>{{ stop.conversieID }}</td>
-                        <td>{{ stop.address }}</td>
-                        <td>{{ stop.arrival_time }}</td>
-                        <td>{{ stop.departure_time }}</td>
-                        <td>{{ stop.telephone_number }}</td>
-                        <td>{{ stop.notes }}</td>
-                        <td>
-                            {% if stop.google_maps_link %}
-                                <a href="{{ stop.google_maps_link }}" target="_blank">View on Map</a>
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
+            {% for stop in stops %}
+                <tr class="{% if stop.has_any_product %}has-products{% endif %}">
+                    <td class="alert-icon">{% if stop.has_any_product %}⚠{% endif %}</td>
+                    <td>{{ stop.sequence }}</td>
+                    <td style="font-weight: bold; font-size: 18px">{{ stop.conversieID }}</td>
+                    <td class="address-col">{{ stop.address }}</td>
+                    <td>{{ stop.arrival_time }}</td>
+                    <td>{{ stop.telephone_number }}</td>
+                    <td class="{% if stop.notes %}notes-col-wide{% else %}notes-col{% endif %}">{{ stop.notes }}</td>
+                    {% for qty in stop.products %}
+                        <td class="product-qty">{% if qty %}{{ qty|floatformat:0 }}{% endif %}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     {% endfor %}

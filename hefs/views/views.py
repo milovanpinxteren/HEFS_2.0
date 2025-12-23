@@ -5,6 +5,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django_rq import job
+from django.db.models import Sum
 
 from hefs import models
 from hefs.apis.paasontbijt2024transacties import Paasontbijt2024Transacties
@@ -25,12 +26,83 @@ from hefs.classes.shopify_sync.sync_table_updater import SyncTableUpdater
 from hefs.classes.veh_handler import VehHandler
 from hefs.forms import PickbonnenForm, GeneralNumbersForm
 from hefs.models import ApiUrls, AlgemeneInformatie, Orders, ErrorLogDataGerijptebieren, Route, Stop, HobOrderProducts, \
-    Productinfo
+    Productinfo, PickItems
 from hefs.views.map_views.arrival_time_calculator import ArrivalTimeCalculator
 from django.db.models import Count, Q
 
+
 def index(request):
+    # find carpaccio per route
+
+    product_ids = ['21001', '21002', '21003']  # your 3 specific IDs
+
+    results = PickItems.objects.filter(
+        product__productID__in=product_ids,
+        pick_order__order__stop__route__isnull=False
+    ).values(
+        'pick_order__order__stop__route__name',
+        'product__productID',
+        'product__omschrijving'
+    ).annotate(
+        total=Sum('hoeveelheid')
+    )
+
+    # Convert to list and sort numerically
+    results_list = list(results)
+
+    def sort_key(row):
+        route = row['pick_order__order__stop__route__name']
+        pid = row['product__productID']
+
+        if route is None:
+            return ((-1,), pid)  # Put None routes first (or use (9999,) for last)
+
+        parts = route.split('.')
+        route_parts = tuple(int(p) for p in parts if p.isdigit())
+        return (route_parts, pid)
+
+    results_list.sort(key=sort_key)
+
+    # Print output
+    for row in results_list:
+        route = row['pick_order__order__stop__route__name'] or 'No route'
+        pid = row['product__productID']
+        pname = row['product__omschrijving']
+        total = row['total']
+        print(f"{route},{pid},{pname},{total}")
+
+
+
+    #################PER VERZENDOPTIE
+    results = PickItems.objects.filter(
+        product__productID__in=product_ids,
+        pick_order__order__verzendoptie__isnull=False
+    ).values(
+        'pick_order__order__verzendoptie__verzendoptie',
+        'product__productID',
+        'product__omschrijving'
+    ).annotate(
+        total=Sum('hoeveelheid')
+    ).order_by('pick_order__order__verzendoptie__verzendoptie', 'product__productID')
+
+    # Print output
+    for row in results:
+        verzendoptie = row['pick_order__order__verzendoptie__verzendoptie']
+        pid = row['product__productID']
+        pname = row['product__omschrijving']
+        total = row['total']
+        print(f"{verzendoptie},{pid},{pname},{total}")
+
+
     try:
+        # Missing order on product finder
+        product_ids = ['21002', '55081', '55082', '68242', '21161']  # products found in the box
+
+        qs = Orders.objects.all()
+        for pid in product_ids:
+            qs = qs.filter(pickorders__pickitems__product__productID=pid)
+        qs = qs.distinct()
+
         if request.user.groups.filter(name='leverancier').exists():
             organisations_to_show = ApiUrls.objects.get(user_id=request.user.id).organisatieIDs
             veh_handler = VehHandler()

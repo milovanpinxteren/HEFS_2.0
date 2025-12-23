@@ -13,7 +13,7 @@ from hefs.data import ColorData
 
 class MapMaker:
     def make_map(self, data, map_type):
-        print('map data: ', data)
+        # print('map data: ', data)
         map_obj = folium.Map(location=[51.69217, 5.2957742], zoom_start=7)
         legend_entries = ""
         colors = ColorData.colors_array.copy()
